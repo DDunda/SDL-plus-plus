@@ -1,0 +1,50 @@
+﻿  rect.cpp
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(74,46): warning C4244: '*=': conversion from 'double' to 'float', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(74,54): warning C4244: '*=': conversion from 'double' to 'float', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(75,46): warning C4244: '/=': conversion from 'double' to 'float', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(75,54): warning C4244: '/=': conversion from 'double' to 'float', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(105,44): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(139,53): warning C4244: '+=': conversion from 'const float' to 'int', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(139,63): warning C4244: '+=': conversion from 'const float' to 'int', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(140,53): warning C4244: '-=': conversion from 'const float' to 'int', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(140,63): warning C4244: '-=': conversion from 'const float' to 'int', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(141,53): warning C4244: '*=': conversion from 'const float' to 'int', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(141,63): warning C4244: '*=': conversion from 'const float' to 'int', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(142,53): warning C4244: '/=': conversion from 'const float' to 'int', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(142,63): warning C4244: '/=': conversion from 'const float' to 'int', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(156,44): warning C4244: '*=': conversion from 'double' to 'int', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(156,52): warning C4244: '*=': conversion from 'double' to 'int', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(157,44): warning C4244: '/=': conversion from 'double' to 'int', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(157,52): warning C4244: '/=': conversion from 'double' to 'int', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(158,43): warning C4244: '*=': conversion from 'float' to 'int', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(158,51): warning C4244: '*=': conversion from 'float' to 'int', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(159,43): warning C4244: '/=': conversion from 'float' to 'int', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(159,51): warning C4244: '/=': conversion from 'float' to 'int', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(201,75): warning C4244: 'argument': conversion from 'const int' to 'const _Ty', possible loss of data
+          with
+          [
+              _Ty=float
+          ]
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(201,109): warning C4244: 'argument': conversion from 'const int' to 'const _Ty', possible loss of data
+          with
+          [
+              _Ty=float
+          ]
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(286,68): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(286,63): warning C4244: 'argument': conversion from 'const int' to 'float', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(286,85): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(286,80): warning C4244: 'argument': conversion from 'const int' to 'float', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(370,14): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(385,14): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(416,55): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(417,55): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(429,14): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(444,14): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(475,55): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+D:\NewDesktop\Programming\VS projects\C++\SDL++\SDL++\rect.cpp(476,55): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  Generating code
+  0 of 61 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  SDL++.vcxproj -> D:\NewDesktop\Programming\VS projects\C++\SDL++\Release\SDL++.exe

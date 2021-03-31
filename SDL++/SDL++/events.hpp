@@ -323,33 +323,33 @@ namespace SDL {
 
 		Uint32* event_at;
 
-		Uint32 button_up_at[5];
-		Uint32 button_down_at[5];
-		Uint32 scancode_up_at[SDL_NUM_SCANCODES];
-		Uint32 scancode_down_at[SDL_NUM_SCANCODES];
+		Uint32 button_up_at[5]{ 0 };
+		Uint32 button_down_at[5]{ 0 };
+		Uint32 scancode_up_at[SDL_NUM_SCANCODES]{ 0 };
+		Uint32 scancode_down_at[SDL_NUM_SCANCODES]{ 0 };
 
-		bool prev_buttons[5];
-		bool buttons[5];
-		bool prev_scancodes[SDL_NUM_SCANCODES];
-		bool scancodes[SDL_NUM_SCANCODES];
+		bool prev_buttons[5]{ false };
+		bool buttons[5]{ false };
+		bool prev_scancodes[SDL_NUM_SCANCODES]{ false };
+		bool scancodes[SDL_NUM_SCANCODES]{ false };
 
 		Input() { typed_callback = new InputCallback[SDL_LASTEVENT]; event_at = new Uint32[SDL_LASTEVENT]; }
 		~Input() { delete[] typed_callback; delete[] event_at; }
 
-		bool buttonUp(Uint8 i) { return    prev_buttons[i] && !buttons[i]; }
+		bool buttonUp  (Uint8 i) { return  prev_buttons[i] && !buttons[i]; }
 		bool buttonDown(Uint8 i) { return !prev_buttons[i] &&  buttons[i]; }
 		bool buttonHeld(Uint8 i) { return  prev_buttons[i] &&  buttons[i]; }
-		bool buttonIdle(Uint8 i) { return  prev_buttons[i] &&  buttons[i]; }
+		bool buttonIdle(Uint8 i) { return !prev_buttons[i] && !buttons[i]; }
 
-		bool scancodeUp(SDL_Scancode i) { return    prev_scancodes[i] && !scancodes[i]; }
+		bool scancodeUp  (SDL_Scancode i) { return  prev_scancodes[i] && !scancodes[i]; }
 		bool scancodeDown(SDL_Scancode i) { return !prev_scancodes[i] &&  scancodes[i]; }
 		bool scancodeHeld(SDL_Scancode i) { return  prev_scancodes[i] &&  scancodes[i]; }
-		bool scancodeIdle(SDL_Scancode i) { return  prev_scancodes[i] &&  scancodes[i]; }
+		bool scancodeIdle(SDL_Scancode i) { return !prev_scancodes[i] && !scancodes[i]; }
 
 		void Update() {
 			Event e;
 
-			memcpy(&prev_mouse, &mouse, sizeof(bool));
+			memcpy(&prev_mouse, &mouse, sizeof(Point));
 			memcpy(&prev_buttons, &buttons, 5 * sizeof(bool));
 			memcpy(&prev_scancodes, &scancodes, SDL_NUM_SCANCODES * sizeof(bool));
 

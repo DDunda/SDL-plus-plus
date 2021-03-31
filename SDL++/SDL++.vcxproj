@@ -94,21 +94,29 @@
     <LinkIncremental>true</LinkIncremental>
     <LibraryPath>$(SDL)\lib\$(PlatformShortName)\;$(SDL_image)\lib\$(PlatformShortName)\;$(SDL_mixer)\lib\$(PlatformShortName)\;$(LibraryPath)</LibraryPath>
     <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(SDL_mixer)\include\;$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)out\$(Configuration)_$(PlatformShortName)\</OutDir>
+    <IntDir>$(SolutionDir)tmp\$(Configuration)_$(PlatformShortName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <LibraryPath>$(SDL)\lib\$(PlatformShortName)\;$(SDL_image)\lib\$(PlatformShortName)\;$(SDL_mixer)\lib\$(PlatformShortName)\;$(LibraryPath)</LibraryPath>
     <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(SDL_mixer)\include\;$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)out\$(Configuration)_$(PlatformShortName)\</OutDir>
+    <IntDir>$(SolutionDir)tmp\$(Configuration)_$(PlatformShortName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <LibraryPath>$(SDL)\lib\$(PlatformShortName)\;$(SDL_image)\lib\$(PlatformShortName)\;$(SDL_mixer)\lib\$(PlatformShortName)\;$(LibraryPath)</LibraryPath>
     <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(SDL_mixer)\include\;$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)out\$(Configuration)_$(PlatformShortName)\</OutDir>
+    <IntDir>$(SolutionDir)tmp\$(Configuration)_$(PlatformShortName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <LibraryPath>$(SDL)\lib\$(PlatformShortName)\;$(SDL_image)\lib\$(PlatformShortName)\;$(SDL_mixer)\lib\$(PlatformShortName)\;$(LibraryPath)</LibraryPath>
     <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(SDL_mixer)\include\;$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)out\$(Configuration)_$(PlatformShortName)\</OutDir>
+    <IntDir>$(SolutionDir)tmp\$(Configuration)_$(PlatformShortName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

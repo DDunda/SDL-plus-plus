@@ -1,5 +1,4 @@
 #include "SDL++/SDL.hpp"
-#include "SDL++/ray.hpp"
 #include <SDL_image.h>
 
 using namespace SDL;

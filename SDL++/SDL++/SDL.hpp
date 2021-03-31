@@ -4,6 +4,7 @@
 #include "audio.hpp"
 #include "error.hpp"
 #include "events.hpp"
+#include "ray.hpp"
 #include "render.hpp"
 #include "timer.hpp"
 #include "video.hpp"

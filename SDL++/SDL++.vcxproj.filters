@@ -10,59 +10,65 @@
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
     <Filter Include="SDL++">
-      <UniqueIdentifier>{82a46790-6389-405d-8a0a-aefd61840398}</UniqueIdentifier>
+      <UniqueIdentifier>{c789801a-7737-462d-81c4-3da97f70852d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SDL++\Headers">
-      <UniqueIdentifier>{c922c3eb-a4b4-4cca-9f69-ca04e3a9eb10}</UniqueIdentifier>
+    <Filter Include="SDL++\Header Files">
+      <UniqueIdentifier>{28c79b0c-f0dc-4953-b16e-628c62c55e8b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SDL++\Sources">
-      <UniqueIdentifier>{2ce3e68b-3904-4366-8e5d-5f4dc608a1fa}</UniqueIdentifier>
+    <Filter Include="SDL++\Source Files">
+      <UniqueIdentifier>{697c4d2c-97df-4aa0-bb51-c37468bae152}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="render.cpp">
-      <Filter>SDL++\Sources</Filter>
+    <ClCompile Include="SDL++\ray.cpp">
+      <Filter>SDL++\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="rect.cpp">
-      <Filter>SDL++\Sources</Filter>
+    <ClCompile Include="SDL++\rect.cpp">
+      <Filter>SDL++\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SDL++\render.cpp">
+      <Filter>SDL++\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SDL.hpp">
-      <Filter>SDL++\Headers</Filter>
+    <ClInclude Include="SDL++\video.hpp">
+      <Filter>SDL++\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="error.hpp">
-      <Filter>SDL++\Headers</Filter>
+    <ClInclude Include="SDL++\audio.hpp">
+      <Filter>SDL++\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="blendmode.hpp">
-      <Filter>SDL++\Headers</Filter>
+    <ClInclude Include="SDL++\blendmode.hpp">
+      <Filter>SDL++\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pixels.hpp">
-      <Filter>SDL++\Headers</Filter>
+    <ClInclude Include="SDL++\error.hpp">
+      <Filter>SDL++\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="rect.hpp">
-      <Filter>SDL++\Headers</Filter>
+    <ClInclude Include="SDL++\events.hpp">
+      <Filter>SDL++\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="render.hpp">
-      <Filter>SDL++\Headers</Filter>
+    <ClInclude Include="SDL++\pixels.hpp">
+      <Filter>SDL++\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="surface.hpp">
-      <Filter>SDL++\Headers</Filter>
+    <ClInclude Include="SDL++\ray.hpp">
+      <Filter>SDL++\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="timer.hpp">
-      <Filter>SDL++\Headers</Filter>
+    <ClInclude Include="SDL++\rect.hpp">
+      <Filter>SDL++\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="video.hpp">
-      <Filter>SDL++\Headers</Filter>
+    <ClInclude Include="SDL++\render.hpp">
+      <Filter>SDL++\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="audio.hpp">
-      <Filter>SDL++\Headers</Filter>
+    <ClInclude Include="SDL++\SDL.hpp">
+      <Filter>SDL++\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="events.hpp">
-      <Filter>SDL++\Headers</Filter>
+    <ClInclude Include="SDL++\surface.hpp">
+      <Filter>SDL++\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SDL++\timer.hpp">
+      <Filter>SDL++\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

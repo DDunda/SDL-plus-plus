@@ -169,46 +169,7 @@ namespace SDL {
 	struct Window {
 		SDL_Window* window = NULL;
 		bool freeWindow = false;
-
-		/**
-		 *  \brief Get the display index associated with this window.
-		 *
-		 *  \return the display index of the display containing the center of the
-		 *		  window, or -1 on error.
-		 */
-		Display GetDisplay() { return { SDL_GetWindowDisplayIndex(window) }; }
-
-		/**
-		 *  \brief Set the display mode used when a fullscreen window is visible.
-		 *
-		 *  By default the window's dimensions and the desktop format and refresh rate
-		 *  are used.
-		 *
-		 *  \param window The window for which the display mode should be set.
-		 *  \param mode The mode to use, or NULL for the default mode.
-		 *
-		 *  \return 0 on success, or -1 if setting the display mode failed.
-		 */
-		int SetDisplayMode(const Display::Mode& mode) { return SDL_SetWindowDisplayMode(window, &mode); }
-
-		/**
-		 *  \brief Set the display mode used when a fullscreen window is visible.
-		 *
-		 *  By default the window's dimensions and the desktop format and refresh rate
-		 *  are used.
-		 *
-		 *  \param window The window for which the display mode should be set.
-		 *  \param mode The mode to use, or NULL for the default mode.
-		 *
-		 *  \return 0 on success, or -1 if setting the display mode failed.
-		 */
-		int SetDisplayMode() { return SDL_SetWindowDisplayMode(window, NULL); }
-
-		// \brief Fill in information about the display mode used when a fullscreen window is visible.
-		int GetDisplayMode(Display::Mode& mode) { return SDL_GetWindowDisplayMode(window, &mode); }
-
-		// \brief Get the pixel format associated with the window.
-		Uint32 GetPixelFormat() { return SDL_GetWindowPixelFormat(window); }
+		int error;
 
 		Window(const Window& wnd) : Window(wnd.window, false) {}
 		Window(Window&& wnd) : Window(wnd.window, wnd.freeWindow) { wnd.window = NULL;  wnd.freeWindow = false; }
@@ -219,7 +180,7 @@ namespace SDL {
 			return *this;
 		}
 
-		Window(SDL_Window* window = NULL, bool free = false) : window(window), freeWindow(free && window != NULL) {}
+		Window(SDL_Window* window = NULL, bool free = false) : window(window), freeWindow(free) {}
 
 		/**
 		 *  \brief Create this window with the specified position, dimensions, and flags.
@@ -271,27 +232,77 @@ namespace SDL {
 		// \brief Destroy this window.
 		~Window() { if(freeWindow) SDL_DestroyWindow(window); }
 
+		/**
+		 *  \brief Get the display index associated with this window.
+		 *
+		 *  \return the display index of the display containing the center of the
+		 *		  window, or -1 on error.
+		 */
+		Display GetDisplay() { return { SDL_GetWindowDisplayIndex(window) }; }
+		// \brief Get the display index associated with this window.
+		Window& GetDisplay(Display& display) { display = { SDL_GetWindowDisplayIndex(window) }; return *this; }
+
+		/**
+		 *  \brief Set the display mode used when a fullscreen window is visible.
+		 *
+		 *  By default the window's dimensions and the desktop format and refresh rate
+		 *  are used.
+		 *
+		 *  error is set to 0 on success, or -1 if setting the display mode failed.
+		 *
+		 *  \param window The window for which the display mode should be set.
+		 *  \param mode The mode to use, or NULL for the default mode.
+		 */
+		Window& SetDisplayMode(const Display::Mode& mode) { error = SDL_SetWindowDisplayMode(window, &mode); return *this; }
+
+		/**
+		 *  \brief Set the display mode used when a fullscreen window is visible.
+		 *
+		 *  By default the window's dimensions and the desktop format and refresh rate
+		 *  are used.
+		 *
+		 *  \param window The window for which the display mode should be set.
+		 *  \param mode The mode to use, or NULL for the default mode.
+		 *
+		 *  error is set to 0 on success, or -1 if setting the display mode failed.
+		 */
+		Window& SetDefaultDisplayMode() { error = SDL_SetWindowDisplayMode(window, NULL); return *this; }
+
+		// \brief Fill in information about the display mode used when a fullscreen window is visible.
+		Window& GetDisplayMode(Display::Mode& mode) { error = SDL_GetWindowDisplayMode(window, &mode);  return *this; }
+
+		// \brief Get the pixel format associated with the window.
+		Uint32 GetPixelFormat() { return SDL_GetWindowPixelFormat(window); }
+		// \brief Get the pixel format associated with the window.
+		Window& GetPixelFormat(Uint32& format) { format = SDL_GetWindowPixelFormat(window); return *this; }
+
 		// \brief Get the numeric ID of this window, for logging purposes.
 		Uint32 GetID() { return SDL_GetWindowID(window); }
+		// \brief Get the numeric ID of this window, for logging purposes.
+		Window& GetID(Uint32& id) { id = SDL_GetWindowID(window); return *this; }
 
 		// \brief Get this window's flags.
 		Uint32 GetFlags() { return SDL_GetWindowFlags(window); }
+		// \brief Get this window's flags.
+		Window& GetFlags(Uint32& flags) { flags = SDL_GetWindowFlags(window); return *this; }
 
 		// \brief Set the title of this window.
-		void SetTitle(const std::string& title) { SDL_SetWindowTitle(window, title.c_str()); }
+		Window& SetTitle(const std::string& title) { SDL_SetWindowTitle(window, title.c_str()); return *this; }
 
 		// \brief Set the title of this window.
-		void SetTitle(const char* title) { SDL_SetWindowTitle(window, title); }
+		Window& SetTitle(const char* title) { SDL_SetWindowTitle(window, title); return *this; }
 
 		// \brief Get the title of this window.
 		std::string GetTitle() { return std::string(SDL_GetWindowTitle(window)); }
+		// \brief Get the title of this window.
+		Window& GetTitle(std::string& title) { title = SDL_GetWindowTitle(window); return *this; }
 
 		/**
 		 *  \brief Set the icon for this window.
 		 *
 		 *  \param icon The icon for the window.
 		 */
-		void SetIcon(Surface& icon) { SDL_SetWindowIcon(window, icon.surface); }
+		Window& SetIcon(Surface& icon) { SDL_SetWindowIcon(window, icon.surface); return *this; }
 
 		/**
 		 *  \brief Associate an arbitrary named pointer with this window.
@@ -313,6 +324,14 @@ namespace SDL {
 		 *  \return The value associated with 'name'
 		 */
 		void* GetData(const std::string& name) { return SDL_GetWindowData(window, name.c_str()); }
+		/**
+		 *  \brief Retrieve the data pointer associated with this window.
+		 *
+		 *  \param name	 The name of the pointer.
+		 *
+		 *  \return The value associated with 'name'
+		 */
+		Window& GetData(const std::string& name, void*& data) { data = SDL_GetWindowData(window, name.c_str()); return *this; }
 
 		/**
 		 *  \brief Set the position of this window.
@@ -322,7 +341,7 @@ namespace SDL {
 		 *
 		 *  \note The window coordinate origin is the upper left of the display.
 		 */
-		void SetPosition(const Point& pos) { SDL_SetWindowPosition(window, pos.x, pos.y); }
+		Window& SetPosition(const Point& pos) { SDL_SetWindowPosition(window, pos.x, pos.y); return *this; }
 
 		/**
 		 *  \brief Get the position of this window.
@@ -340,7 +359,7 @@ namespace SDL {
 		 *  \param pos		Reference to variable for storing the position, in screen
 		 *				  coordinates.
 		 */
-		void GetPosition(Point& pos) { SDL_GetWindowPosition(window, &pos.x, &pos.y); }
+		Window& GetPosition(Point& pos) { SDL_GetWindowPosition(window, &pos.x, &pos.y); return *this; }
 		/**
 		 *  \brief Get the position of this window.
 		 *
@@ -349,7 +368,7 @@ namespace SDL {
 		 *  \param y		Pointer to variable for storing the y position, in screen
 		 *				  coordinates. May be NULL.
 		 */
-		void GetPosition(int* x, int* y) { SDL_GetWindowPosition(window, x, y); }
+		Window& GetPosition(int* x, int* y) { SDL_GetWindowPosition(window, x, y); return *this; }
 
 		/**
 		 *  \brief Set the size of this window's client area.
@@ -365,21 +384,21 @@ namespace SDL {
 		 *  high-dpi support (e.g. iOS or OS X). Use SDL_GL_GetDrawableSize() or
 		 *  SDL_GetRendererOutputSize() to get the real client area size in pixels.
 		 */
-		void SetSize(int w, int h) { SDL_SetWindowSize(window, w, h); }
+		Window& SetSize(int w, int h) { SDL_SetWindowSize(window, w, h); return *this; }
 		/**
 		 *  \brief Set the size of this window's client area.
 		 *
 		 *  \param size		The size of the window, in screen coordinates. Must be >0.
 		 *
 		 *  \note Fullscreen windows automatically match the size of the display mode,
-		 *		and you should use SDL_SetWindowDisplayMode() to change their size.
+		 *		and you should use SetWindowDisplayMode() to change their size.
 		 *
 		 *  The window size in screen coordinates may differ from the size in pixels, if
 		 *  the window was created with SDL_WINDOW_ALLOW_HIGHDPI on a platform with
-		 *  high-dpi support (e.g. iOS or OS X). Use SDL_GL_GetDrawableSize() or
+		 *  high-dpi support (e.g. iOS or OS X). Use GL_GetDrawableSize() or
 		 *  SDL_GetRendererOutputSize() to get the real client area size in pixels.
 		 */
-		void SetSize(const Rect& size) { SDL_SetWindowSize(window, size.w, size.h); }
+		Window& SetSize(const Point& size) { SDL_SetWindowSize(window, size.w, size.h); return *this; }
 
 		/**
 		 *  \brief Get the size of this window's client area.
@@ -407,8 +426,7 @@ namespace SDL {
 		 *  high-dpi support (e.g. iOS or OS X). Use SDL_GL_GetDrawableSize() or
 		 *  SDL_GetRendererOutputSize() to get the real client area size in pixels.
 		 */
-		void GetSize(Point& size) { SDL_GetWindowSize(window, &size.w, &size.h); }
-
+		Window& GetSize(Point& size) { SDL_GetWindowSize(window, &size.w, &size.h); return *this; }
 		/**
 		 *  \brief Get the size of this window's client area.
 		 *
@@ -422,23 +440,23 @@ namespace SDL {
 		 *  high-dpi support (e.g. iOS or OS X). Use SDL_GL_GetDrawableSize() or
 		 *  SDL_GetRendererOutputSize() to get the real client area size in pixels.
 		 */
-		void GetSize(int* x, int* y) { SDL_GetWindowSize(window, x, y); }
+		Window& GetSize(int* x, int* y) { SDL_GetWindowSize(window, x, y); return *this; }
 
 		/**
 		 *  \brief Get the size of this window's borders (decorations) around the client area.
+		 *
+		 *  error is set to 0 on success, or -1 if getting this information is not supported.
 		 *
 		 *  \param top Pointer to variable for storing the size of the top border. NULL is permitted.
 		 *  \param left Pointer to variable for storing the size of the left border. NULL is permitted.
 		 *  \param bottom Pointer to variable for storing the size of the bottom border. NULL is permitted.
 		 *  \param right Pointer to variable for storing the size of the right border. NULL is permitted.
 		 *
-		 *  \return 0 on success, or -1 if getting this information is not supported.
-		 *
 		 *  \note if this function fails (returns -1), the size values will be
 		 *		initialized to 0, 0, 0, 0 (if a non-NULL pointer is provided), as
 		 *		if the window in question was borderless.
 		 */
-		int GetBordersSize(int* top, int* left, int* bottom, int* right) { return SDL_GetWindowBordersSize(window, top, left, bottom, right); }
+		Window& GetBordersSize(int* top, int* left, int* bottom, int* right) { error = SDL_GetWindowBordersSize(window, top, left, bottom, right); return *this; }
 
 		/**
 		 *  \brief Set the minimum size of this window's client area.
@@ -448,7 +466,7 @@ namespace SDL {
 		 *  \note You can't change the minimum size of a fullscreen window, it
 		 *		automatically matches the size of the display mode.
 		 */
-		void SetMinimumSize(const Point& min_size) { SDL_SetWindowMinimumSize(window, min_size.w, min_size.h); }
+		Window& SetMinimumSize(const Point& min_size) { SDL_SetWindowMinimumSize(window, min_size.w, min_size.h); return *this; }
 
 		/**
 		 *  \brief Get the minimum size of this window's client area.
@@ -463,18 +481,16 @@ namespace SDL {
 		/**
 		 *  \brief Get the minimum size of this window's client area.
 		 *
-		 *  \param size		Reference to variable for storing the minimum size
+		 *  \return The size of the window
 		 */
-		void GetMinimumSize(Point& size) {
-			SDL_GetWindowMinimumSize(window, &size.w, &size.h);
-		}
+		Window& GetMinimumSize(Point& point) { SDL_GetWindowMinimumSize(window, &point.w, &point.h); return *this; }
 		/**
 		 *  \brief Get the minimum size of this window's client area.
 		 *
 		 *  \param w		Pointer to variable for storing the minimum width, may be NULL
 		 *  \param h		Pointer to variable for storing the minimum height, may be NULL
 		 */
-		void GetMinimumSize(int* w, int* h) { SDL_GetWindowMinimumSize(window, w, h); }
+		Window& GetMinimumSize(int* w, int* h) { SDL_GetWindowMinimumSize(window, w, h); return *this; }
 
 		/**
 		 *  \brief Set the maximum size of this window's client area.
@@ -485,7 +501,7 @@ namespace SDL {
 		 *  \note You can't change the maximum size of a fullscreen window, it
 		 *		automatically matches the size of the display mode.
 		 */
-		void SetMaximumSize(const Point& max_size) { SDL_SetWindowMaximumSize(window, max_size.w, max_size.h); }
+		Window& SetMaximumSize(const Point& max_size) { SDL_SetWindowMaximumSize(window, max_size.w, max_size.h); return *this; }
 
 		/**
 		 *  \brief Get the maximum size of this window's client area.
@@ -497,19 +513,15 @@ namespace SDL {
 			SDL_GetWindowMaximumSize(window, &returnVal.w, &returnVal.h);
 			return returnVal;
 		}
-		/**
-		 *  \brief Get the maximum size of this window's client area.
-		 *
-		 *  \param size		Reference to variable for storing the maximum size, may be NULL
-		 */
-		void GetMaximumSize(Point& size) { SDL_GetWindowMaximumSize(window, &size.w, &size.h); }
+		// \brief Get the maximum size of this window's client area.
+		Window& GetMaximumSize(Point& point) { SDL_GetWindowMaximumSize(window, &point.w, &point.h); return *this; }
 		/**
 		 *  \brief Get the maximum size of this window's client area.
 		 *
 		 *  \param w		Pointer to variable for storing the maximum width, may be NULL
 		 *  \param h		Pointer to variable for storing the maximum height, may be NULL
 		 */
-		void GetMaximumSize(int* w, int* h) { SDL_GetWindowMaximumSize(window, w, h); }
+		Window& GetMaximumSize(int* w, int* h) { SDL_GetWindowMaximumSize(window, w, h); return *this; }
 
 		/**
 		 *  \brief Set the border state of this window.
@@ -522,7 +534,7 @@ namespace SDL {
 		 *
 		 *  \note You can't change the border state of a fullscreen window.
 		 */
-		void SetBordered(bool bordered) { SDL_SetWindowBordered(window, (SDL_bool)bordered); }
+		Window& SetBordered(bool bordered) { SDL_SetWindowBordered(window, (SDL_bool)bordered); return *this; }
 
 		/**
 		 *  \brief Set the user-resizable state of this window.
@@ -535,32 +547,32 @@ namespace SDL {
 		 *
 		 *  \note You can't change the resizable state of a fullscreen window.
 		 */
-		void SetResizable(bool resizable) { SDL_SetWindowResizable(window, (SDL_bool)resizable); }
+		Window& SetResizable(bool resizable) { SDL_SetWindowResizable(window, (SDL_bool)resizable); return *this; }
 
 		// \brief Show this window.
-		void Show() { SDL_ShowWindow(window); };
+		Window& Show() { SDL_ShowWindow(window); return *this; };
 
 		// \brief Hide this window.
-		void Hide() { SDL_HideWindow(window); };
+		Window& Hide() { SDL_HideWindow(window); return *this; };
 
 		// \brief Raise this window above other windows and set the input focus.
-		void Raise() { SDL_RaiseWindow(window); }
+		Window& Raise() { SDL_RaiseWindow(window); return *this; }
 
 		// \brief Make this window as large as possible.
-		void Maximize() { SDL_MaximizeWindow(window); }
+		Window& Maximize() { SDL_MaximizeWindow(window); return *this; }
 
 		// \brief Minimize this window to an iconic representation.
-		void Minimize() { SDL_MinimizeWindow(window); }
+		Window& Minimize() { SDL_MinimizeWindow(window); return *this; }
 
 		// \brief Restore the size and position of a minimized or maximized window.
-		void Restore() { SDL_RestoreWindow(window); };
+		Window& Restore() { SDL_RestoreWindow(window); return *this; };
 
 		/**
 		 *  \brief Set this window's fullscreen state.
 		 *
-		 *  \return 0 on success, or -1 if setting the display mode failed.
+		 *  error is set to 0 on success, or -1 if setting the display mode failed.
 		 */
-		int SetFullscreen(Uint32 flags) { SDL_SetWindowFullscreen(window, flags); }
+		Window& SetFullscreen(Uint32 flags) { SDL_SetWindowFullscreen(window, flags); return *this; }
 
 		/**
 		 *  \brief Get the SDL surface associated with the window.
@@ -573,27 +585,41 @@ namespace SDL {
 		 *  \note You may not combine this with 3D or the rendering API on this window.
 		 */
 		Surface GetSurface() { return SDL_GetWindowSurface(window); }
+		/**
+		 *  \brief Get the SDL surface associated with the window.
+		 *
+		 *  A new surface will be created with the optimal format for the window,
+		 *  if necessary. This surface will be freed when the window is destroyed.
+		 *
+		 *  \note You may not combine this with 3D or the rendering API on this window.
+		 */
+		Window& GetSurface(Surface& surface) {
+			surface.~Surface();
+			surface.surface = SDL_GetWindowSurface(window);
+			surface.freeSurface = false;
+			return *this;
+		}
 
 		/**
 		 *  \brief Copy the window surface to the screen.
 		 *
-		 *  \return 0 on success, or -1 on error.
+		 *  error is set to 0 on success, or -1 on error.
 		 */
-		int UpdateSurface() { return SDL_UpdateWindowSurface(window); }
+		Window& UpdateSurface() { error = SDL_UpdateWindowSurface(window); return *this; }
 
 		/**
 		 *  \brief Copy a number of rectangles on the window surface to the screen.
 		 *
-		 *  \return 0 on success, or -1 on error.
+		 *  error is set to 0 on success, or -1 on error.
 		 */
-		int UpdateSurfaceRects(const std::vector<Rect>& rects) { SDL_UpdateWindowSurfaceRects(window, (const SDL_Rect*)rects.data(), rects.size());}
+		Window& UpdateSurfaceRects(const std::vector<Rect>& rects) { error = SDL_UpdateWindowSurfaceRects(window, (const SDL_Rect*)rects.data(), rects.size()); return *this; }
 		
 		/**
 		 *  \brief Copy a number of rectangles on the window surface to the screen.
 		 *
-		 *  \return 0 on success, or -1 on error.
+		 *  error is set to 0 on success, or -1 on error.
 		 */
-		int UpdateSurfaceRects(const Rect* rects, int numrects) { SDL_UpdateWindowSurfaceRects(window, (const SDL_Rect*)rects, numrects); }
+		Window& UpdateSurfaceRects(const Rect* rects, int numrects) { error = SDL_UpdateWindowSurfaceRects(window, (const SDL_Rect*)rects, numrects); return *this; }
 
 		/**
 		 *  \brief Set this window's input grab mode.
@@ -604,7 +630,7 @@ namespace SDL {
 		 *  If the caller enables a grab while another window is currently grabbed,
 		 *  the other window loses its grab in favor of the caller's window.
 		 */
-		void SetGrab(bool grabbed) { SDL_SetWindowGrab(window, (SDL_bool)grabbed); }
+		Window& SetGrab(bool grabbed) { SDL_SetWindowGrab(window, (SDL_bool)grabbed); return *this; }
 
 		/**
 		 *  \brief Get this window's input grab mode.
@@ -612,20 +638,28 @@ namespace SDL {
 		 *  \return This returns true if input is grabbed, and false otherwise.
 		 */
 		bool GetGrab() { return SDL_GetWindowGrab(window) == SDL_TRUE; }
+		//\brief Get this window's input grab mode.
+		Window& GetGrab(bool& grab) { grab = SDL_GetWindowGrab(window) == SDL_TRUE; return *this; }
 
 		/**
 		 *  \brief Set the brightness (gamma correction) for this window.
 		 *
-		 *  \return 0 on success, or -1 if setting the brightness isn't supported.
+		 *  error is set to 0 on success, or -1 if setting the brightness isn't supported.
 		 */
-		int SetBrightness(float brightness) { return SDL_SetWindowBrightness(window, brightness); }
+		Window& SetBrightness(float brightness) { error = SDL_SetWindowBrightness(window, brightness); return *this; }
 
 		/**
 		 *  \brief Get the brightness (gamma correction) for this window.
 		 *
-		 *  \return The last brightness value passed to SDL_SetWindowBrightness()
+		 *  \return The last brightness value passed to SetWindowBrightness()
 		 */
 		float GetBrightness() { return SDL_GetWindowBrightness(window); }
+		/**
+		 *  \brief Get the brightness (gamma correction) for this window.
+		 *
+		 *  \return The last brightness value passed to SetWindowBrightness()
+		 */
+		Window& GetBrightness(float& brightness) { brightness = SDL_GetWindowBrightness(window); return *this; }
 
 		/**
 		 *  \brief Set the opacity for this window

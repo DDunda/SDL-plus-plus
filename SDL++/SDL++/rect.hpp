@@ -95,8 +95,6 @@ namespace SDL {
 
 		bool operator==(const FPoint& v) const;
 		bool operator!=(const FPoint& v) const;
-
-		friend static std::ostream& operator<<(std::ostream& os, const FPoint& v);
 	};
 
 	FPoint operator*(double a, const FPoint& b);
@@ -186,8 +184,6 @@ namespace SDL {
 
 		bool operator==(const Point& v) const;
 		bool operator!=(const Point& v) const;
-
-		friend static std::ostream& operator<<(std::ostream& os, const Point& v);
 	};
 
 	FPoint operator*(double a, const Point& b);
@@ -265,6 +261,16 @@ namespace SDL {
 		FRect& operator+=(const Point& v);
 		FRect& operator-=(const Point& v);
 
+		FRect operator*(const FPoint& v) const;
+		FRect operator/(const FPoint& v) const;
+		FRect operator*(const Point& v) const;
+		FRect operator/(const Point& v) const;
+
+		FRect& operator*=(const FPoint& v);
+		FRect& operator/=(const FPoint& v);
+		FRect& operator*=(const Point& v);
+		FRect& operator/=(const Point& v);
+
 		FRect operator*(double m) const;
 		FRect operator/(double m) const;
 		FRect operator*(float m) const;
@@ -281,8 +287,6 @@ namespace SDL {
 
 		bool operator==(const FRect& v) const;
 		bool operator!=(const FRect& v) const;
-
-		friend static std::ostream& operator<< (std::ostream& os, const FRect& r);
 	};
 
 	struct Rect {
@@ -361,6 +365,16 @@ namespace SDL {
 		Rect& operator+=(const Point& v);
 		Rect& operator-=(const Point& v);
 
+		FRect operator*(const FPoint& v) const;
+		FRect operator/(const FPoint& v) const;
+		Rect  operator*(const Point& v) const;
+		Rect  operator/(const Point& v) const;
+
+		Rect& operator*=(const FPoint& v);
+		Rect& operator/=(const FPoint& v);
+		Rect& operator*=(const Point& v);
+		Rect& operator/=(const Point& v);
+
 		FRect operator*(double m) const;
 		FRect operator/(double m) const;
 		FRect operator*(float m) const;
@@ -377,29 +391,10 @@ namespace SDL {
 
 		bool operator==(const Rect& v) const;
 		bool operator!=(const Rect& v) const;
-
-		friend static std::ostream& operator<<(std::ostream& os, const Rect& r);
 	};
 
-	struct RayContact {
-		bool contact = false;
-		FPoint point = { 0,0 };
-		FPoint normal = { 0,0 };
-		float time = 0;
-	};
-
-	struct Ray {
-		FPoint origin;
-		FPoint dir;
-
-		RayContact hit;
-
-		Ray() : origin(), dir() {}
-		Ray(FPoint origin, FPoint dir) : origin(origin), dir(dir) {}
-
-		bool intersectsRect(const Rect& rect) const;
-		bool intersectsRect(const FRect& rect) const;
-		bool intersectRect(const Rect& rect);
-		bool intersectRect(const FRect& rect);
-	};
+	std::ostream& operator<<(std::ostream& os, const FPoint& v);
+	std::ostream& operator<<(std::ostream& os, const Point& v);
+	std::ostream& operator<<(std::ostream& os, const FRect& r);
+	std::ostream& operator<<(std::ostream& os, const Rect& r);
 }

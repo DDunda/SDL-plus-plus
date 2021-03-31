@@ -19,22 +19,24 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="render.cpp" />
+    <ClCompile Include="SDL++\ray.cpp" />
+    <ClCompile Include="SDL++\rect.cpp" />
+    <ClCompile Include="SDL++\render.cpp" />
     <ClCompile Include="Source.cpp" />
-    <ClCompile Include="rect.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="audio.hpp" />
-    <ClInclude Include="blendmode.hpp" />
-    <ClInclude Include="error.hpp" />
-    <ClInclude Include="events.hpp" />
-    <ClInclude Include="pixels.hpp" />
-    <ClInclude Include="rect.hpp" />
-    <ClInclude Include="SDL.hpp" />
-    <ClInclude Include="render.hpp" />
-    <ClInclude Include="surface.hpp" />
-    <ClInclude Include="timer.hpp" />
-    <ClInclude Include="video.hpp" />
+    <ClInclude Include="SDL++\audio.hpp" />
+    <ClInclude Include="SDL++\blendmode.hpp" />
+    <ClInclude Include="SDL++\error.hpp" />
+    <ClInclude Include="SDL++\events.hpp" />
+    <ClInclude Include="SDL++\pixels.hpp" />
+    <ClInclude Include="SDL++\ray.hpp" />
+    <ClInclude Include="SDL++\rect.hpp" />
+    <ClInclude Include="SDL++\render.hpp" />
+    <ClInclude Include="SDL++\SDL.hpp" />
+    <ClInclude Include="SDL++\surface.hpp" />
+    <ClInclude Include="SDL++\timer.hpp" />
+    <ClInclude Include="SDL++\video.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

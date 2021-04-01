@@ -1322,6 +1322,20 @@ namespace SDL {
 	 */
 	int CreateWindowAndRenderer(const Point& size, Window& window, Renderer& renderer, Uint32 window_flags = SDL_WINDOW_SHOWN);
 
+	const Colour VERY_LIGHT_RED = { 255, 191, 191 };
+	const Colour VERY_LIGHT_YELLOW = { 255, 255, 191 };
+	const Colour VERY_LIGHT_GREEN = { 191, 255, 191 };
+	const Colour VERY_LIGHT_CYAN = { 191, 255, 255 };
+	const Colour VERY_LIGHT_BLUE = { 191, 191, 255 };
+	const Colour VERY_LIGHT_MAGENTA = { 255, 191, 255 };
+
+	const Colour LIGHT_RED = { 255, 127, 127 };
+	const Colour LIGHT_YELLOW = { 255, 255, 127 };
+	const Colour LIGHT_GREEN = { 127, 255, 127 };
+	const Colour LIGHT_CYAN = { 127, 255, 255 };
+	const Colour LIGHT_BLUE = { 127, 127, 255 };
+	const Colour LIGHT_MAGENTA = { 255, 127, 255 };
+
 	const Colour RED = { 255, 0, 0 };
 	const Colour YELLOW = { 255, 255, 0 };
 	const Colour GREEN = { 0, 255, 0 };

@@ -39,6 +39,7 @@ namespace SDL {
 		bool nonZero() const;
 		bool inRect(const FRect& r) const;
 
+		FPoint turn(float a) const;
 		FPoint perp() const;
 		FPoint norm() const;
 		FPoint abs()  const;
@@ -132,6 +133,7 @@ namespace SDL {
 		bool nonZero() const;
 		bool inRect(const Rect& r) const;
 
+		FPoint turn(float a) const;
 		Point perp() const;
 		FPoint norm() const;
 		Point abs() const;

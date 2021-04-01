@@ -9,6 +9,8 @@
 #include "timer.hpp"
 #include "video.hpp"
 
+#include "image.hpp"
+
 namespace SDL {
 	// This function initializes the subsystems specified by \c flags.
 	static int Init(Uint32 flags = SDL_INIT_EVERYTHING) {

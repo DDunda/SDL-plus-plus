@@ -29,6 +29,7 @@
     <ClInclude Include="SDL++\blendmode.hpp" />
     <ClInclude Include="SDL++\error.hpp" />
     <ClInclude Include="SDL++\events.hpp" />
+    <ClInclude Include="SDL++\image.hpp" />
     <ClInclude Include="SDL++\pixels.hpp" />
     <ClInclude Include="SDL++\ray.hpp" />
     <ClInclude Include="SDL++\rect.hpp" />

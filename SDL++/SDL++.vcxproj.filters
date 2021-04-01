@@ -70,5 +70,8 @@
     <ClInclude Include="SDL++\timer.hpp">
       <Filter>SDL++\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SDL++\image.hpp">
+      <Filter>SDL++\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

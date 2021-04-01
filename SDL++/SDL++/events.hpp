@@ -336,15 +336,13 @@ namespace SDL {
 		Input() { typed_callback = new InputCallback[SDL_LASTEVENT]; event_at = new Uint32[SDL_LASTEVENT]; }
 		~Input() { delete[] typed_callback; delete[] event_at; }
 
-		bool buttonUp  (Uint8 i) { return  prev_buttons[i] && !buttons[i]; }
+		bool button    (Uint8 i) { return  buttons[i]; }
 		bool buttonDown(Uint8 i) { return !prev_buttons[i] &&  buttons[i]; }
-		bool buttonHeld(Uint8 i) { return  prev_buttons[i] &&  buttons[i]; }
-		bool buttonIdle(Uint8 i) { return !prev_buttons[i] && !buttons[i]; }
+		bool buttonUp  (Uint8 i) { return  prev_buttons[i] && !buttons[i]; }
 
-		bool scancodeUp  (SDL_Scancode i) { return  prev_scancodes[i] && !scancodes[i]; }
-		bool scancodeDown(SDL_Scancode i) { return !prev_scancodes[i] &&  scancodes[i]; }
-		bool scancodeHeld(SDL_Scancode i) { return  prev_scancodes[i] &&  scancodes[i]; }
-		bool scancodeIdle(SDL_Scancode i) { return !prev_scancodes[i] && !scancodes[i]; }
+		bool scancode     (SDL_Scancode i) { return  scancodes[i]; }
+		bool scancodeDown (SDL_Scancode i) { return !prev_scancodes[i] &&  scancodes[i]; }
+		bool scancodeUp   (SDL_Scancode i) { return  prev_scancodes[i] && !scancodes[i]; }
 
 		void Update() {
 			Event e;

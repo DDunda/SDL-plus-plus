@@ -1320,7 +1320,7 @@ namespace SDL {
 	 *
 	 *  \return 0 on success, or -1 on error
 	 */
-	int CreateWindowAndRenderer(const Point& size, Window& window, Renderer& renderer, Uint32 window_flags = SDL_WINDOW_SHOWN);
+	int CreateWindowAndRenderer(const Point& size, Window& window, Renderer& renderer, Uint32 window_flags = SDL_WINDOW_SHOWN & SDL_WINDOW_RESIZABLE);
 
 	const Colour VERY_LIGHT_RED = { 255, 191, 191 };
 	const Colour VERY_LIGHT_YELLOW = { 255, 255, 191 };

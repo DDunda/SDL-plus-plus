@@ -137,9 +137,7 @@
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SDL)\lib\$(PlatformShortName)\*.dll" "$(OutDir)";
-copy "$(SDL_image)\lib\$(PlatformShortName)\*.dll" "$(OutDir)";
-copy "$(SDL_mixer)\lib\$(PlatformShortName)\*.dll" "$(OutDir)";</Command>
+      <Command>copy "$(SDL)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"&amp;copy "$(SDL_image)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"&amp;copy "$(SDL_mixer)\lib\$(PlatformShortName)\*.dll" "$(OutDir)";</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -160,9 +158,7 @@ copy "$(SDL_mixer)\lib\$(PlatformShortName)\*.dll" "$(OutDir)";</Command>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SDL)\lib\$(PlatformShortName)\*.dll" "$(OutDir)";
-copy "$(SDL_image)\lib\$(PlatformShortName)\*.dll" "$(OutDir)";
-copy "$(SDL_mixer)\lib\$(PlatformShortName)\*.dll" "$(OutDir)";</Command>
+      <Command>copy "$(SDL)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"&amp;copy "$(SDL_image)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"&amp;copy "$(SDL_mixer)\lib\$(PlatformShortName)\*.dll" "$(OutDir)";</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -179,9 +175,7 @@ copy "$(SDL_mixer)\lib\$(PlatformShortName)\*.dll" "$(OutDir)";</Command>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SDL)\lib\$(PlatformShortName)\*.dll" "$(OutDir)";
-copy "$(SDL_image)\lib\$(PlatformShortName)\*.dll" "$(OutDir)";
-copy "$(SDL_mixer)\lib\$(PlatformShortName)\*.dll" "$(OutDir)";</Command>
+      <Command>copy "$(SDL)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"&amp;copy "$(SDL_image)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"&amp;copy "$(SDL_mixer)\lib\$(PlatformShortName)\*.dll" "$(OutDir)";</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -202,9 +196,7 @@ copy "$(SDL_mixer)\lib\$(PlatformShortName)\*.dll" "$(OutDir)";</Command>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SDL)\lib\$(PlatformShortName)\*.dll" "$(OutDir)";
-copy "$(SDL_image)\lib\$(PlatformShortName)\*.dll" "$(OutDir)";
-copy "$(SDL_mixer)\lib\$(PlatformShortName)\*.dll" "$(OutDir)";</Command>
+      <Command>copy "$(SDL)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"&amp;copy "$(SDL_image)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"&amp;copy "$(SDL_mixer)\lib\$(PlatformShortName)\*.dll" "$(OutDir)";</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

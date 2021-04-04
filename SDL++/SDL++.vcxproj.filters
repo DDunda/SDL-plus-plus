@@ -23,54 +23,54 @@
     <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SDL++\ray.cpp">
+    <ClCompile Include="source\ray.cpp">
       <Filter>SDL++\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SDL++\rect.cpp">
+    <ClCompile Include="source\rect.cpp">
       <Filter>SDL++\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SDL++\render.cpp">
+    <ClCompile Include="source\render.cpp">
       <Filter>SDL++\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SDL++\video.hpp">
+    <ClInclude Include="include\video.hpp">
       <Filter>SDL++\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDL++\audio.hpp">
+    <ClInclude Include="include\audio.hpp">
       <Filter>SDL++\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDL++\blendmode.hpp">
+    <ClInclude Include="include\blendmode.hpp">
       <Filter>SDL++\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDL++\error.hpp">
+    <ClInclude Include="include\error.hpp">
       <Filter>SDL++\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDL++\events.hpp">
+    <ClInclude Include="include\events.hpp">
       <Filter>SDL++\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDL++\pixels.hpp">
+    <ClInclude Include="include\image.hpp">
       <Filter>SDL++\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDL++\ray.hpp">
+    <ClInclude Include="include\pixels.hpp">
       <Filter>SDL++\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDL++\rect.hpp">
+    <ClInclude Include="include\ray.hpp">
       <Filter>SDL++\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDL++\render.hpp">
+    <ClInclude Include="include\rect.hpp">
       <Filter>SDL++\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDL++\SDL.hpp">
+    <ClInclude Include="include\render.hpp">
       <Filter>SDL++\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDL++\surface.hpp">
+    <ClInclude Include="include\SDL.hpp">
       <Filter>SDL++\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDL++\timer.hpp">
+    <ClInclude Include="include\surface.hpp">
       <Filter>SDL++\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDL++\image.hpp">
+    <ClInclude Include="include\timer.hpp">
       <Filter>SDL++\Header Files</Filter>
     </ClInclude>
   </ItemGroup>

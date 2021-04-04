@@ -1,4 +1,4 @@
-#include "SDL++/SDL.hpp"
+#include<SDL.hpp>
 
 int main(int argc, char* argv[]) {
 	using namespace SDL;

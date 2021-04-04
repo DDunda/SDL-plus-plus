@@ -10,3 +10,6 @@ SDL++ is provided as a standard C++ Visual Studio project, however just the cont
 If you wish to compile the VS project, please follow my guide for installing SDL2 and SDL2_image: https://github.com/DDunda/InstallSDL2
 
 When I install SDL++ this way in the future, I will use the `SDL++` environment variable.
+
+## Credits
+Since this an SDL wrapper, this project uses SDL. The api, interal functions, and documentation comments, are all taken directly from the SDL library (which you can find [here](https://www.libsdl.org/download-2.0.php), by the way).

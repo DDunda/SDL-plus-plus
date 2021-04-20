@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -17,27 +17,6 @@
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="source\ray.cpp" />
-    <ClCompile Include="source\rect.cpp" />
-    <ClCompile Include="source\render.cpp" />
-    <ClCompile Include="Source.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="include\audio.hpp" />
-    <ClInclude Include="include\blendmode.hpp" />
-    <ClInclude Include="include\error.hpp" />
-    <ClInclude Include="include\events.hpp" />
-    <ClInclude Include="include\image.hpp" />
-    <ClInclude Include="include\pixels.hpp" />
-    <ClInclude Include="include\ray.hpp" />
-    <ClInclude Include="include\rect.hpp" />
-    <ClInclude Include="include\render.hpp" />
-    <ClInclude Include="include\SDL.hpp" />
-    <ClInclude Include="include\surface.hpp" />
-    <ClInclude Include="include\timer.hpp" />
-    <ClInclude Include="include\video.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -93,35 +72,31 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(SDL_mixer)\include\;$(SDLpp)\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SDL)\lib\$(PlatformShortName)\;$(SDL_image)\lib\$(PlatformShortName)\;$(SDL_mixer)\lib\$(PlatformShortName)\;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(SDL_mixer)\include\;$(ProjectDir)\include\;$(IncludePath)</IncludePath>
-    <IntDir>$(ProjectDir)tmp\$(Configuration)_$(PlatformShortName)\</IntDir>
-    <OutDir>$(ProjectDir)out\$(Configuration)_$(PlatformShortName)\</OutDir>
-    <SourcePath>$(ProjectDir)\source\;$(SourcePath)</SourcePath>
+    <OutDir>$(ProjectDir)\out\$(Configuration)_$(PlatformShortName)\</OutDir>
+    <IntDir>$(ProjectDir)\tmp\$(Configuration)_$(PlatformShortName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(SDL_mixer)\include\;$(SDLpp)\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SDL)\lib\$(PlatformShortName)\;$(SDL_image)\lib\$(PlatformShortName)\;$(SDL_mixer)\lib\$(PlatformShortName)\;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(SDL_mixer)\include\;$(ProjectDir)\include\;$(IncludePath)</IncludePath>
-    <IntDir>$(ProjectDir)tmp\$(Configuration)_$(PlatformShortName)\</IntDir>
-    <OutDir>$(ProjectDir)out\$(Configuration)_$(PlatformShortName)\</OutDir>
-    <SourcePath>$(ProjectDir)\source\;$(SourcePath)</SourcePath>
+    <OutDir>$(ProjectDir)\out\$(Configuration)_$(PlatformShortName)\</OutDir>
+    <IntDir>$(ProjectDir)\tmp\$(Configuration)_$(PlatformShortName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(SDL_mixer)\include\;$(SDLpp)\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SDL)\lib\$(PlatformShortName)\;$(SDL_image)\lib\$(PlatformShortName)\;$(SDL_mixer)\lib\$(PlatformShortName)\;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(SDL_mixer)\include\;$(ProjectDir)\include\;$(IncludePath)</IncludePath>
-    <IntDir>$(ProjectDir)tmp\$(Configuration)_$(PlatformShortName)\</IntDir>
-    <OutDir>$(ProjectDir)out\$(Configuration)_$(PlatformShortName)\</OutDir>
-    <SourcePath>$(ProjectDir)\source\;$(SourcePath)</SourcePath>
+    <OutDir>$(ProjectDir)\out\$(Configuration)_$(PlatformShortName)\</OutDir>
+    <IntDir>$(ProjectDir)\tmp\$(Configuration)_$(PlatformShortName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(SDL_mixer)\include\;$(SDLpp)\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SDL)\lib\$(PlatformShortName)\;$(SDL_image)\lib\$(PlatformShortName)\;$(SDL_mixer)\lib\$(PlatformShortName)\;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(SDL_mixer)\include\;$(ProjectDir)\include\;$(IncludePath)</IncludePath>
-    <IntDir>$(ProjectDir)tmp\$(Configuration)_$(PlatformShortName)\</IntDir>
-    <OutDir>$(ProjectDir)out\$(Configuration)_$(PlatformShortName)\</OutDir>
-    <SourcePath>$(ProjectDir)\source\;$(SourcePath)</SourcePath>
+    <OutDir>$(ProjectDir)\out\$(Configuration)_$(PlatformShortName)\</OutDir>
+    <IntDir>$(ProjectDir)\tmp\$(Configuration)_$(PlatformShortName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -151,7 +126,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -189,7 +164,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -199,6 +174,27 @@
       <Command>copy "$(SDL)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"&amp;copy "$(SDL_image)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"&amp;copy "$(SDL_mixer)\lib\$(PlatformShortName)\*.dll" "$(OutDir)";</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="include\audio.hpp" />
+    <ClInclude Include="include\blendmode.hpp" />
+    <ClInclude Include="include\error.hpp" />
+    <ClInclude Include="include\events.hpp" />
+    <ClInclude Include="include\image.hpp" />
+    <ClInclude Include="include\pixels.hpp" />
+    <ClInclude Include="include\ray.hpp" />
+    <ClInclude Include="include\rect.hpp" />
+    <ClInclude Include="include\render.hpp" />
+    <ClInclude Include="include\SDL.hpp" />
+    <ClInclude Include="include\surface.hpp" />
+    <ClInclude Include="include\timer.hpp" />
+    <ClInclude Include="include\video.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Example.cpp" />
+    <ClCompile Include="src\ray.cpp" />
+    <ClCompile Include="src\rect.cpp" />
+    <ClCompile Include="src\render.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

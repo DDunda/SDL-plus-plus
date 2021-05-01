@@ -28,6 +28,6 @@ namespace SDL {
 		bool intersectRect(const Rect& rect);
 		bool intersectRect(const FRect& rect);
 
-		friend static std::ostream& operator<<(std::ostream& os, const Ray& r);
+		friend std::ostream& operator<<(std::ostream& os, const Ray& r);
 	};
 }

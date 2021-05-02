@@ -10,7 +10,7 @@ namespace SDL {
 	 *
 	 *  \return -1, there is no error handling for this function
 	 */
-	static int SetError(SDL_PRINTF_FORMAT_STRING const char* fmt, Args... args) SDL_PRINTF_VARARG_FUNC(1) { return SDL_SetError(fmt, args...); }
+	static int SetError(SDL_PRINTF_FORMAT_STRING const char* fmt, Args... args) { return SDL_SetError(fmt, args...); }
 
 	/**
 	 *  \brief Get the last error message that was set

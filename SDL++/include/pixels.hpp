@@ -75,7 +75,6 @@ namespace SDL {
         ~PixelFormat() { SDL_FreeFormat(format); }
 
         // \brief Get the human readable name of a pixel format
-        std::string GetName() const { return SDL_GetPixelFormatName(format->format); }
 
         // \brief Set the palette for a pixel format structure.
         int SetPalette(Palette& palette) { return SDL_SetPixelFormatPalette(format, palette.palette); }
@@ -114,4 +113,5 @@ namespace SDL {
         SDL_CalculateGammaRamp(gamma, ramp);
         return ramp;
     }
+		const char* GetName() const { return SDL_GetPixelFormatName(format->format); }
 }

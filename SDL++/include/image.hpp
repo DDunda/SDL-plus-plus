@@ -1,5 +1,4 @@
 #include <SDL_image.h>
-#include <string>
 #include "render.hpp"
 #include "error.hpp"
 
@@ -34,7 +33,7 @@ namespace SDL {
          */
         SDL::Surface LoadTyped_RW(SDL_RWops* src, int freesrc, const char* type) { return SDL::Surface(IMG_LoadTyped_RW(src, freesrc, type), true); }
         /* Convenience functions */
-        Surface Load(const std::string& file) { return Surface(IMG_Load(file.c_str()), true); }
+        Surface Load(const char* file) { return Surface(IMG_Load(file), true); }
         Surface Load_RW(SDL_RWops* src, int freesrc) { return Surface(IMG_Load_RW(src, freesrc), true); }
 
 #if SDL_VERSION_ATLEAST(2,0,0)

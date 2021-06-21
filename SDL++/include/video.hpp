@@ -1,7 +1,6 @@
 #pragma once
 
 #include <SDL_video.h>
-#include <string>
 #include "rect.hpp"
 #include "surface.hpp"
 
@@ -25,7 +24,7 @@ namespace SDL {
 	 *  \note The video drivers are presented in the order in which they are
 	 *		normally checked during initialization.
 	 */
-	static std::string GetVideoDriver(int index) { return std::string(SDL_GetVideoDriver(index)); }
+	static const char* GetVideoDriver(int index) { return SDL_GetVideoDriver(index); }
 
 	/**
 	 *  \brief Initialize the video subsystem, specifying a video driver.
@@ -38,7 +37,7 @@ namespace SDL {
 	 *  to the window manager, etc, and determines the available display modes
 	 *  and pixel formats, but does not initialize a window or graphics mode.
 	 */
-	static int VideoInit(const std::string& driver_name) { return SDL_VideoInit(driver_name.c_str()); }
+	static int VideoInit(const char* driver_name) { return SDL_VideoInit(driver_name); }
 
 	/**
 	 *  \brief Initialize the video subsystem with the default video driver.
@@ -213,8 +212,8 @@ namespace SDL {
 		 *		Vulkan loader or link to a dynamic library version. This limitation
 		 *		may be removed in a future version of SDL.
 		 */
-		Window(std::string title, const Rect& shape, Uint32 flags)
-			: Window(SDL_CreateWindow(title.c_str(), shape.x, shape.y, shape.w, shape.h, flags), true) {}
+		Window(const char* title, const Rect& shape, Uint32 flags)
+			: Window(SDL_CreateWindow(title, shape.x, shape.y, shape.w, shape.h, flags), true) {}
 
 		/**
 		 *  \brief Create an SDL window from an existing native window.
@@ -287,15 +286,12 @@ namespace SDL {
 		Window& GetFlags(Uint32& flags) { flags = SDL_GetWindowFlags(window); return *this; }
 
 		// \brief Set the title of this window.
-		Window& SetTitle(const std::string& title) { SDL_SetWindowTitle(window, title.c_str()); return *this; }
-
-		// \brief Set the title of this window.
 		Window& SetTitle(const char* title) { SDL_SetWindowTitle(window, title); return *this; }
 
-		// \brief Get the title of this window.
-		std::string GetTitle() { return std::string(SDL_GetWindowTitle(window)); }
-		// \brief Get the title of this window.
-		Window& GetTitle(std::string& title) { title = SDL_GetWindowTitle(window); return *this; }
+		// Get the title of this window.
+		const char* GetTitle() { return SDL_GetWindowTitle(window); }
+		// Get the title of this window.
+		Window& GetTitle(const char* title) { title = SDL_GetWindowTitle(window); return *this; }
 
 		/**
 		 *  \brief Set the icon for this window.
@@ -314,7 +310,7 @@ namespace SDL {
 		 *
 		 *  \note The name is case-sensitive.
 		 */
-		void* SetData(const std::string& name, void* data) { return SDL_SetWindowData(window, name.c_str(), data); }
+		void* SetData(const char* name, void* data) { return SDL_SetWindowData(window, name, data); }
 
 		/**
 		 *  \brief Retrieve the data pointer associated with this window.
@@ -323,7 +319,7 @@ namespace SDL {
 		 *
 		 *  \return The value associated with 'name'
 		 */
-		void* GetData(const std::string& name) { return SDL_GetWindowData(window, name.c_str()); }
+		void* GetData(const char* name) { return SDL_GetWindowData(window, name); }
 		/**
 		 *  \brief Retrieve the data pointer associated with this window.
 		 *
@@ -331,7 +327,7 @@ namespace SDL {
 		 *
 		 *  \return The value associated with 'name'
 		 */
-		Window& GetData(const std::string& name, void*& data) { data = SDL_GetWindowData(window, name.c_str()); return *this; }
+		Window& GetData(const char* name, void*& data) { data = SDL_GetWindowData(window, name); return *this; }
 
 		/**
 		 *  \brief Set the position of this window.
@@ -843,16 +839,16 @@ namespace SDL {
 		  *  \note If you do this, you need to retrieve all of the GL functions used in
 		  *		your program from the dynamic library using SDL_GL_GetProcAddress().
 		  */
-		static int LoadLibrary(const std::string& path) { return SDL_GL_LoadLibrary(path.c_str()); }
+		static int LoadLibrary(const char* path) { return SDL_GL_LoadLibrary(path); }
 
-		// \brief Get the address of an OpenGL function.
-		static void* GetProcAddress(const std::string& proc) { return SDL_GL_GetProcAddress(proc.c_str()); }
+		// Get the address of an OpenGL function.
+		static void* GetProcAddress(const char* proc) { return SDL_GL_GetProcAddress(proc); }
 
 		// \brief Unload the OpenGL library previously loaded by SDL_GL_LoadLibrary().
 		static void UnloadLibrary() { SDL_GL_UnloadLibrary(); }
 
-		// \brief Return true if an OpenGL extension is supported for the current context.
-		static bool ExtensionSupported(const std::string& extension) { return SDL_GL_ExtensionSupported(extension.c_str());}
+		// Return true if an OpenGL extension is supported for the current context.
+		static bool ExtensionSupported(const char* extension) { return SDL_GL_ExtensionSupported(extension);}
 
 		// \brief Reset all previously set OpenGL context attributes to their default values
 		static void ResetAttributes() { SDL_GL_ResetAttributes(); }

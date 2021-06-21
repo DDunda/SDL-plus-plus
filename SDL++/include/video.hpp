@@ -236,7 +236,7 @@ namespace SDL {
 	struct Window {
 		SDL_Window* window = NULL;
 		bool freeWindow = false;
-		int error;
+		int error = 0;
 
 		Window(const Window& wnd) : Window(wnd.window, false) {}
 		Window(Window&& wnd) noexcept : Window(wnd.window, wnd.freeWindow) { wnd.window = NULL; wnd.freeWindow = false; }

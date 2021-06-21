@@ -24,7 +24,7 @@ namespace SDL {
 
 		SDL_Renderer* renderer = nullptr;
 		bool freeRenderer = false;
-		int error;
+		int error = 0;
 
 		Renderer(const Renderer& r);
 		Renderer(Renderer&& r) noexcept;

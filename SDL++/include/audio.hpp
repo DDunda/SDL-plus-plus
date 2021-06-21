@@ -79,7 +79,7 @@ namespace SDL {
 
     struct Audio {
         bool freeAudio;
-        int error;
+        int error = 0;
 
         /**
          *  This function opens the audio device with the desired parameters, and
@@ -128,6 +128,7 @@ namespace SDL {
          */
         Audio(AudioSpec& desired, AudioSpec& obtained) {
             freeAudio = SDL_OpenAudio(&desired, &obtained) != -1;
+            error = !freeAudio ? -1 : 0;
         }
 
         /**
@@ -174,6 +175,7 @@ namespace SDL {
          */
         Audio(AudioSpec& desired) {
             freeAudio = SDL_OpenAudio(&desired, NULL) != -1;
+            error = !freeAudio ? -1 : 0;
         }
 
         // This function shuts down audio processing and closes the audio device.
@@ -236,7 +238,7 @@ namespace SDL {
         typedef SDL_AudioDeviceID DeviceID;
 
         DeviceID ID;
-        int error;
+        int error = 0;
         bool freeDevice;
 
         AudioDevice(DeviceID ID, bool free = false) : ID(ID), freeDevice(free && ID > 1) {}
@@ -573,7 +575,7 @@ namespace SDL {
 
     struct AudioCVT {
         SDL_AudioCVT cvt;
-        int error;
+        int error = 0;
 
         /**
          *  This function takes a source format and rate and a destination format

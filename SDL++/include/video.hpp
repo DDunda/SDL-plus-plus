@@ -795,15 +795,38 @@ namespace SDL {
 
 	// \name OpenGL support functions
 	namespace GL {
-		// \brief An opaque handle to an OpenGL context.
-		typedef SDL_GLContext Context;
+		// OpenGL configuration attributes
+		enum class attr
+		{
+			RED_SIZE                   = SDL_GL_RED_SIZE,
+			GREEN_SIZE                 = SDL_GL_GREEN_SIZE,
+			BLUE_SIZE                  = SDL_GL_BLUE_SIZE,
+			ALPHA_SIZE                 = SDL_GL_ALPHA_SIZE,
+			BUFFER_SIZE                = SDL_GL_BUFFER_SIZE,
+			DOUBLEBUFFER               = SDL_GL_DOUBLEBUFFER,
+			DEPTH_SIZE                 = SDL_GL_DEPTH_SIZE,
+			STENCIL_SIZE               = SDL_GL_STENCIL_SIZE,
+			ACCUM_RED_SIZE             = SDL_GL_ACCUM_RED_SIZE,
+			ACCUM_GREEN_SIZE           = SDL_GL_ACCUM_GREEN_SIZE,
+			ACCUM_BLUE_SIZE            = SDL_GL_ACCUM_BLUE_SIZE,
+			ACCUM_ALPHA_SIZE           = SDL_GL_ACCUM_ALPHA_SIZE,
+			STEREO                     = SDL_GL_STEREO,
+			MULTISAMPLEBUFFERS         = SDL_GL_MULTISAMPLEBUFFERS,
+			MULTISAMPLESAMPLES         = SDL_GL_MULTISAMPLESAMPLES,
+			ACCELERATED_VISUAL         = SDL_GL_ACCELERATED_VISUAL,
+			RETAINED_BACKING           = SDL_GL_RETAINED_BACKING,
+			CONTEXT_MAJOR_VERSION      = SDL_GL_CONTEXT_MAJOR_VERSION,
+			CONTEXT_MINOR_VERSION      = SDL_GL_CONTEXT_MINOR_VERSION,
+			CONTEXT_EGL                = SDL_GL_CONTEXT_EGL,
+			CONTEXT_FLAGS              = SDL_GL_CONTEXT_FLAGS,
+			CONTEXT_PROFILE_MASK       = SDL_GL_CONTEXT_PROFILE_MASK,
+			SHARE_WITH_CURRENT_CONTEXT = SDL_GL_SHARE_WITH_CURRENT_CONTEXT,
+			FRAMEBUFFER_SRGB_CAPABLE   = SDL_GL_FRAMEBUFFER_SRGB_CAPABLE,
+			CONTEXT_RELEASE_BEHAVIOR   = SDL_GL_CONTEXT_RELEASE_BEHAVIOR,
+			CONTEXT_RESET_NOTIFICATION = SDL_GL_CONTEXT_RESET_NOTIFICATION,
+			CONTEXT_NO_ERROR           = SDL_GL_CONTEXT_NO_ERROR
+		};
 
-		// \brief OpenGL configuration attributes
-		typedef SDL_GLattr attr;
-		typedef SDL_GLprofile profile;
-		typedef SDL_GLcontextFlag contextFlag;
-		typedef SDL_GLcontextReleaseFlag contextReleaseFlag;
-		typedef SDL_GLContextResetNotification ContextResetNotification;
 
 		 /**
 		  *  \brief Dynamically load an OpenGL library.
@@ -834,36 +857,76 @@ namespace SDL {
 		// \brief Reset all previously set OpenGL context attributes to their default values
 		static void ResetAttributes() { SDL_GL_ResetAttributes(); }
 
-		/**
-		 *  \brief Set an OpenGL window attribute before window creation.
-		 *
-		 *  \return 0 on success, or -1 if the attribute could not be set.
-		 */
-		static int SetAttribute(attr attr, int value) { return SDL_GL_SetAttribute(attr, value); }
+		struct GLContext {
+			enum class Profile
+			{
+				CORE = SDL_GL_CONTEXT_PROFILE_CORE,
+				COMPATIBILITY = SDL_GL_CONTEXT_PROFILE_COMPATIBILITY,
+				ES = SDL_GL_CONTEXT_PROFILE_ES // GLX_CONTEXT_ES2_PROFILE_BIT_EXT
+			};
+			enum class Flag
+			{
+				DEBUG = SDL_GL_CONTEXT_DEBUG_FLAG,
+				FORWARD_COMPATIBLE = SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG,
+				ROBUST_ACCESS = SDL_GL_CONTEXT_ROBUST_ACCESS_FLAG,
+				RESET_ISOLATION = SDL_GL_CONTEXT_RESET_ISOLATION_FLAG
+			};
+			enum class ReleaseBehaviour
+			{
+				NONE = SDL_GL_CONTEXT_RELEASE_BEHAVIOR_NONE,
+				FLUSH = SDL_GL_CONTEXT_RELEASE_BEHAVIOR_FLUSH
+			};
+			enum class ResetNotification
+			{
+				NO_NOTIFICATION = SDL_GL_CONTEXT_RESET_NO_NOTIFICATION,
+				LOSE_CONTEXT = SDL_GL_CONTEXT_RESET_LOSE_CONTEXT
+			};
+
+			// An opaque handle to an OpenGL context.
+			SDL_GLContext context;
+			bool freeContext;
+
+			// Create an OpenGL context for use with an OpenGL window, and make it current.
+			GLContext(Window& window) : GLContext(SDL_GL_CreateContext(window.window), true) {}
+
+			GLContext(SDL_GLContext context = NULL, bool freeContext = false) : context(context), freeContext(freeContext) {}
+
+			// Delete an OpenGL context.
+			~GLContext() { if(freeContext) SDL_GL_DeleteContext(context); }
+
+			/**
+			 *  \brief    Set up an OpenGL context for rendering into an OpenGL window.
+			 *
+			 *  \note     The context must have been created with a compatible window.
+			 */
+			int MakeCurrent(Window& window) { return SDL_GL_MakeCurrent(window.window, context); }
+
+			// Get the currently active OpenGL window.
+			static Window GetCurrentWindow() { return SDL_GL_GetCurrentWindow(); }
+
+			// Get the currently active OpenGL context.
+			static GLContext GetCurrentContext() { return SDL_GL_GetCurrentContext(); }
+
+			/**
+			 *  \brief    Set an OpenGL window attribute before window creation.
+			 *
+			 *  \return   0 on success, or -1 if the attribute could not be set.
+			 */
+			static int SetAttribute(attr attr, int value) { return SDL_GL_SetAttribute((SDL_GLattr)attr, value); }
+
+			/**
+			 *  \brief    Get the actual value for an attribute from the current context.
+			 *
+			 *  \return   0 on success, or -1 if the attribute could not be retrieved.
+			 *            The integer at \c value will be modified in either case.
+			 */
+			static int GetAttribute(attr attr, int& value) { return SDL_GL_GetAttribute((SDL_GLattr)attr, &value); }
+		};
 
 		/**
-		 *  \brief Get the actual value for an attribute from the current context.
+		 *  \brief    Get the size of a window's underlying drawable in pixels (for use
+		 *            with glViewport).
 		 *
-		 *  \return 0 on success, or -1 if the attribute could not be retrieved.
-		 *		  The integer at \c value will be modified in either case.
-		 */
-		static int GetAttribute(attr attr, int& value) { return SDL_GL_GetAttribute(attr, &value); }
-
-		// \brief Create an OpenGL context for use with an OpenGL window, and make it current.
-		static Context CreateContext(Window& window) { return SDL_GL_CreateContext(window.window); }
-
-		/**
-		 *  \brief Set up an OpenGL context for rendering into an OpenGL window.
-		 *
-		 *  \note The context must have been created with a compatible window.
-		 */
-		static int MakeCurrent(Window& window, Context context) { return SDL_GL_MakeCurrent(window.window, context); }
-
-		// \brief Get the currently active OpenGL window.
-		static Window GetCurrentWindow() { return SDL_GL_GetCurrentWindow(); }
-
-		// \brief Get the currently active OpenGL context.
-		static Context GetCurrentContext() { return SDL_GL_GetCurrentContext(); }
 
 		/**
 		 *  \brief Get the size of a window's underlying drawable in pixels (for use
@@ -936,8 +999,5 @@ namespace SDL {
 
 		// \brief Swap the OpenGL buffers for a window, if double-buffering is supported.
 		static void SwapWindow(Window& window) { SDL_GL_SwapWindow(window.window); }
-
-		// \brief Delete an OpenGL context.
-		static void DeleteContext(Context context) { SDL_GL_DeleteContext(context); }
 	}
 }

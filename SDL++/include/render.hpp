@@ -1345,42 +1345,75 @@ namespace SDL {
 	int CreateWindowAndRenderer(const Point& size, Window& window, Renderer& renderer, Uint32 window_flags = SDL_WINDOW_SHOWN & SDL_WINDOW_RESIZABLE);
 
 	const Colour VERY_LIGHT_RED = { 255, 191, 191 };
+	const Colour VERY_LIGHT_ORANGE = { 255, 223, 191 };
 	const Colour VERY_LIGHT_YELLOW = { 255, 255, 191 };
+	const Colour VERY_LIGHT_LIME = { 223, 255, 191 };
 	const Colour VERY_LIGHT_GREEN = { 191, 255, 191 };
+	const Colour VERY_LIGHT_TURQUOISE = { 191, 255, 223 };
 	const Colour VERY_LIGHT_CYAN = { 191, 255, 255 };
+	const Colour VERY_LIGHT_AZURE = { 191, 223, 255 };
 	const Colour VERY_LIGHT_BLUE = { 191, 191, 255 };
+	const Colour VERY_LIGHT_VIOLET = { 223, 191, 255 };
 	const Colour VERY_LIGHT_MAGENTA = { 255, 191, 255 };
+	const Colour VERY_LIGHT_RASPBERRY = { 255, 191, 223 };
 
-	const Colour LIGHT_RED = { 255, 127, 127 };
-	const Colour LIGHT_YELLOW = { 255, 255, 127 };
-	const Colour LIGHT_GREEN = { 127, 255, 127 };
-	const Colour LIGHT_CYAN = { 127, 255, 255 };
-	const Colour LIGHT_BLUE = { 127, 127, 255 };
-	const Colour LIGHT_MAGENTA = { 255, 127, 255 };
+	const Colour LIGHT_RED = { 255, 128, 128 };
+	const Colour LIGHT_ORANGE = { 255, 191, 128 };
+	const Colour LIGHT_YELLOW = { 255, 255, 128 };
+	const Colour LIGHT_LIME = { 191, 255, 128 };
+	const Colour LIGHT_GREEN = { 128, 255, 128 };
+	const Colour LIGHT_TURQUOISE = { 128, 255, 191 };
+	const Colour LIGHT_CYAN = { 128, 255, 255 };
+	const Colour LIGHT_AZURE = { 128, 191, 255 };
+	const Colour LIGHT_BLUE = { 128, 128, 255 };
+	const Colour LIGHT_VIOLET = { 191, 128, 255 };
+	const Colour LIGHT_MAGENTA = { 255, 128, 255 };
+	const Colour LIGHT_RASPBERRY = { 255, 128, 191 };
 
 	const Colour RED = { 255, 0, 0 };
+	const Colour ORANGE = { 255, 128, 0 };
 	const Colour YELLOW = { 255, 255, 0 };
+	const Colour LIME = { 128, 255, 0 };
 	const Colour GREEN = { 0, 255, 0 };
+	const Colour TURQUOISE = { 0, 255, 128 };
 	const Colour CYAN = { 0, 255, 255 };
+	const Colour AZURE = { 0, 128, 255 };
 	const Colour BLUE = { 0, 0, 255 };
+	const Colour VIOLET = { 128, 0, 255 };
 	const Colour MAGENTA = { 255, 0, 255 };
+	const Colour RASPBERRY = { 255, 0, 128 };
 
-	const Colour DARK_RED = { 127, 0, 0 };
-	const Colour DARK_YELLOW = { 127, 127, 0 };
-	const Colour DARK_GREEN = { 0, 127, 0 };
-	const Colour DARK_CYAN = { 0, 127, 127 };
-	const Colour DARK_BLUE = { 0, 0, 127 };
-	const Colour DARK_MAGENTA = { 127, 0, 127 };
+	const Colour DARK_RED = { 128, 0, 0 };
+	const Colour DARK_ORANGE = { 128, 64, 0 };
+	const Colour DARK_YELLOW = { 128, 128, 0 };
+	const Colour DARK_LIME = { 64, 128, 0 };
+	const Colour DARK_GREEN = { 0, 128, 0 };
+	const Colour DARK_TURQUOISE = { 0, 128, 64 };
+	const Colour DARK_CYAN = { 0, 128, 128 };
+	const Colour DARK_AZURE = { 0, 64, 128 };
+	const Colour DARK_BLUE = { 0, 0, 128 };
+	const Colour DARK_VIOLET = { 64, 0, 128 };
+	const Colour DARK_MAGENTA = { 128, 0, 128 };
+	const Colour DARK_RASPBERRY = { 128, 0, 64 };
 
-	const Colour VERY_DARK_RED = { 63, 0, 0 };
-	const Colour VERY_DARK_YELLOW = { 63, 63, 0 };
-	const Colour VERY_DARK_GREEN = { 0, 63, 0 };
-	const Colour VERY_DARK_CYAN = { 0, 63, 63 };
-	const Colour VERY_DARK_BLUE = { 0, 0, 63 };
-	const Colour VERY_DARK_MAGENTA = { 63, 0, 63 };
+	const Colour VERY_DARK_RED = { 64, 0, 0 };
+	const Colour VERY_DARK_ORANGE = { 64, 32, 0 };
+	const Colour VERY_DARK_YELLOW = { 64, 64, 0 };
+	const Colour VERY_DARK_LIME = { 32, 64, 0 };
+	const Colour VERY_DARK_GREEN = { 0, 64, 0 };
+	const Colour VERY_DARK_TURQUOISE = { 0, 64, 32 };
+	const Colour VERY_DARK_CYAN = { 0, 64, 64 };
+	const Colour VERY_DARK_AZURE = { 0, 32, 64 };
+	const Colour VERY_DARK_BLUE = { 0, 0, 64 };
+	const Colour VERY_DARK_VIOLET = { 32, 0, 64 };
+	const Colour VERY_DARK_MAGENTA = { 64, 0, 64 };
+	const Colour VERY_DARK_RASPBERRY = { 64, 0, 32 };
 
 	const Colour WHITE = { 255, 255, 255 };
-	const Colour GREY = { 127, 127, 127 };
+	const Colour LIGHT_GREY = { 191, 191, 191 };
+	const Colour GREY = { 128, 128, 128 };
+	const Colour DARK_GREY = { 64, 64, 64 };
+	const Colour VERY_DARK_GREY = { 32, 32, 32 };
 	const Colour BLACK = { 0, 0, 0 };
 
 	namespace GL {

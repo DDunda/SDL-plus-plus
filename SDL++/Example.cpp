@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
 	for (int frame = 0; input.running; frame++) {
 		input.Update();
 
-		if (input.button(SDL_BUTTON_LEFT))
+		if (input.button(Button::LEFT))
 			rect.pos = mouse;
 
 		r.SetDrawColor(VERY_DARK_BLUE).Clear();

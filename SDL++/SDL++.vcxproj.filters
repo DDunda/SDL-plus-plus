@@ -50,6 +50,15 @@
     <ClInclude Include="include\video.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\observer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mouse.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scancode.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ray.cpp">

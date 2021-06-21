@@ -184,10 +184,13 @@
     <ClInclude Include="include\ray.hpp" />
     <ClInclude Include="include\rect.hpp" />
     <ClInclude Include="include\render.hpp" />
+    <ClInclude Include="include\scancode.hpp" />
     <ClInclude Include="include\SDL.hpp" />
     <ClInclude Include="include\surface.hpp" />
     <ClInclude Include="include\timer.hpp" />
     <ClInclude Include="include\video.hpp" />
+    <ClInclude Include="include\mouse.hpp" />
+    <ClInclude Include="include\observer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Example.cpp" />

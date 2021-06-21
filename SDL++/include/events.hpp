@@ -1,8 +1,9 @@
 #include <SDL_events.h>
-#include <vector>
-#include <algorithm>
-#include <functional>
+#include "observer.hpp"
+
 #include "rect.hpp"
+#include "scancode.hpp"
+#include "mouse.hpp"
 
 namespace SDL {
 	struct Event {
@@ -287,41 +288,18 @@ namespace SDL {
 		Uint32 RegisterEvents(int numevents) { return SDL_RegisterEvents(numevents); }
 	};
 
-	template<typename... Ts>
-	class Callback {
-	protected:
-		std::vector<std::function<void(Ts...)>> callbacks;
-	public:
-		Callback& operator+=(std::function<void(Ts...)> f) {
-			callbacks.push_back(f);
-			return *this;
-		}
-		Callback& operator-=(std::function<void(Ts...)> f) {
-			auto it = std::find(callbacks.begin(), callbacks.end());
-			if (it == callbacks.end()) return *this;
+	typedef Subject<const Event&> InputSubject;
+	typedef Observer<const Event&> InputObserver;
 
-			*it = callbacks.end();
-			callbacks.pop_back();
-
-			return *this;
-		}
-		void operator()(Ts... a) {
-			for (auto c : callbacks) c(a...);
-		}
-	};
-
-	typedef Callback<const Event&> InputCallback;
-
-	struct Input {
-		InputCallback* typed_callback;
-		InputCallback callback;
+	struct Input : public InputSubject {
+		std::map<Event::Type, InputSubject> typed_subjects;
 
 		bool running = true;
 		Point prev_mouse;
 		Point mouse;
 		Point windowSize;
 
-		Uint32* event_at;
+		std::map<Event::Type, Uint32> event_at;
 
 		Uint32 button_up_at[5]{ 0 };
 		Uint32 button_down_at[5]{ 0 };
@@ -333,76 +311,95 @@ namespace SDL {
 		bool prev_scancodes[SDL_NUM_SCANCODES]{ false };
 		bool scancodes[SDL_NUM_SCANCODES]{ false };
 
-		Input() { typed_callback = new InputCallback[SDL_LASTEVENT]; event_at = new Uint32[SDL_LASTEVENT]; }
-		~Input() { delete[] typed_callback; delete[] event_at; }
+		bool button    (Button i) { return  buttons[(int)i]; }
+		bool buttonDown(Button i) { return !prev_buttons[(int)i] &&  buttons[(int)i]; }
+		bool buttonUp  (Button i) { return  prev_buttons[(int)i] && !buttons[(int)i]; }
 
-		bool button    (Uint8 i) { return  buttons[i]; }
-		bool buttonDown(Uint8 i) { return !prev_buttons[i] &&  buttons[i]; }
-		bool buttonUp  (Uint8 i) { return  prev_buttons[i] && !buttons[i]; }
+		bool scancode    (Scancode i) { return  scancodes[(int)i]; }
+		bool scancodeDown(Scancode i) { return !prev_scancodes[(int)i] &&  scancodes[(int)i]; }
+		bool scancodeUp  (Scancode i) { return  prev_scancodes[(int)i] && !scancodes[(int)i]; }
 
-		bool scancode     (SDL_Scancode i) { return  scancodes[i]; }
-		bool scancodeDown (SDL_Scancode i) { return !prev_scancodes[i] &&  scancodes[i]; }
-		bool scancodeUp   (SDL_Scancode i) { return  prev_scancodes[i] && !scancodes[i]; }
+		void RegisterEventType(Event::Type type, InputObserver& observer) {
+			typed_subjects[type].Register(observer);
+		}
+		void UnregisterEventType(Event::Type type, InputObserver& observer) {
+			typed_subjects[type].Unregister(observer);
+		}
+
+		void UpdateBuffers() {
+			memcpy(&prev_mouse, &mouse, sizeof(Point));
+			memcpy(&prev_buttons, &buttons, 5 * sizeof(bool));
+			memcpy(&prev_scancodes, &scancodes, SDL_NUM_SCANCODES * sizeof(bool));
+		}
+
+		void Notify(Event e) {
+			if (typed_subjects.find(e.type) != typed_subjects.end())
+				typed_subjects[e.type].Notify(e);
+
+			InputSubject::Notify(e);
+		}
+
+		void ProcessEvent(Event e) {
+			Uint32 timestamp = e.common.timestamp;
+
+			switch (e.type) {
+			case Event::Type::QUIT:
+				running = false;
+				break;
+
+			case Event::Type::WINDOWEVENT:
+				switch (e.window.event)
+				{
+				case SDL_WINDOWEVENT_RESIZED:
+					windowSize = { e.window.data1, e.window.data2 };
+					break;
+				}
+				break;
+
+			case Event::Type::MOUSEMOTION:
+				mouse = { e.motion.x, e.motion.y };
+				break;
+
+			case Event::Type::MOUSEBUTTONDOWN:
+			{
+				Uint8 button = e.button.button;
+				button_down_at[button] = timestamp;
+				buttons[button] = true;
+			}	break;
+
+			case Event::Type::MOUSEBUTTONUP:
+			{
+				Uint8 button = e.button.button;
+				button_up_at[button] = timestamp;
+				buttons[button] = false;
+			}	break;
+
+			case Event::Type::KEYDOWN:
+			{
+				Scancode scancode = (Scancode)e.key.keysym.scancode;
+				scancode_down_at[(int)scancode] = timestamp;
+				scancodes[(int)scancode] = true;
+			}	break;
+
+			case Event::Type::KEYUP:
+			{
+				Scancode scancode = (Scancode)e.key.keysym.scancode;
+				scancode_up_at[(int)scancode] = timestamp;
+				scancodes[(int)scancode] = false;
+			}	break;
+
+			}
+
+			event_at[e.type] = timestamp;
+			Notify(e);
+		}
 
 		void Update() {
 			Event e;
 
-			memcpy(&prev_mouse, &mouse, sizeof(Point));
-			memcpy(&prev_buttons, &buttons, 5 * sizeof(bool));
-			memcpy(&prev_scancodes, &scancodes, SDL_NUM_SCANCODES * sizeof(bool));
+			UpdateBuffers();
 
-			while (e.Poll()) {
-				SDL_CommonEvent c = e.common;
-				switch (e.type) {
-				case Event::Type::QUIT:
-					running = false;
-					break;
-				case Event::Type::WINDOWEVENT:
-					switch (e.window.event)
-					{
-					case SDL_WINDOWEVENT_RESIZED:
-						windowSize = { e.window.data1, e.window.data2 };
-						break;
-					}
-					break;
-				case Event::Type::MOUSEMOTION:
-					mouse.x = e.motion.x;
-					mouse.y = e.motion.y;
-					break;
-				case Event::Type::MOUSEBUTTONDOWN:
-				{
-					Uint8 button = e.button.button;
-					button_down_at[button] = c.timestamp;
-					buttons[button] = true;
-				}
-					break;
-				case Event::Type::MOUSEBUTTONUP:
-				{
-					Uint8 button = e.button.button;
-					button_up_at[button] = c.timestamp;
-					buttons[button] = false;
-				}
-					break;
-				case Event::Type::KEYDOWN:
-				{
-					SDL_Scancode scancode = e.key.keysym.scancode;
-					scancode_down_at[scancode] = c.timestamp;
-					scancodes[scancode] = true;
-				}
-					break;
-				case Event::Type::KEYUP:
-				{
-					SDL_Scancode scancode = e.key.keysym.scancode;
-					scancode_up_at[scancode] = c.timestamp;
-					scancodes[scancode] = false;
-				}
-					break;
-				}
-
-				event_at[(Uint32)e.type] = c.timestamp;
-				typed_callback[(Uint32)e.type](e);
-				callback(e);
-			}
+			while(e.Poll()) ProcessEvent(e);
 		}
 	};
 }

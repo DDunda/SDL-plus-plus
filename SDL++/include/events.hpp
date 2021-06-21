@@ -48,82 +48,82 @@ namespace SDL {
 			QUIT = SDL_QUIT, /* User-requested quit */
 
 			/* These application events have special meaning on iOS, see README-ios.md for details */
-			APP_TERMINATING = SDL_APP_TERMINATING, /* The application is being terminated by the OS */
-			APP_LOWMEMORY = SDL_APP_LOWMEMORY, /* The application is low on memory, free memory if possible. */
+			APP_TERMINATING         = SDL_APP_TERMINATING,         /* The application is being terminated by the OS */
+			APP_LOWMEMORY           = SDL_APP_LOWMEMORY,           /* The application is low on memory, free memory if possible. */
 			APP_WILLENTERBACKGROUND = SDL_APP_WILLENTERBACKGROUND, /* The application is about to enter the background */
-			APP_DIDENTERBACKGROUND = SDL_APP_DIDENTERBACKGROUND, /* The application did enter the background and may not get CPU for some time */
+			APP_DIDENTERBACKGROUND  = SDL_APP_DIDENTERBACKGROUND,  /* The application did enter the background and may not get CPU for some time */
 			APP_WILLENTERFOREGROUND = SDL_APP_WILLENTERFOREGROUND, /* The application is about to enter the foreground */
-			APP_DIDENTERFOREGROUND = SDL_APP_DIDENTERFOREGROUND, /* The application is now interactive */
+			APP_DIDENTERFOREGROUND  = SDL_APP_DIDENTERFOREGROUND,  /* The application is now interactive */
 
 			/* Display events */
 			DISPLAYEVENT = SDL_DISPLAYEVENT, /* Display state change */
 
 			/* Window events */
 			WINDOWEVENT = SDL_WINDOWEVENT, /* Window state change */
-			SYSWMEVENT = SDL_SYSWMEVENT, /* System specific event */
+			SYSWMEVENT  = SDL_SYSWMEVENT,  /* System specific event */
 
 			/* Keyboard events */
-			KEYDOWN = SDL_KEYDOWN, /* Key pressed */
-			KEYUP = SDL_KEYUP, /* Key released */
-			TEXTEDITING = SDL_TEXTEDITING, /* Keyboard text editing (composition) */
-			TEXTINPUT = SDL_TEXTINPUT, /* Keyboard text input */
+			KEYDOWN       = SDL_KEYDOWN,       /* Key pressed */
+			KEYUP         = SDL_KEYUP,         /* Key released */
+			TEXTEDITING   = SDL_TEXTEDITING,   /* Keyboard text editing (composition) */
+			TEXTINPUT     = SDL_TEXTINPUT,     /* Keyboard text input */
 			KEYMAPCHANGED = SDL_KEYMAPCHANGED, /* Keymap changed due to a system event such as an input language or keyboard layout change. */
 
 			/* Mouse events */
-			MOUSEMOTION = SDL_MOUSEMOTION, /* Mouse moved */
+			MOUSEMOTION     = SDL_MOUSEMOTION,     /* Mouse moved */
 			MOUSEBUTTONDOWN = SDL_MOUSEBUTTONDOWN, /* Mouse button pressed */
-			MOUSEBUTTONUP = SDL_MOUSEBUTTONUP, /* Mouse button released */
-			MOUSEWHEEL = SDL_MOUSEWHEEL, /* Mouse wheel motion */
+			MOUSEBUTTONUP   = SDL_MOUSEBUTTONUP,   /* Mouse button released */
+			MOUSEWHEEL      = SDL_MOUSEWHEEL,      /* Mouse wheel motion */
 
 			/* Joystick events */
-			JOYAXISMOTION = SDL_JOYAXISMOTION, /* Joystick axis motion */
-			JOYBALLMOTION = SDL_JOYBALLMOTION, /* Joystick trackball motion */
-			JOYHATMOTION = SDL_JOYHATMOTION, /* Joystick hat position change */
-			JOYBUTTONDOWN = SDL_JOYBUTTONDOWN, /* Joystick button pressed */
-			JOYBUTTONUP = SDL_JOYBUTTONUP, /* Joystick button released */
-			JOYDEVICEADDED = SDL_JOYDEVICEADDED, /* A new joystick has been inserted into the system */
-			JOYDEVICEREMOVED = SDL_JOYDEVICEREMOVED, /* An opened joystick has been removed */
+			JOYAXISMOTION    = SDL_JOYAXISMOTION,    // Joystick axis motion
+			JOYBALLMOTION    = SDL_JOYBALLMOTION,    // Joystick trackball motion
+			JOYHATMOTION     = SDL_JOYHATMOTION,     // Joystick hat position change
+			JOYBUTTONDOWN    = SDL_JOYBUTTONDOWN,    // Joystick button pressed
+			JOYBUTTONUP      = SDL_JOYBUTTONUP,      // Joystick button released
+			JOYDEVICEADDED   = SDL_JOYDEVICEADDED,   // A new joystick has been inserted into the system
+			JOYDEVICEREMOVED = SDL_JOYDEVICEREMOVED, // An opened joystick has been removed
 
 			/* Game controller events */
-			CONTROLLERAXISMOTION = SDL_CONTROLLERAXISMOTION, /* Game controller axis motion */
-			CONTROLLERBUTTONDOWN = SDL_CONTROLLERBUTTONDOWN, /* Game controller button pressed */
-			CONTROLLERBUTTONUP = SDL_CONTROLLERBUTTONUP, /* Game controller button released */
-			CONTROLLERDEVICEADDED = SDL_CONTROLLERDEVICEADDED, /* A new Game controller has been inserted into the system */
-			CONTROLLERDEVICEREMOVED = SDL_CONTROLLERDEVICEREMOVED, /* An opened Game controller has been removed */
-			CONTROLLERDEVICEREMAPPED = SDL_CONTROLLERDEVICEREMAPPED, /* The controller mapping was updated */
+			CONTROLLERAXISMOTION     = SDL_CONTROLLERAXISMOTION,     // Game controller axis motion
+			CONTROLLERBUTTONDOWN     = SDL_CONTROLLERBUTTONDOWN,     // Game controller button pressed
+			CONTROLLERBUTTONUP       = SDL_CONTROLLERBUTTONUP,       // Game controller button released
+			CONTROLLERDEVICEADDED    = SDL_CONTROLLERDEVICEADDED,    // A new Game controller has been inserted into the system
+			CONTROLLERDEVICEREMOVED  = SDL_CONTROLLERDEVICEREMOVED,  // An opened Game controller has been removed
+			CONTROLLERDEVICEREMAPPED = SDL_CONTROLLERDEVICEREMAPPED, // The controller mapping was updated
 
 			/* Touch events */
-			FINGERMOTION = SDL_FINGERMOTION, /* Finger moved */
-			FINGERDOWN = SDL_FINGERDOWN, /* Finger pressed down */
-			FINGERUP = SDL_FINGERUP, /* Finger lifted up */
+			FINGERMOTION = SDL_FINGERMOTION, // Finger moved
+			FINGERDOWN   = SDL_FINGERDOWN,   // Finger pressed down
+			FINGERUP     = SDL_FINGERUP,     // Finger lifted up
 
 			/* Gesture events */
-			DOLLARGESTURE = SDL_DOLLARGESTURE, /**/
-			DOLLARRECORD = SDL_DOLLARRECORD,
-			MULTIGESTURE = SDL_MULTIGESTURE,
+			DOLLARGESTURE = SDL_DOLLARGESTURE,
+			DOLLARRECORD  = SDL_DOLLARRECORD,
+			MULTIGESTURE  = SDL_MULTIGESTURE,
 
 			/* Clipboard events */
-			CLIPBOARDUPDATE = SDL_CLIPBOARDUPDATE, /* The clipboard changed */
+			CLIPBOARDUPDATE = SDL_CLIPBOARDUPDATE, // The clipboard changed
 
 			/* Drag and drop events */
-			DROPFILE = SDL_DROPFILE, /* The system requests a file open */
-			DROPTEXT = SDL_DROPTEXT, /* text/plain drag-and-drop event */
-			DROPBEGIN = SDL_DROPBEGIN, /* A new set of drops is beginning (NULL filename) */
-			DROPCOMPLETE = SDL_DROPCOMPLETE, /* Current set of drops is now complete (NULL filename) */
+			DROPFILE     = SDL_DROPFILE,     // The system requests a file open
+			DROPTEXT     = SDL_DROPTEXT,     // text/plain drag-and-drop event
+			DROPBEGIN    = SDL_DROPBEGIN,    // A new set of drops is beginning (NULL filename)
+			DROPCOMPLETE = SDL_DROPCOMPLETE, // Current set of drops is now complete (NULL filename)
 
 			/* Audio hotplug events */
-			AUDIODEVICEADDED = SDL_AUDIODEVICEADDED, /* A new audio device is available */
-			AUDIODEVICEREMOVED = SDL_AUDIODEVICEREMOVED, /* An audio device has been removed. */
+			AUDIODEVICEADDED   = SDL_AUDIODEVICEADDED,   // A new audio device is available
+			AUDIODEVICEREMOVED = SDL_AUDIODEVICEREMOVED, // An audio device has been removed.
 
 			/* Sensor events */
-			SENSORUPDATE = SDL_SENSORUPDATE, /* A sensor was updated */
+			SENSORUPDATE = SDL_SENSORUPDATE, // A sensor was updated
 
 			/* Render events */
-			SDL_RENDER_TARGETS_RESET = SDL_RENDER_TARGETS_RESET, /* The render targets have been reset and their contents need to be updated */
-			SDL_RENDER_DEVICE_RESET = SDL_RENDER_DEVICE_RESET, /* The device has been reset and all textures need to be recreated */
+			RENDER_TARGETS_RESET = SDL_RENDER_TARGETS_RESET, // The render targets have been reset and their contents need to be updated
+			RENDER_DEVICE_RESET  = SDL_RENDER_DEVICE_RESET,  // The device has been reset and all textures need to be recreated
 
-			USEREVENT = SDL_USEREVENT, /* Events ::USEREVENT through ::LASTEVENT are for your use, and should be allocated with RegisterEvents() */
-			LASTEVENT = SDL_LASTEVENT /* This last event is only for bounding internal arrays */
+			USEREVENT = SDL_USEREVENT, // Events ::USEREVENT through ::LASTEVENT are for your use, and should be allocated with RegisterEvents()
+			LASTEVENT = SDL_LASTEVENT  // This last event is only for bounding internal arrays
 		};
 		union {
 			Type type;
@@ -266,10 +266,7 @@ namespace SDL {
 		 */
 		static void SetFilter(Filter filter, void* userdata) { SDL_SetEventFilter(filter, userdata); }
 
-		/**
-		 *  Return the current event filter - can be used to "chain" filters.
-		 *  If there is no event filter set, this function returns false.
-		 */
+		// Return the current event filter - can be used to "chain" filters. If there is no event filter set, this function returns false.
 		static bool GetFilter(Filter& filter, void*& userdata) { return SDL_GetEventFilter(&filter, &userdata); }
 
 		// Add a function which is called when an event is added to the queue.
@@ -278,10 +275,7 @@ namespace SDL {
 		// Remove an event watch function added with AddEventWatch()
 		static void DeleteWatch(Filter filter, void* userdata) { SDL_DelEventWatch(filter, userdata); }
 
-		/**
-		 *  Run the filter function on the current event queue, removing any
-		 *  events for which the filter returns 0.
-		 */
+		// Run the filter function on the current event queue, removing any events for which the filter returns 0.
 		static void FilterEvents(Filter filter, void* userdata) { SDL_FilterEvents(filter, userdata); }
 
 		enum class State {

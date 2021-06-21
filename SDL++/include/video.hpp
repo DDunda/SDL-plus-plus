@@ -239,7 +239,7 @@ namespace SDL {
 		int error;
 
 		Window(const Window& wnd) : Window(wnd.window, false) {}
-		Window(Window&& wnd) : Window(wnd.window, wnd.freeWindow) { wnd.window = NULL;  wnd.freeWindow = false; }
+		Window(Window&& wnd) noexcept : Window(wnd.window, wnd.freeWindow) { wnd.window = NULL; wnd.freeWindow = false; }
 		Window& operator=(Window that)
 		{
 			std::swap(window, that.window);

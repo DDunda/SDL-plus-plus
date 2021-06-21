@@ -5,7 +5,7 @@
 using namespace SDL;
 
 Renderer::Renderer(const Renderer& r) : renderer(r.renderer) { }
-Renderer::Renderer(Renderer&& r) : renderer(r.renderer), freeRenderer(r.freeRenderer) { r.freeRenderer = false; }
+Renderer::Renderer(Renderer&& r) noexcept : renderer(r.renderer), freeRenderer(r.freeRenderer) { r.freeRenderer = false; }
 Renderer& Renderer::operator=(Renderer that)
 {
 	std::swap(renderer, that.renderer);
@@ -150,7 +150,7 @@ void* Renderer::GetMetalLayer() { return SDL_RenderGetMetalLayer(renderer); }
 void* Renderer::GetMetalCommandEncoder() { return SDL_RenderGetMetalCommandEncoder(renderer); }
 
 Texture::Texture(Texture& txt) : Texture(txt.renderer, txt.texture, false) {}
-Texture::Texture(Texture&& txt) : Texture(txt.renderer, txt.texture, txt.freeTexture) { txt.freeTexture = false; }
+Texture::Texture(Texture&& txt) noexcept : Texture(txt.renderer, txt.texture, txt.freeTexture) { txt.freeTexture = false; }
 Texture& Texture::operator=(Texture that)
 {
 	std::swap(renderer, that.renderer);

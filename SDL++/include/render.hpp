@@ -27,7 +27,7 @@ namespace SDL {
 		int error;
 
 		Renderer(const Renderer& r);
-		Renderer(Renderer&& r);
+		Renderer(Renderer&& r) noexcept;
 		Renderer& operator=(Renderer that);
 
 		Renderer(SDL_Renderer* renderer = NULL, bool free = false);
@@ -744,7 +744,7 @@ namespace SDL {
 		bool freeTexture = false;
 
 		Texture(Texture& txt);
-		Texture(Texture&& txt);
+		Texture(Texture&& txt) noexcept;
 		Texture& operator=(Texture that);
 
 		Texture(Renderer& renderer, SDL_Texture* texture, bool free = true);

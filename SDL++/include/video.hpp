@@ -242,8 +242,10 @@ namespace SDL {
 		Window(Window&& wnd) noexcept : Window(wnd.window, wnd.freeWindow) { wnd.window = NULL; wnd.freeWindow = false; }
 		Window& operator=(Window that)
 		{
-			std::swap(window, that.window);
-			std::swap(freeWindow, that.freeWindow);
+			if(freeWindow) SDL_DestroyWindow(window);
+			window = that.window;
+			freeWindow = that.freeWindow;
+			that.freeWindow = false;
 			return *this;
 		}
 

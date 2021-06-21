@@ -33,10 +33,10 @@ FPoint Renderer::GetScale() {
 Renderer& Renderer::GetScale(FPoint& scale) { SDL_RenderGetScale(renderer, &scale.x, &scale.y); return *this; }
 Renderer& Renderer::GetScale(float& scaleX, float& scaleY) { SDL_RenderGetScale(renderer, &scaleX, &scaleY); return *this; }
 
-Renderer& Renderer::SetDrawColor(const Colour& color) { error |= SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a); return *this; }
-Renderer& Renderer::SetDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a) { error |= SDL_SetRenderDrawColor(renderer, r, g, b, a); return *this; }
-Renderer& Renderer::GetDrawColor(Colour& color) { error |= SDL_GetRenderDrawColor(renderer, &color.r, &color.g, &color.b, &color.a); return *this; }
-Renderer& Renderer::GetDrawColor(Uint8& r, Uint8& g, Uint8& b, Uint8& a) { error |= SDL_GetRenderDrawColor(renderer, &r, &g, &b, &a); return *this; }
+Renderer& Renderer::SetDrawColour(const Colour& colour) { error |= SDL_SetRenderDrawColor(renderer, colour.r, colour.g, colour.b, colour.a); return *this; }
+Renderer& Renderer::SetDrawColour(Uint8 r, Uint8 g, Uint8 b, Uint8 a) { error |= SDL_SetRenderDrawColor(renderer, r, g, b, a); return *this; }
+Renderer& Renderer::GetDrawColour(Colour& colour) { error |= SDL_GetRenderDrawColor(renderer, &colour.r, &colour.g, &colour.b, &colour.a); return *this; }
+Renderer& Renderer::GetDrawColour(Uint8& r, Uint8& g, Uint8& b, Uint8& a) { error |= SDL_GetRenderDrawColor(renderer, &r, &g, &b, &a); return *this; }
 
 Renderer& Renderer::SetDrawBlendMode(const BlendMode& blendMode) { error |= SDL_SetRenderDrawBlendMode(renderer, (SDL_BlendMode)blendMode); return *this; }
 Renderer& Renderer::GetDrawBlendMode(BlendMode& blendMode) { error |= SDL_GetRenderDrawBlendMode(renderer, (SDL_BlendMode*)&blendMode); return *this; }
@@ -232,8 +232,8 @@ int Texture::QuerySize(Point& size) { return SDL_QueryTexture(texture, NULL, NUL
 int Texture::Query(Uint32& format, int& access, Point& size) { return SDL_QueryTexture(texture, &format, &access, &size.w, &size.h); }
 int Texture::Query(Uint32* format, int* access, int* w, int* h) { return SDL_QueryTexture(texture, format, access, w, h); }
 
-int Texture::SetColorMod(Uint8 r, Uint8 g, Uint8 b) { return SDL_SetTextureColorMod(texture, r, g, b); }
-int Texture::GetColorMod(Uint8& r, Uint8& g, Uint8& b) { return SDL_GetTextureColorMod(texture, &r, &g, &b); }
+int Texture::SetColourMod(Uint8 r, Uint8 g, Uint8 b) { return SDL_SetTextureColorMod(texture, r, g, b); }
+int Texture::GetColourMod(Uint8& r, Uint8& g, Uint8& b) { return SDL_GetTextureColorMod(texture, &r, &g, &b); }
 
 int Texture::SetAlphaMod(Uint8 alpha) { return SDL_SetTextureAlphaMod(texture, alpha); }
 int Texture::GetAlphaMod(Uint8& alpha) { return SDL_GetTextureAlphaMod(texture, &alpha); }

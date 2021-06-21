@@ -197,11 +197,11 @@ namespace SDL {
 		/**
 		 *  \brief Fill in information about a specific display mode.
 		 *
-		 *  \note The display modes are sorted in this priority:
-		 *		\li bits per pixel -> more colors to fewer colors
-		 *		\li width -> largest to smallest
-		 *		\li height -> largest to smallest
-		 *		\li refresh rate -> highest to lowest
+		 *  \note     The display modes are sorted in this priority:
+		 *            \li bits per pixel -> more colours to fewer colours
+		 *            \li width          -> largest to smallest
+		 *            \li height         -> largest to smallest
+		 *            \li refresh rate   -> highest to lowest
 		 */
 		int GetMode(int modeIndex, Mode& mode) { return SDL_GetDisplayMode(index, modeIndex, &mode); }
 
@@ -760,20 +760,19 @@ namespace SDL {
 		int SetInputFocus() { return SDL_SetWindowInputFocus(window); }
 
 		/**
-		 *  \brief Set the gamma ramp for this window.
+		 *  \brief    Set the gamma ramp for this window.
 		 *
-		 *  \param window The window for which the gamma ramp should be set.
-		 *  \param red The translation table for the red channel, or NULL.
-		 *  \param green The translation table for the green channel, or NULL.
-		 *  \param blue The translation table for the blue channel, or NULL.
+		 *  \details  Set the gamma translation table for the red, green, and blue channels
+		 *            of the video hardware.  Each table is an array of 256 16-bit quantities,
+		 *            representing a mapping between the input and output for that channel.
+		 *            The input is the index into the array, and the output is the 16-bit
+		 *            gamma value at that index, scaled to the output colour precision.
 		 *
-		 *  \return 0 on success, or -1 if gamma ramps are unsupported.
+		 *  \param    red:   The translation table for the red channel, or NULL.
+		 *  \param    green: The translation table for the green channel, or NULL.
+		 *  \param    blue:  The translation table for the blue channel, or NULL.
 		 *
-		 *  Set the gamma translation table for the red, green, and blue channels
-		 *  of the video hardware.  Each table is an array of 256 16-bit quantities,
-		 *  representing a mapping between the input and output for that channel.
-		 *  The input is the index into the array, and the output is the 16-bit
-		 *  gamma value at that index, scaled to the output color precision.
+		 *  \return   0 on success, or -1 if gamma ramps are unsupported.
 		 */
 		int SetGammaRamp(const Uint16* red, const Uint16* green, const Uint16* blue) { return SDL_SetWindowGammaRamp(window, red, green, blue); }
 		/**

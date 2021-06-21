@@ -23,9 +23,8 @@ int main(int argc, char* argv[]) {
 		if (input.button(Button::LEFT))
 			rect.pos = mouse;
 
-		r.SetDrawColor(VERY_DARK_BLUE).Clear();
-		r.SetDrawColor(WHITE).FillRect(rect);
-
+		r.SetDrawColour(VERY_DARK_BLUE).Clear();
+		r.SetDrawColour(WHITE).FillRect(rect);
 
 		r.Present();
 

@@ -27,9 +27,9 @@ namespace SDL {
            The 'type' may be one of: "BMP", "GIF", "PNG", etc.
 
            If the image format supports a transparent pixel, SDL will set the
-           colorkey for the surface.  You can enable RLE acceleration on the
+           colourkey for the surface.  You can enable RLE acceleration on the
            surface afterwards by calling:
-            SDL_SetColorKey(image, SDL_RLEACCEL, image->format->colorkey);
+           SetColourKey(SDL_RLEACCEL, image->format->colourkey);
          */
         SDL::Surface LoadTyped_RW(SDL_RWops* src, int freesrc, const char* type) { return SDL::Surface(IMG_LoadTyped_RW(src, freesrc, type), true); }
         /* Convenience functions */

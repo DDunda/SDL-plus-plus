@@ -108,15 +108,15 @@ namespace SDL {
 		Renderer& GetScale(float& scaleX, float& scaleY);
 
 		/**
-		 *  \brief Set the color used for drawing operations (Rect, Line and Clear).
+		 *  \brief    Set the colour used for drawing operations (Rect, Line and Clear).
 		 *
-		 *  \param color The color value used to draw on the rendering target.
+		 *  \param    colour: The colour value used to draw on the rendering target.
 		 *
 		 *  \return 0 on success, or -1 on error
 		 */
-		Renderer& SetDrawColor(const Colour& color);
+		Renderer& SetDrawColour(const Colour& colour);
 		/**
-		 *  \brief Set the color used for drawing operations (Rect, Line and Clear).
+		 *  \brief    Set the colour used for drawing operations (Rect, Line and Clear).
 		 *
 		 *  \param r The red value used to draw on the rendering target.
 		 *  \param g The green value used to draw on the rendering target.
@@ -126,17 +126,17 @@ namespace SDL {
 		 *
 		 *  \return 0 on success, or -1 on error
 		 */
-		Renderer& SetDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a = 255);
+		Renderer& SetDrawColour(Uint8 r, Uint8 g, Uint8 b, Uint8 a = 255);
 		/**
-		 *  \brief Get the color used for drawing operations (Rect, Line and Clear).
+		 *  \brief    Get the colour used for drawing operations (Rect, Line and Clear).
 		 *
-		 *  \param color A reference to be filled with the color used to draw on the rendering target.
+		 *  \param    colour: A reference to be filled with the colour used to draw on the rendering target.
 		 *
 		 *  \return 0 on success, or -1 on error
 		 */
-		Renderer& GetDrawColor(Colour& color);
+		Renderer& GetDrawColour(Colour& colour);
 		/**
-		 *  \brief Get the color used for drawing operations (Rect, Line and Clear).
+		 *  \brief    Get the colour used for drawing operations (Rect, Line and Clear).
 		 *
 		 *  \param r A reference to be filled with the red value used to draw on the rendering target.
 		 *  \param g A reference to be filled with the green value used to draw on the rendering target.
@@ -146,7 +146,7 @@ namespace SDL {
 		 *
 		 *  \return 0 on success, or -1 on error
 		 */
-		Renderer& GetDrawColor(Uint8& r, Uint8& g, Uint8& b, Uint8& a);
+		Renderer& GetDrawColour(Uint8& r, Uint8& g, Uint8& b, Uint8& a);
 
 		/**
 		 *  \brief Set the blend mode used for drawing operations (Fill and Line).
@@ -169,7 +169,7 @@ namespace SDL {
 		Renderer& GetDrawBlendMode(BlendMode& blendMode);
 
 		/**
-		 *  \brief Clear the current rendering target with the drawing color
+		 *  \brief    Clear the current rendering target with the drawing colour
 		 *
 		 *  This function clears the entire rendering target, ignoring the viewport and
 		 *  the clip rectangle.
@@ -389,19 +389,19 @@ namespace SDL {
 		Renderer& DrawRectsF(const std::vector<FRect>& rects);
 
 		/**
-		*  \brief Fill the entire current rendering target with the drawing color.
+		*  \brief     Fill the entire current rendering target with the drawing colour.
 		*
 		*  \return 0 on success, or -1 on error
 		*/
 		Renderer& Fill();
 		/**
-		 *  \brief Fill the entire current rendering target with the drawing color.
+		 *  \brief    Fill the entire current rendering target with the drawing colour.
 		 *
 		 *  \return 0 on success, or -1 on error
 		 */
 		Renderer& FillF();
 		/**
-		 *  \brief Fill a rectangle on the current rendering target with the drawing color.
+		 *  \brief    Fill a rectangle on the current rendering target with the drawing colour.
 		 *
 		 *  \param rect A pointer to the destination rectangle.
 		 *
@@ -409,7 +409,7 @@ namespace SDL {
 		 */
 		Renderer& FillRect(const Rect& rect);
 		/**
-		 *  \brief Fill a rectangle on the current rendering target with the drawing color.
+		 *  \brief    Fill a rectangle on the current rendering target with the drawing colour.
 		 *
 		 *  \param rect A pointer to the destination rectangle, or NULL for the entire
 		 *              rendering target.
@@ -418,7 +418,7 @@ namespace SDL {
 		 */
 		Renderer& FillRect(const Rect* rect);
 		/**
-		 *  \brief Fill a rectangle on the current rendering target with the drawing color.
+		 *  \brief    Fill a rectangle on the current rendering target with the drawing colour.
 		 *
 		 *  \param rect A reference to the destination rectangle.
 		 *
@@ -426,7 +426,7 @@ namespace SDL {
 		 */
 		Renderer& FillRectF(const FRect& rect);
 		/**
-		 *  \brief Fill a rectangle on the current rendering target with the drawing color.
+		 *  \brief    Fill a rectangle on the current rendering target with the drawing colour.
 		 *
 		 *  \param rect A pointer to the destination rectangle, or NULL for the entire
 		 *              rendering target.
@@ -435,7 +435,7 @@ namespace SDL {
 		 */
 		Renderer& FillRectF(const FRect* rect);
 		/**
-		 *  \brief Fill some number of rectangles on the current rendering target with the drawing color.
+		 *  \brief    Fill some number of rectangles on the current rendering target with the drawing colour.
 		 *
 		 *  \param rects A pointer to an array of destination rectangles.
 		 *  \param count The number of rectangles.
@@ -444,7 +444,7 @@ namespace SDL {
 		 */
 		Renderer& FillRects(const Rect* rects, int count);
 		/**
-		 *  \brief Fill some number of rectangles on the current rendering target with the drawing color.
+		 *  \brief    Fill some number of rectangles on the current rendering target with the drawing colour.
 		 *
 		 *  \param rects A pointer to an array of destination rectangles.
 		 *  \param count The number of rectangles.
@@ -453,7 +453,7 @@ namespace SDL {
 		 */
 		Renderer& FillRectsF(const FRect* rects, int count);
 		/**
-		 *  \brief Fill some number of rectangles on the current rendering target with the drawing color.
+		 *  \brief    Fill some number of rectangles on the current rendering target with the drawing colour.
 		 *
 		 *  \param rects A reference to a vector of destination rectangles.
 		 *
@@ -461,7 +461,7 @@ namespace SDL {
 		 */
 		Renderer& FillRects(const std::vector<Rect>& rects);
 		/**
-		 *  \brief Fill some number of rectangles on the current rendering target with the drawing color.
+		 *  \brief    Fill some number of rectangles on the current rendering target with the drawing colour.
 		 *
 		 *  \param rects A reference to a vector of destination rectangles.
 		 *
@@ -1226,26 +1226,26 @@ namespace SDL {
 		int Query(Uint32* format, int* access, int* w, int* h);
 
 		/**
-		 *  \brief Set an additional color value used in render copy operations.
+		 *  \brief    Set an additional colour value used in render copy operations.
 		 *
-		 *  \param r       The red color value multiplied into copy operations.
-		 *  \param g       The green color value multiplied into copy operations.
-		 *  \param b       The blue color value multiplied into copy operations.
+		 *  \param    r: The red colour value multiplied into copy operations.
+		 *  \param    g: The green colour value multiplied into copy operations.
+		 *  \param    b: The blue colour value multiplied into copy operations.
 		 *
-		 *  \return 0 on success, or -1 if the texture is not valid or color modulation
-		 *          is not supported.
+		 *  \return   0 on success, or -1 if the texture is not valid or colour modulation
+		 *            is not supported.
 		 */
-		int SetColorMod(Uint8 r, Uint8 g, Uint8 b);
+		int SetColourMod(Uint8 r, Uint8 g, Uint8 b);
 		/**
-		 *  \brief Get the additional color value used in render copy operations.
+		 *  \brief    Get the additional colour value used in render copy operations.
 		 *
-		 *  \param r         A reference to be filled in with the current red color value.
-		 *  \param g         A reference to be filled in with the current green color value.
-		 *  \param b         A reference to be filled in with the current blue color value.
+		 *  \param    r: A reference to be filled in with the current red colour value.
+		 *  \param    g: A reference to be filled in with the current green colour value.
+		 *  \param    b: A reference to be filled in with the current blue colour value.
 		 *
 		 *  \return 0 on success, or -1 if the texture is not valid.
 		 */
-		int GetColorMod(Uint8& r, Uint8& g, Uint8& b);
+		int GetColourMod(Uint8& r, Uint8& g, Uint8& b);
 
 		/**
 		 *  \brief Set an additional alpha value used in render copy operations.
@@ -1266,27 +1266,25 @@ namespace SDL {
 		int GetAlphaMod(Uint8& alpha);
 
 		/**
-		 *  \brief Set an additional color and alpha value used in render copy operations.
+		 *  \brief    Set an additional colour and alpha value used in render copy operations.
 		 *
-		 *  \param r       The red color value multiplied into copy operations.
-		 *  \param g       The green color value multiplied into copy operations.
-		 *  \param b       The blue color value multiplied into copy operations.
-		 *  \param alpha   The blue color value multiplied into copy operations.
+		 *  \param    r:     The red colour value multiplied into copy operations.
+		 *  \param    g:     The green colour value multiplied into copy operations.
+		 *  \param    b:     The blue colour value multiplied into copy operations.
+		 *  \param    alpha: The blue colour value multiplied into copy operations.
 		 *
-		 *  \return tuple<int,int>:
-		 *          0 on success, or -1 if the texture is not valid or color modulation
-		 *          is not supported.
-		 *          0 on success, or -1 if the texture is not valid or alpha modulation
-		 *          is not supported.
+		 *  \return   0 on success, -1 if colour modulation is not supported,
+		 *            -2 if alpha modulation is not supported, or -3 if neither
+		 *            are supported or if the texture is not valid.
 		 */
-		std::tuple<int, int> SetMod(const Colour& c);
+		int SetMod(const Colour& c);
 		/**
-		 *  \brief Get the additional color value used in render copy operations.
+		 *  \brief    Get the additional colour value used in render copy operations.
 		 *
-		 *  \param r         A reference to be filled in with the current red color value.
-		 *  \param g         A reference to be filled in with the current green color value.
-		 *  \param b         A reference to be filled in with the current blue color value.
-		 *  \param alpha     A reference to be filled in with the current alpha value.
+		 *  \param    r:     A reference to be filled in with the current red colour value.
+		 *  \param    g:     A reference to be filled in with the current green colour value.
+		 *  \param    b:     A reference to be filled in with the current blue colour value.
+		 *  \param    alpha: A reference to be filled in with the current alpha value.
 		 *
 		 *  \return 0 on success, or -1 if the texture is not valid.
 		 */

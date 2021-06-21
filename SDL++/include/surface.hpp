@@ -97,15 +97,15 @@ namespace SDL {
 		void Unlock() { SDL_UnlockSurface(surface); }
 
 		/**
-		 *  Save a surface to a seekable SDL data stream (memory or file).
+		 *  \brief    Save a surface to a seekable SDL data stream (memory or file).
 		 *
-		 *  Surfaces with a 24-bit, 32-bit and paletted 8-bit format get saved in the
-		 *  BMP directly. Other RGB formats with 8-bit or higher get converted to a
-		 *  24-bit surface or, if they have an alpha mask or a colorkey, to a 32-bit
-		 *  surface before they are saved. YUV and paletted 1-bit and 4-bit formats are
-		 *  not supported.
+		 *  \note     If \c freedst is true, the stream will be closed after being written.
 		 *
-		 *  If \c freedst is true, the stream will be closed after being written.
+		 *  \details  Surfaces with a 24-bit, 32-bit and paletted 8-bit format get saved in the
+		 *            BMP directly. Other RGB formats with 8-bit or higher get converted to a
+		 *            24-bit surface or, if they have an alpha mask or a colourkey, to a 32-bit
+		 *            surface before they are saved. YUV and paletted 1-bit and 4-bit formats are
+		 *            not supported.
 		 *
 		 *  \return 0 if successful or -1 if there was an error.
 		 */
@@ -117,69 +117,69 @@ namespace SDL {
 		/**
 		 *  \brief Sets the RLE acceleration hint for a surface.
 		 *
-		 *  \return 0 on success, or -1 if the surface is not valid
+		 *  \note     If RLE is enabled, colourkey and alpha blending blits are much faster,
+		 *	          but the surface must be locked before directly accessing the pixels.
 		 *
-		 *  \note If RLE is enabled, colorkey and alpha blending blits are much faster,
-		 *		but the surface must be locked before directly accessing the pixels.
+		 *  \return   0 on success, or -1 if the surface is not valid
 		 */
 		int SetRLE(int flag) { return SDL_SetSurfaceRLE(surface,flag); }
 
 		/**
-		  *  \brief Sets the color key (transparent pixel) in a blittable surface.
+		  *  \brief   Sets the colour key (transparent pixel) in a blittable surface.
 		  *
-		  *  \param flag Non-zero to enable colorkey and 0 to disable colorkey
-		  *  \param key The transparent pixel in the native surface format
+		  *  \param   flag: Non-zero to enable colourkey and 0 to disable colourkey
+		  *  \param   key: The transparent pixel in the native surface format
 		  *
 		  *  \return 0 on success, or -1 if the surface is not valid
 		  *
 		  *  You can pass SDL_RLEACCEL to enable RLE accelerated blits.
 		  */
-		int SetColorKey(int flag, Uint32 key) { return SDL_SetColorKey(surface, flag, key); }
+		int SetColourKey(int flag, Uint32 key) { return SDL_SetColorKey(surface, flag, key); }
 
 		/**
-		 *  \brief Returns whether the surface has a color key
+		 *  \brief    Returns whether the surface has a colour key
 		 *
-		 *  \return true if the surface has a color key, or false if the surface is NULL or has no color key
+		 *  \return   true if the surface has a colour key, or false if the surface is NULL or has no colour key
 		 */
-		bool HasColorKey() { return SDL_HasColorKey(surface); }
+		bool HasColourKey() { return SDL_HasColorKey(surface); }
 
 		/**
-		 *  \brief Gets the color key (transparent pixel) in a blittable surface.
+		 *  \brief    Gets the colour key (transparent pixel) in a blittable surface.
 		 *
 		 *  \param key A reference to be filled in with the transparent pixel in the native
 		 *			 surface format
 		 *
-		 *  \return 0 on success, or -1 if the surface is not valid or colorkey is not
-		 *		  enabled.
+		 *  \return   0 on success, or -1 if the surface is not valid or colourkey is not
+		 *	          enabled.
 		 */
-		int GetColorKey(Uint32& key) {
+		int GetColourKey(Uint32& key) {
 			return SDL_GetColorKey(surface, &key);
 		}
 
 		/**
-		 *  \brief Set an additional color value used in blit operations.
+		 *  \brief Set an additional colour value used in blit operations.
 		 *
-		 *  \param r The red color value multiplied into blit operations.
-		 *  \param g The green color value multiplied into blit operations.
-		 *  \param b The blue color value multiplied into blit operations.
+		 *  \param    r: The red colour value multiplied into blit operations.
+		 *  \param    g: The green colour value multiplied into blit operations.
+		 *  \param    b: The blue colour value multiplied into blit operations.
 		 *
 		 *  \return 0 on success, or -1 if the surface is not valid.
 		 */
-		int SetColorMod(Uint8 r, Uint8 g, Uint8 b) {
+		int SetColourMod(Uint8 r, Uint8 g, Uint8 b) {
 			return SDL_SetSurfaceColorMod(surface, r, g, b);
 		}
 
 
 		/**
-		 *  \brief Get the additional color value used in blit operations.
+		 *  \brief    Get the additional colour value used in blit operations.
 		 *
-		 *  \param r A reference to be filled in with the current red color value.
-		 *  \param g A reference to be filled in with the current green color value.
-		 *  \param b A reference to be filled in with the current blue color value.
+		 *  \param    r: A reference to be filled in with the current red colour value.
+		 *  \param    g: A reference to be filled in with the current green colour value.
+		 *  \param    b: A reference to be filled in with the current blue colour value.
 		 *
 		 *  \return 0 on success, or -1 if the surface is not valid.
 		 */
-		int GetColorMod(Uint8& r, Uint8& g, Uint8& b) {
+		int GetColourMod(Uint8& r, Uint8& g, Uint8& b) {
 			return SDL_GetSurfaceColorMod(surface, &r, &g, &b);
 		}
 
@@ -273,14 +273,14 @@ namespace SDL {
 		}
 
 		/**
-		 *  Performs a fast fill of the whole surface with \c color. 
+		 *  \brief    Performs a fast fill of the whole surface with \c colour. 
 		 *
-		 *  The color should be a pixel of the format used by the surface, and 
-		 *  can be generated by the SDL_MapRGB() function.
+		 *  \param    colour: The colour should be a pixel of the format used by the surface, and 
+		 *                    can be generated by the MapRGB() function.
 		 *
 		 *  \return 0 on success, or -1 on error.
 		 */
-		int Fill(Uint32 color) { return SDL_FillRect(surface, NULL, color); }
+		int Fill(Uint32 colour) { return SDL_FillRect(surface, NULL, colour); }
 		/**
 		 *  Performs a fast fill of the whole surface with r, g, b.
 		 *
@@ -290,19 +290,19 @@ namespace SDL {
 		/**
 		 *  Performs a fast fill of the given rectangle with \c color.
 		 *
-		 *  The color should be a pixel of the format used by the surface, and
-		 *  can be generated by the SDL_MapRGB() function.
+		 *  \details  The colour should be a pixel of the format used by the surface, and
+		 *            can be generated by the MapRGB() function.
 		 *
 		 *  \return 0 on success, or -1 on error.
 		 */
-		int FillRect(const Rect& rect, Uint32 color) { return SDL_FillRect(surface, &rect.rect, color); }
+		int FillRect(const Rect& rect, Uint32 colour) { return SDL_FillRect(surface, &rect.rect, colour); }
 		/**
 		 *  Performs a fast fill of the given rectangle with r, g, b.
 		 *
 		 *  \return 0 on success, or -1 on error.
 		 */
 		int FillRect(const Rect& rect, Uint8 r, Uint8 g, Uint8 b) { return SDL_FillRect(surface, &rect.rect, ((PixelFormat*)surface->format)->MapRGB(r, g, b)); }
-		int FillRects(const Rect* rects, int count, Uint32 color) { return SDL_FillRects(surface, (const SDL_Rect*)rects, count, color); }
+		int FillRects(const Rect* rects, int count, Uint32 colour) { return SDL_FillRects(surface, (const SDL_Rect*)rects, count, colour); }
 		int FillRects(const Rect* rects, int count, Uint8 r, Uint8 g, Uint8 b) { return SDL_FillRects(surface, (const SDL_Rect*)rects, count, ((PixelFormat*)surface->format)->MapRGB(r, g, b)); }
 
 		/**
@@ -317,50 +317,49 @@ namespace SDL {
 		 *
 		 *  The blit function should not be called on a locked surface.
 		 *
-		 *  The blit semantics for surfaces with and without blending and colorkey
-		 *  are defined as follows:
+		 *            The blit semantics for surfaces with and without blending and colourkey
+		 *            are defined as follows:
 		 *  \verbatim
-			RGBA->RGB:
-			  Source surface blend mode set to SDL_BLENDMODE_BLEND:
-				alpha-blend (using the source alpha-channel and per-surface alpha)
-				SDL_SRCCOLORKEY ignored.
-			  Source surface blend mode set to SDL_BLENDMODE_NONE:
-				copy RGB.
-				if SDL_SRCCOLORKEY set, only copy the pixels matching the
-				RGB values of the source color key, ignoring alpha in the
-				comparison.
-
-			RGB->RGBA:
-			  Source surface blend mode set to SDL_BLENDMODE_BLEND:
-				alpha-blend (using the source per-surface alpha)
-			  Source surface blend mode set to SDL_BLENDMODE_NONE:
-				copy RGB, set destination alpha to source per-surface alpha value.
-			  both:
-				if SDL_SRCCOLORKEY set, only copy the pixels matching the
-				source color key.
-
-			RGBA->RGBA:
-			  Source surface blend mode set to SDL_BLENDMODE_BLEND:
-				alpha-blend (using the source alpha-channel and per-surface alpha)
-				SDL_SRCCOLORKEY ignored.
-			  Source surface blend mode set to SDL_BLENDMODE_NONE:
-				copy all of RGBA to the destination.
-				if SDL_SRCCOLORKEY set, only copy the pixels matching the
-				RGB values of the source color key, ignoring alpha in the
-				comparison.
-
-			RGB->RGB:
-			  Source surface blend mode set to SDL_BLENDMODE_BLEND:
-				alpha-blend (using the source per-surface alpha)
-			  Source surface blend mode set to SDL_BLENDMODE_NONE:
-				copy RGB.
-			  both:
-				if SDL_SRCCOLORKEY set, only copy the pixels matching the
-				source color key.
-			\endverbatim
+		 *  RGBA->RGB:
+		 *    Source surface blend mode set to SDL_BLENDMODE_BLEND:
+		 *      alpha-blend (using the source alpha-channel and per-surface alpha)
+		 *      SDL_SRCCOLOURKEY ignored.
+		 *    Source surface blend mode set to SDL_BLENDMODE_NONE:
+		 *      copy RGB.
+		 *      if SDL_SRCCOLOURKEY set, only copy the pixels matching the
+		 *      RGB values of the source colour key, ignoring alpha in the
+		 *      comparison.
+		 *  
+		 *  RGB->RGBA:
+		 *    Source surface blend mode set to SDL_BLENDMODE_BLEND:
+		 *      alpha-blend (using the source per-surface alpha)
+		 *    Source surface blend mode set to SDL_BLENDMODE_NONE:
+		 *      copy RGB, set destination alpha to source per-surface alpha value.
+		 *    both:
+		 *      if SDL_SRCCOLOURKEY set, only copy the pixels matching the
+		 *      source colour key.
+		 *  
+		 *  RGBA->RGBA:
+		 *    Source surface blend mode set to SDL_BLENDMODE_BLEND:
+		 *      alpha-blend (using the source alpha-channel and per-surface alpha)
+		 *      SDL_SRCCOLOURKEY ignored.
+		 *    Source surface blend mode set to SDL_BLENDMODE_NONE:
+		 *      copy all of RGBA to the destination.
+		 *      if SDL_SRCCOLOURKEY set, only copy the pixels matching the
+		 *      RGB values of the source colour key, ignoring alpha in the
+		 *      comparison.
+		 *  
+		 *  RGB->RGB:
+		 *    Source surface blend mode set to BLENDMODE::BLEND:
+		 *      alpha-blend (using the source per-surface alpha)
+		 *    Source surface blend mode set to BLENDMODE::NONE:
+		 *      copy RGB.
+		 *    both:
+		 *      if SDL_SRCCOLOURKEY set, only copy the pixels matching the
+		 *      source coloUr key.
+		 *  \endverbatim
 		 *
-		 *  You should call SDL_BlitSurface() unless you know exactly how SDL
-		 *  blitting works internally and how to use the other blit functions.
+		 *  \return   If the blit is successful, it returns 0, otherwise it returns -1
 		 */
 		int BlitSurface(Rect* srcrect, Surface& dst, Rect* dstrect) {
 			return SDL_BlitSurface(surface, (SDL_Rect*)srcrect, dst.surface, (SDL_Rect*)dstrect);

@@ -7,6 +7,33 @@
 
 namespace SDL {
 	struct Event {
+		typedef SDL_CommonEvent           Common;           // Common event data
+		typedef SDL_DisplayEvent          Display;          // Display event data
+		typedef SDL_WindowEvent           Window;           // Window event data
+		typedef SDL_KeyboardEvent         Keyboard;         // Keyboard event data
+		typedef SDL_TextEditingEvent      TextEditing;      // Text editing event data
+		typedef SDL_TextInputEvent        TextInput;        // Text input event data
+		typedef SDL_MouseMotionEvent      MouseMotion;      // Mouse motion event data
+		typedef SDL_MouseButtonEvent      MouseButton;      // Mouse button event data
+		typedef SDL_MouseWheelEvent       MouseWheel;       // Mouse wheel event data
+		typedef SDL_JoyAxisEvent          JoyAxis;          // Joystick axis event data
+		typedef SDL_JoyBallEvent          JoyBall;          // Joystick ball event data
+		typedef SDL_JoyHatEvent           JoyHat;           // Joystick hat event data
+		typedef SDL_JoyButtonEvent        JoyButton;        // Joystick button event data
+		typedef SDL_JoyDeviceEvent        JoyDevice;        // Joystick device change event data
+		typedef SDL_ControllerAxisEvent   ControllerAxis;   // Game Controller axis event data
+		typedef SDL_ControllerButtonEvent ControllerButton; // Game Controller button event data
+		typedef SDL_ControllerDeviceEvent ControllerDevice; // Game Controller device event data
+		typedef SDL_AudioDeviceEvent      AudioDevice;      // Audio device event data
+		typedef SDL_SensorEvent           Sensor;           // Sensor event data
+		typedef SDL_QuitEvent             Quit;             // Quit request event data
+		typedef SDL_UserEvent             User;             // Custom event data
+		typedef SDL_SysWMEvent            SysWM;            // System dependent window event data
+		typedef SDL_TouchFingerEvent      TouchFinger;      // Touch finger event data
+		typedef SDL_MultiGestureEvent     MultiGesture;     // Gesture event data
+		typedef SDL_DollarGestureEvent    DollarGesture;    // Gesture event data
+		typedef SDL_DropEvent             Drop;             // Drag and drop event data
+
 		enum class Action
 		{
 			ADDEVENT = SDL_ADDEVENT,
@@ -101,32 +128,32 @@ namespace SDL {
 		union {
 			Type type;
 			SDL_Event event;
-			SDL_CommonEvent common;         /**< Common event data */
-			SDL_DisplayEvent display;       /**< Display event data */
-			SDL_WindowEvent window;         /**< Window event data */
-			SDL_KeyboardEvent key;          /**< Keyboard event data */
-			SDL_TextEditingEvent edit;      /**< Text editing event data */
-			SDL_TextInputEvent text;        /**< Text input event data */
-			SDL_MouseMotionEvent motion;    /**< Mouse motion event data */
-			SDL_MouseButtonEvent button;    /**< Mouse button event data */
-			SDL_MouseWheelEvent wheel;      /**< Mouse wheel event data */
-			SDL_JoyAxisEvent jaxis;         /**< Joystick axis event data */
-			SDL_JoyBallEvent jball;         /**< Joystick ball event data */
-			SDL_JoyHatEvent jhat;           /**< Joystick hat event data */
-			SDL_JoyButtonEvent jbutton;     /**< Joystick button event data */
-			SDL_JoyDeviceEvent jdevice;     /**< Joystick device change event data */
-			SDL_ControllerAxisEvent caxis;      /**< Game Controller axis event data */
-			SDL_ControllerButtonEvent cbutton;  /**< Game Controller button event data */
-			SDL_ControllerDeviceEvent cdevice;  /**< Game Controller device event data */
-			SDL_AudioDeviceEvent adevice;   /**< Audio device event data */
-			SDL_SensorEvent sensor;         /**< Sensor event data */
-			SDL_QuitEvent quit;             /**< Quit request event data */
-			SDL_UserEvent user;             /**< Custom event data */
-			SDL_SysWMEvent syswm;           /**< System dependent window event data */
-			SDL_TouchFingerEvent tfinger;   /**< Touch finger event data */
-			SDL_MultiGestureEvent mgesture; /**< Gesture event data */
-			SDL_DollarGestureEvent dgesture; /**< Gesture event data */
-			SDL_DropEvent drop;             /**< Drag and drop event data */
+			Common common;            // Common event data
+			Display display;          // Display event data
+			Window window;            // Window event data
+			Keyboard key;             // Keyboard event data
+			TextEditing edit;         // Text editing event data
+			TextInput text;           // Text input event data
+			MouseMotion motion;       // Mouse motion event data
+			MouseButton button;       // Mouse button event data
+			MouseWheel wheel;         // Mouse wheel event data
+			JoyAxis jaxis;            // Joystick axis event data
+			JoyBall jball;            // Joystick ball event data
+			JoyHat jhat;              // Joystick hat event data
+			JoyButton jbutton;        // Joystick button event data
+			JoyDevice jdevice;        // Joystick device change event data
+			ControllerAxis caxis;     // Game Controller axis event data
+			ControllerButton cbutton; // Game Controller button event data
+			ControllerDevice cdevice; // Game Controller device event data
+			AudioDevice adevice;      // Audio device event data
+			Sensor sensor;            // Sensor event data
+			Quit quit;                // Quit request event data
+			User user;                // Custom event data
+			SysWM syswm;              // System dependent window event data
+			TouchFinger tfinger;      // Touch finger event data
+			MultiGesture mgesture;    // Gesture event data
+			DollarGesture dgesture;   // Gesture event data
+			Drop drop;                // Drag and drop event data
 		};
 
 		/**
@@ -257,7 +284,7 @@ namespace SDL {
 		 */
 		static void FilterEvents(Filter filter, void* userdata) { SDL_FilterEvents(filter, userdata); }
 
-		enum State {
+		enum class State {
 			QUERY = SDL_QUERY,
 			IGNORE = SDL_IGNORE,
 			DISABLE = SDL_DISABLE,
@@ -273,10 +300,10 @@ namespace SDL {
 		 *   - If \c state is set to ::SDL_QUERY, SDL_EventState() will return the
 		 *	 current processing state of the specified event.
 		 */
-		static void SetState(Type type, State state) { SDL_EventState((Uint32)type, state); }
-		static State GetState(Type type) { return (State)SDL_EventState((Uint32)type, QUERY); }
-		void SetState(State state) { SDL_EventState((Uint32)type, state); }
-		State GetState() { return (State)SDL_EventState((Uint32)type, QUERY); }
+		static void SetState(Type type, State state) { SDL_EventState((Uint32)type, (int)state); }
+		static State GetState(Type type) { return (State)SDL_EventState((Uint32)type, (int)State::QUERY); }
+		void SetState(State state) { SDL_EventState((Uint32)type, (int)state); }
+		State GetState() { return (State)SDL_EventState((Uint32)type, (int)State::QUERY); }
 
 		/**
 		 *  This function allocates a set of user-defined events, and returns

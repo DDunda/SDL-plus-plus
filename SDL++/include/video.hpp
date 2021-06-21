@@ -6,14 +6,75 @@
 
 namespace SDL {
 
-	// \brief The flags on a window
-	typedef SDL_WindowFlags WindowFlags;
+	// The flags on a window
+	enum class WindowFlags {
+		FULLSCREEN         = SDL_WINDOW_FULLSCREEN,         // fullscreen window
+		OPENGL             = SDL_WINDOW_OPENGL,             // window usable with OpenGL context
+		SHOWN              = SDL_WINDOW_SHOWN,              // window is visible
+		HIDDEN             = SDL_WINDOW_HIDDEN,             // window is not visible
+		BORDERLESS         = SDL_WINDOW_BORDERLESS,         // no window decoration
+		RESIZABLE          = SDL_WINDOW_RESIZABLE,          // window can be resized
+		MINIMIZED          = SDL_WINDOW_MINIMIZED,          // window is minimized
+		MAXIMIZED          = SDL_WINDOW_MAXIMIZED,          // window is maximized
+		INPUT_GRABBED      = SDL_WINDOW_INPUT_GRABBED,      // window has grabbed input focus
+		INPUT_FOCUS        = SDL_WINDOW_INPUT_FOCUS,        // window has input focus
+		MOUSE_FOCUS        = SDL_WINDOW_MOUSE_FOCUS,        // window has mouse focus
+		FULLSCREEN_DESKTOP = SDL_WINDOW_FULLSCREEN_DESKTOP,
+		FOREIGN            = SDL_WINDOW_FOREIGN,            // window not created by SDL
+		ALLOW_HIGHDPI      = SDL_WINDOW_ALLOW_HIGHDPI,      /* window should be created in high - DPI mode if supported.
+		                                                       On macOS NSHighResolutionCapable must be set true in the
+		                                                       application's Info.plist for this to have any effect. */
+		MOUSE_CAPTURE      = SDL_WINDOW_MOUSE_CAPTURE,      // window has mouse captured (unrelated to INPUT_GRABBED)
+		ALWAYS_ON_TOP      = SDL_WINDOW_ALWAYS_ON_TOP,      // window should always be above others
+		SKIP_TASKBAR       = SDL_WINDOW_SKIP_TASKBAR,       // window should not be added to the taskbar
+		UTILITY            = SDL_WINDOW_UTILITY,            // window should be treated as a utility window
+		TOOLTIP            = SDL_WINDOW_TOOLTIP,            // window should be treated as a tooltip
+		POPUP_MENU         = SDL_WINDOW_POPUP_MENU,         // window should be treated as a popup menu
+		VULKAN             = SDL_WINDOW_VULKAN              // window usable for Vulkan surface
+	};
 
-	// \brief Event subtype for window events
-	typedef SDL_WindowEventID WindowEventID;
+	// Event subtype for window events
+	enum class WindowEventID {
+		NONE         = SDL_WINDOWEVENT_NONE,         // Never used
+		SHOWN        = SDL_WINDOWEVENT_SHOWN,        // Window has been shown
+		HIDDEN       = SDL_WINDOWEVENT_HIDDEN,       // Window has been hidden
+		EXPOSED      = SDL_WINDOWEVENT_EXPOSED,      // Window has been exposed and should be redrawn
+		MOVED        = SDL_WINDOWEVENT_MOVED,        // Window has been moved to data1, data2
+		RESIZED      = SDL_WINDOWEVENT_RESIZED,      // Window has been resized to data1xdata2
+		SIZE_CHANGED = SDL_WINDOWEVENT_SIZE_CHANGED, // The window size has changed, either as a result of an API call, or through the system or user changing the window size.
+		MINIMIZED    = SDL_WINDOWEVENT_MINIMIZED,    // Window has been minimized
+		MAXIMIZED    = SDL_WINDOWEVENT_MAXIMIZED,    // Window has been maximized
+		RESTORED     = SDL_WINDOWEVENT_RESTORED,     // Window has been restored to normal size and position
+		ENTER        = SDL_WINDOWEVENT_ENTER,        // Window has gained mouse focus
+		LEAVE        = SDL_WINDOWEVENT_LEAVE,        // Window has lost mouse focus
+		FOCUS_GAINED = SDL_WINDOWEVENT_FOCUS_GAINED, // Window has gained keyboard focus
+		FOCUS_LOST   = SDL_WINDOWEVENT_FOCUS_LOST,   // Window has lost keyboard focus
+		CLOSE        = SDL_WINDOWEVENT_CLOSE,        // The window manager requests that the window be closed
+		TAKE_FOCUS   = SDL_WINDOWEVENT_TAKE_FOCUS,   // Window is being offered a focus (should SetWindowInputFocus() on itself or a subwindow, or ignore)
+		HIT_TEST     = SDL_WINDOWEVENT_HIT_TEST      // Window had a hit test that wasn't SDL_HITTEST_NORMAL.
+	};
 
-	// \brief Event subtype for display events
-	typedef SDL_DisplayEventID DisplayEventID;
+	// Event subtype for display events
+	enum class DisplayEventID {
+		NONE        = SDL_DISPLAYEVENT_NONE,       // Never used
+		ORIENTATION = SDL_DISPLAYEVENT_ORIENTATION // Display orientation has changed to data1
+	};
+
+	// Possible return values from the SDL::HitTest callback.
+	enum class HitTestResult {
+		NORMAL = SDL_HITTEST_NORMAL,             // Region is normal. No special properties.
+		DRAGGABLE = SDL_HITTEST_DRAGGABLE,          // Region can drag entire window.
+		RESIZE_TOPLEFT = SDL_HITTEST_RESIZE_TOPLEFT,
+		RESIZE_TOP = SDL_HITTEST_RESIZE_TOP,
+		RESIZE_TOPRIGHT = SDL_HITTEST_RESIZE_TOPRIGHT,
+		RESIZE_RIGHT = SDL_HITTEST_RESIZE_RIGHT,
+		RESIZE_BOTTOMRIGHT = SDL_HITTEST_RESIZE_BOTTOMRIGHT,
+		RESIZE_BOTTOM = SDL_HITTEST_RESIZE_BOTTOM,
+		RESIZE_BOTTOMLEFT = SDL_HITTEST_RESIZE_BOTTOMLEFT,
+		RESIZE_LEFT = SDL_HITTEST_RESIZE_LEFT
+	};
+	// Callback used for hit-testing.
+	typedef SDL_HitTest HitTest;
 
 	// \brief Get the number of video drivers compiled into SDL
 	static int GetNumVideoDrivers() { return SDL_GetNumVideoDrivers(); }
@@ -68,7 +129,14 @@ namespace SDL {
 	struct Display {
 		// \brief  The structure that defines a display mode
 		typedef SDL_DisplayMode Mode;
-		typedef SDL_DisplayOrientation Orientation;
+
+		enum class Orientation {
+			UNKNOWN = SDL_ORIENTATION_UNKNOWN,                     // The display orientation can't be determined
+			LANDSCAPE = SDL_ORIENTATION_LANDSCAPE,                 // The display is in landscape mode, with the right side up, relative to portrait mode
+			PORTRAIT = SDL_ORIENTATION_PORTRAIT,                   // The display is in portrait mode
+			LANDSCAPE_FLIPPED = SDL_ORIENTATION_LANDSCAPE_FLIPPED, // The display is in landscape mode, with the left side up, relative to portrait mode
+			PORTRAIT_FLIPPED = SDL_ORIENTATION_PORTRAIT_FLIPPED    // The display is in portrait mode, upside down
+		};
 
 		int index;
 
@@ -121,7 +189,7 @@ namespace SDL {
 		 *
 		 *  \return The orientation of the display, or SDL_ORIENTATION_UNKNOWN if it isn't available.
 		 */
-		Orientation GetOrientation() { return SDL_GetDisplayOrientation(index); }
+		Orientation GetOrientation() { return (Orientation)SDL_GetDisplayOrientation(index); }
 
 		// \brief Returns the number of available display modes.
 		int GetNumModes() { return SDL_GetNumDisplayModes(index); }
@@ -722,13 +790,6 @@ namespace SDL {
 		 *  \return 0 on success, or -1 if gamma ramps are unsupported.
 		 */
 		int GetGammaRamp(Uint16* red, Uint16* green, Uint16* blue) { return SDL_GetWindowGammaRamp(window, red, green, blue); }
-
-
-		// \brief Possible return values from the SDL::HitTest callback.
-		typedef SDL_HitTestResult HitTestResult;
-
-		// \brief Callback used for hit-testing.
-		typedef SDL_HitTest HitTest;
 
 		/**
 		 *  \brief Provide a callback that decides if this window region has special properties.

@@ -38,8 +38,8 @@ Renderer& Renderer::SetDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a) { error |= 
 Renderer& Renderer::GetDrawColor(Colour& color) { error |= SDL_GetRenderDrawColor(renderer, &color.r, &color.g, &color.b, &color.a); return *this; }
 Renderer& Renderer::GetDrawColor(Uint8& r, Uint8& g, Uint8& b, Uint8& a) { error |= SDL_GetRenderDrawColor(renderer, &r, &g, &b, &a); return *this; }
 
-Renderer& Renderer::SetDrawBlendMode(const BlendMode& blendMode) { error |= SDL_SetRenderDrawBlendMode(renderer, blendMode); return *this; }
-Renderer& Renderer::GetDrawBlendMode(BlendMode& blendMode) { error |= SDL_GetRenderDrawBlendMode(renderer, &blendMode); return *this; }
+Renderer& Renderer::SetDrawBlendMode(const BlendMode& blendMode) { error |= SDL_SetRenderDrawBlendMode(renderer, (SDL_BlendMode)blendMode); return *this; }
+Renderer& Renderer::GetDrawBlendMode(BlendMode& blendMode) { error |= SDL_GetRenderDrawBlendMode(renderer, (SDL_BlendMode*)&blendMode); return *this; }
 
 Renderer& Renderer::Clear() { error |= SDL_RenderClear(renderer); return *this; }
 Renderer& Renderer::Flush() { error |= SDL_RenderFlush(renderer); return *this; }
@@ -160,7 +160,7 @@ Texture& Texture::operator=(Texture that)
 }
 
 Texture::Texture(Renderer& renderer, SDL_Texture* texture, bool free) : renderer(renderer), texture(texture), freeTexture(free && texture != NULL) {}
-Texture::Texture(Renderer& renderer, const Point& size, Access access, Uint32 format) : Texture(renderer, SDL_CreateTexture(renderer.renderer, format, access, size.x, size.y)) {}
+Texture::Texture(Renderer& renderer, const Point& size, Access access, Uint32 format) : Texture(renderer, SDL_CreateTexture(renderer.renderer, format, (SDL_TextureAccess)access, size.x, size.y)) {}
 Texture::Texture(Renderer& renderer, Surface& surface) : Texture(renderer, SDL_CreateTextureFromSurface(renderer.renderer, surface.surface)) {}
 
 Texture::~Texture() { if (freeTexture) SDL_DestroyTexture(texture); }
@@ -206,25 +206,25 @@ int Texture::CopyF_Fill(const Rect& src) { return SDL_RenderCopyF(renderer.rende
 int Texture::CopyF_Fill() { return SDL_RenderCopyF(renderer.renderer, texture, NULL, NULL); }
 int Texture::CopyF(const Rect* src, const FRect* dst) { return SDL_RenderCopyF(renderer.renderer, texture, (SDL_Rect*)src, (SDL_FRect*)dst); }
 
-int Texture::CopyEx(const Rect& src, const Rect& dst, const Point& center, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, &src.rect, &dst.rect, angle, &center.point, flipType); }
-int Texture::CopyEx(const Rect& src, const Rect& dst, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, &src.rect, &dst.rect, angle, NULL, flipType); }
-int Texture::CopyEx(const Rect& dst, const Point& center, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, NULL, &dst.rect, angle, &center.point, flipType); }
-int Texture::CopyEx(const Rect& dst, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, NULL, &dst.rect, angle, NULL, flipType); }
-int Texture::CopyEx_Fill(const Rect& src, const Point& center, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, &src.rect, NULL, angle, &center.point, flipType); }
-int Texture::CopyEx_Fill(const Rect& src, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, &src.rect, NULL, angle, NULL, flipType); }
-int Texture::CopyEx_Fill(const Point& center, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, NULL, NULL, angle, &center.point, flipType); }
-int Texture::CopyEx_Fill(double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, NULL, NULL, angle, NULL, flipType); }
-int Texture::CopyEx(const Rect* src, const Rect* dst, const Point* center, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, (SDL_Rect*)src, (SDL_Rect*)dst, angle, (SDL_Point*)center, flipType); }
+int Texture::CopyEx(const Rect& src, const Rect& dst, const Point& center, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, &src.rect, &dst.rect, angle, &center.point, (SDL_RendererFlip)flipType); }
+int Texture::CopyEx(const Rect& src, const Rect& dst, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, &src.rect, &dst.rect, angle, NULL, (SDL_RendererFlip)flipType); }
+int Texture::CopyEx(const Rect& dst, const Point& center, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, NULL, &dst.rect, angle, &center.point, (SDL_RendererFlip)flipType); }
+int Texture::CopyEx(const Rect& dst, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, NULL, &dst.rect, angle, NULL, (SDL_RendererFlip)flipType); }
+int Texture::CopyEx_Fill(const Rect& src, const Point& center, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, &src.rect, NULL, angle, &center.point, (SDL_RendererFlip)flipType); }
+int Texture::CopyEx_Fill(const Rect& src, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, &src.rect, NULL, angle, NULL, (SDL_RendererFlip)flipType); }
+int Texture::CopyEx_Fill(const Point& center, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, NULL, NULL, angle, &center.point, (SDL_RendererFlip)flipType); }
+int Texture::CopyEx_Fill(double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, NULL, NULL, angle, NULL, (SDL_RendererFlip)flipType); }
+int Texture::CopyEx(const Rect* src, const Rect* dst, const Point* center, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, (SDL_Rect*)src, (SDL_Rect*)dst, angle, (SDL_Point*)center, (SDL_RendererFlip)flipType); }
 
-int Texture::CopyExF(const Rect& src, const FRect& dst, const FPoint& center, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, &src.rect, &dst.rect, angle, &center.point, flipType); }
-int Texture::CopyExF(const Rect& src, const FRect& dst, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, &src.rect, &dst.rect, angle, NULL, flipType); }
-int Texture::CopyExF(const FRect& dst, const FPoint& center, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, NULL, &dst.rect, angle, &center.point, flipType); }
-int Texture::CopyExF(const FRect& dst, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, NULL, &dst.rect, angle, NULL, flipType); }
-int Texture::CopyExF_Fill(const Rect& src, const FPoint& center, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, &src.rect, NULL, angle, &center.point, flipType); }
-int Texture::CopyExF_Fill(const Rect& src, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, &src.rect, NULL, angle, NULL, flipType); }
-int Texture::CopyExF_Fill(const FPoint& center, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, NULL, NULL, angle, &center.point, flipType); }
-int Texture::CopyExF_Fill(double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, NULL, NULL, angle, NULL, flipType); }
-int Texture::CopyExF(const Rect* src, const FRect* dst, const FPoint* center, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, (SDL_Rect*)src, (SDL_FRect*)dst, angle, (SDL_FPoint*)center, flipType); }
+int Texture::CopyExF(const Rect& src, const FRect& dst, const FPoint& center, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, &src.rect, &dst.rect, angle, &center.point, (SDL_RendererFlip)flipType); }
+int Texture::CopyExF(const Rect& src, const FRect& dst, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, &src.rect, &dst.rect, angle, NULL, (SDL_RendererFlip)flipType); }
+int Texture::CopyExF(const FRect& dst, const FPoint& center, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, NULL, &dst.rect, angle, &center.point, (SDL_RendererFlip)flipType); }
+int Texture::CopyExF(const FRect& dst, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, NULL, &dst.rect, angle, NULL, (SDL_RendererFlip)flipType); }
+int Texture::CopyExF_Fill(const Rect& src, const FPoint& center, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, &src.rect, NULL, angle, &center.point, (SDL_RendererFlip)flipType); }
+int Texture::CopyExF_Fill(const Rect& src, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, &src.rect, NULL, angle, NULL, (SDL_RendererFlip)flipType); }
+int Texture::CopyExF_Fill(const FPoint& center, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, NULL, NULL, angle, &center.point, (SDL_RendererFlip)flipType); }
+int Texture::CopyExF_Fill(double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, NULL, NULL, angle, NULL, (SDL_RendererFlip)flipType); }
+int Texture::CopyExF(const Rect* src, const FRect* dst, const FPoint* center, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, (SDL_Rect*)src, (SDL_FRect*)dst, angle, (SDL_FPoint*)center, (SDL_RendererFlip)flipType); }
 
 int Texture::QueryFormat(Uint32& format) { return SDL_QueryTexture(texture, &format, NULL, NULL, NULL); }
 int Texture::QueryAccess(int& access) { return SDL_QueryTexture(texture, NULL, &access, NULL, NULL); }
@@ -238,14 +238,14 @@ int Texture::GetColorMod(Uint8& r, Uint8& g, Uint8& b) { return SDL_GetTextureCo
 int Texture::SetAlphaMod(Uint8 alpha) { return SDL_SetTextureAlphaMod(texture, alpha); }
 int Texture::GetAlphaMod(Uint8& alpha) { return SDL_GetTextureAlphaMod(texture, &alpha); }
 
-std::tuple<int, int> Texture::SetMod(const Colour& c) { return { SetColorMod(c.r, c.g, c.b), SetAlphaMod(c.a) }; }
-int Texture::GetMod(Colour& c) { return GetColorMod(c.r, c.g, c.b) | GetAlphaMod(c.a); }
+int Texture::SetMod(const Colour& c) { return SetColourMod(c.r, c.g, c.b) + 2 * SetAlphaMod(c.a); }
+int Texture::GetMod(Colour& c) { return GetColourMod(c.r, c.g, c.b) | GetAlphaMod(c.a); }
 
-int Texture::SetBlendMode(BlendMode blendMode) { return SDL_SetTextureBlendMode(texture, blendMode); }
-int Texture::GetBlendMode(BlendMode& blendMode) { return SDL_GetTextureBlendMode(texture, &blendMode); }
+int Texture::SetBlendMode(BlendMode blendMode) { return SDL_SetTextureBlendMode(texture, (SDL_BlendMode)blendMode); }
+int Texture::GetBlendMode(BlendMode& blendMode) { return SDL_GetTextureBlendMode(texture, (SDL_BlendMode*)&blendMode); }
 
-int Texture::SetScaleMode(ScaleMode scaleMode) { return SDL_SetTextureScaleMode(texture, scaleMode); }
-int Texture::GetScaleMode(ScaleMode& scaleMode) { return SDL_GetTextureScaleMode(texture, &scaleMode); }
+int Texture::SetScaleMode(ScaleMode scaleMode) { return SDL_SetTextureScaleMode(texture, (SDL_ScaleMode)scaleMode); }
+int Texture::GetScaleMode(ScaleMode& scaleMode) { return SDL_GetTextureScaleMode(texture, (SDL_ScaleMode*)&scaleMode); }
 
 int SDL::CreateWindowAndRenderer(const Point& size, Window& window, Renderer& renderer, Uint32 window_flags) {
 	window.~Window();

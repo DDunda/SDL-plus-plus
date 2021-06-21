@@ -50,29 +50,32 @@ namespace SDL {
      */
     typedef SDL_AudioSpec AudioSpec;
     typedef SDL_AudioFilter AudioFilter;
-    typedef SDL_AudioStatus AudioStatus;
+    enum class AudioStatus {
+        STOPPED = SDL_AUDIO_STOPPED,
+        PLAYING = SDL_AUDIO_PLAYING,
+        PAUSED = SDL_AUDIO_PAUSED
+    };
 
-    const AudioFormat U8 = { AUDIO_U8 }; /**< Unsigned 8-bit samples */
-    const AudioFormat S8 = { AUDIO_S8 }; /**< Signed 8-bit samples */
-    const AudioFormat U16LSB = { AUDIO_U16LSB }; /**< Unsigned 16-bit samples */
-    const AudioFormat S16LSB = { AUDIO_S16LSB }; /**< Signed 16-bit samples */
-    const AudioFormat U16MSB = { AUDIO_U16MSB }; /**< As above, but big-endian byte order */
-    const AudioFormat S16MSB = { AUDIO_S16MSB };/**< As above, but big-endian byte order */
-    const AudioFormat U16 = { AUDIO_U16 };
-    const AudioFormat S16 = { AUDIO_S16 };
-
-    const AudioFormat S32LSB = { AUDIO_S32LSB }; /**< 32-bit integer samples */
-    const AudioFormat S32MSB = { AUDIO_S32MSB }; /**< As above, but big-endian byte order */
-    const AudioFormat S32 = { AUDIO_S32 };
-
-    const AudioFormat F32LSB = { AUDIO_F32LSB }; /**< 32-bit floating point samples */
-    const AudioFormat F32MSB = { AUDIO_F32MSB }; /**< As above, but big-endian byte order */
-    const AudioFormat F32 = { AUDIO_F32 };
-
-    const AudioFormat U16SYS = { AUDIO_U16SYS };
-    const AudioFormat S16SYS = { AUDIO_S16SYS };
-    const AudioFormat S32SYS = { AUDIO_S32SYS };
-    const AudioFormat F32SYS = { AUDIO_F32SYS };
+    enum class AudioFormatEnum {
+        U8     = AUDIO_U8,     // Unsigned 8-bit samples
+        S8     = AUDIO_S8,     // Signed 8-bit samples
+        U16LSB = AUDIO_U16LSB, // Unsigned 16-bit samples
+        S16LSB = AUDIO_S16LSB, // Signed 16-bit samples
+        U16MSB = AUDIO_U16MSB, // As above, but big-endian byte order
+        S16MSB = AUDIO_S16MSB, // As above, but big-endian byte order
+        U16    = AUDIO_U16,   
+        S16    = AUDIO_S16,   
+        S32LSB = AUDIO_S32LSB, // 32-bit integer samples
+        S32MSB = AUDIO_S32MSB, // As above, but big-endian byte order
+        S32    = AUDIO_S32,      
+        F32LSB = AUDIO_F32LSB, // 32-bit floating point samples
+        F32MSB = AUDIO_F32MSB, // As above, but big-endian byte order
+        F32    = AUDIO_F32,   
+        U16SYS = AUDIO_U16SYS,
+        S16SYS = AUDIO_S16SYS,
+        S32SYS = AUDIO_S32SYS,
+        F32SYS = AUDIO_F32SYS
+    };
 
     struct Audio {
         bool freeAudio;
@@ -194,7 +197,7 @@ namespace SDL {
         static const char* GetCurrentDriver() { return SDL_GetCurrentAudioDriver(); }
 
         // Get the current audio state.
-        AudioStatus GetStatus() { return SDL_GetAudioStatus(); }
+        AudioStatus GetStatus() { return (AudioStatus)SDL_GetAudioStatus(); }
 
         // This function pauses and unpauses the audio callback processing.
         Audio& Pause(int pause_on) { SDL_PauseAudio(pause_on); return *this; }
@@ -292,7 +295,7 @@ namespace SDL {
         }
 
         // Get the current audio state.
-        AudioStatus GetStatus() { return SDL_GetAudioDeviceStatus(ID); }
+        AudioStatus GetStatus() { return (AudioStatus)SDL_GetAudioDeviceStatus(ID); }
 
         /**
          *  Get the number of available devices exposed by the current driver.

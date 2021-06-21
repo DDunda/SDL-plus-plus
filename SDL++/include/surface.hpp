@@ -63,7 +63,7 @@ namespace SDL {
 		Surface(SDL_RWops* src, bool freesrc) : Surface(SDL_LoadBMP_RW(src,freesrc), true) {}
 
 		// Load a surface from a file.
-		Surface(std::string file) : Surface(SDL_RWFromFile(file.c_str(), "rb"), true) {}
+		Surface(const char* file) : Surface(SDL_RWFromFile(file, "rb"), true) {}
 
 		~Surface() { if(freeSurface) SDL_FreeSurface(surface); }
 
@@ -112,7 +112,7 @@ namespace SDL {
 		int SaveBMP_RW(SDL_RWops* dst, bool freedst) { return SDL_SaveBMP_RW(surface, dst, freedst); }
 
 		// Save a surface to a file.
-		int SaveBMP(std::string file) { SDL_SaveBMP_RW(surface, SDL_RWFromFile(file.c_str(), "wb"), true); }
+		int SaveBMP(const char* file) { SDL_SaveBMP_RW(surface, SDL_RWFromFile(file, "wb"), true); }
 
 		/**
 		 *  \brief Sets the RLE acceleration hint for a surface.
@@ -208,7 +208,7 @@ namespace SDL {
 		 *
 		 *  \return 0 on success, or -1 if the parameters are not valid.
 		 */
-		int SetBlendMode(BlendMode blendMode) { return SDL_SetSurfaceBlendMode(surface, blendMode); }
+		int SetBlendMode(BlendMode blendMode) { return SDL_SetSurfaceBlendMode(surface, (SDL_BlendMode)blendMode); }
 
 		/**
 		 *  \brief Get the blend mode used for blit operations.
@@ -217,7 +217,7 @@ namespace SDL {
 		 *
 		 *  \return 0 on success, or -1 if the surface is not valid.
 		 */
-		int GetBlendMode(BlendMode& blendMode) { return SDL_GetSurfaceBlendMode(surface, &blendMode); }
+		int GetBlendMode(BlendMode& blendMode) { return SDL_GetSurfaceBlendMode(surface, (SDL_BlendMode*)&blendMode); }
 
 		/**
 		 *  Sets the clipping rectangle for the destination surface in a blit.
@@ -418,21 +418,27 @@ namespace SDL {
 
 	namespace YUV {
 		// \brief The formula used for converting between YUV and RGB
-		typedef SDL_YUV_CONVERSION_MODE CONVERSION_MODE;
+		enum class Conversion
+		{
+			JPEG      = SDL_YUV_CONVERSION_JPEG,     // Full range JPEG
+			BT601     = SDL_YUV_CONVERSION_BT601,    // BT.601 (the default)
+			BT709     = SDL_YUV_CONVERSION_BT709,    // BT.709
+			AUTOMATIC = SDL_YUV_CONVERSION_AUTOMATIC // BT.601 for SD content, BT.709 for HD content
+		};
 
-		// \brief Set the YUV conversion mode
-		static void SetConversionMode(CONVERSION_MODE mode) {
-			SDL_SetYUVConversionMode(mode);
+		// Set the YUV conversion mode
+		static void SetConversionMode(Conversion mode) {
+			SDL_SetYUVConversionMode((SDL_YUV_CONVERSION_MODE)mode);
 		}
 
 		// \brief Get the YUV conversion mode
-		static CONVERSION_MODE GetConversionMode() {
-			return SDL_GetYUVConversionMode();
+		static Conversion GetConversionMode() {
+			return (Conversion)SDL_GetYUVConversionMode();
 		}
 
 		// \brief Get the YUV conversion mode, returning the correct mode for the resolution when the current conversion mode is SDL::YUV::CONVERSION_AUTOMATIC
-		static CONVERSION_MODE GetConversionModeForResolution(const Point& size) {
-			return SDL_GetYUVConversionModeForResolution(size.w, size.h);
+		static Conversion GetConversionModeForResolution(const Point& size) {
+			return (Conversion)SDL_GetYUVConversionModeForResolution(size.w, size.h);
 		}
 	}
 }

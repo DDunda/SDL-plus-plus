@@ -11,9 +11,15 @@ namespace SDL {
 
 	// \brief A structure representing rendering state
 	struct Renderer {
-		// \brief Flags used when creating a rendering context
-		typedef SDL_RendererFlags Flags;
-		// \brief Information on the capabilities of a render driver or context.
+		// Flags used when creating a rendering context
+		enum class Flags
+		{
+			SOFTWARE      = SDL_RENDERER_SOFTWARE,         // The renderer is a software fallback
+			ACCELERATED   = SDL_RENDERER_ACCELERATED,      // The renderer uses hardware acceleration
+			PRESENTVSYNC  = SDL_RENDERER_PRESENTVSYNC,     // Present is synchronized with the refresh rate
+			TARGETTEXTURE = SDL_RENDERER_TARGETTEXTURE     // The renderer supports rendering to texture
+		};
+		// Information on the capabilities of a render driver or context.
 		typedef SDL_RendererInfo Info;
 
 		SDL_Renderer* renderer = nullptr;
@@ -706,14 +712,32 @@ namespace SDL {
 
 	// \brief An efficient driver-specific representation of pixel data
 	struct Texture {
-		// \brief The scaling mode for a texture.
-		typedef SDL_ScaleMode ScaleMode;
-		// \brief The access pattern allowed for a texture.
-		typedef SDL_TextureAccess Access;
-		// \brief The texture channel modulation used in Renderer::Copy().
-		typedef SDL_TextureModulate Modulate;
-		// \brief Flip constants for CopyEx
-		typedef SDL_RendererFlip Flip;
+		// The scaling mode for a texture.
+		enum class ScaleMode
+		{
+			Nearest = SDL_ScaleModeNearest, // nearest pixel sampling
+			Linear  = SDL_ScaleModeLinear,  // linear filtering
+			Best    = SDL_ScaleModeBest     // anisotropic filtering
+		};
+		// The access pattern allowed for a texture.
+		enum class Access
+		{
+			STATIC    = SDL_TEXTUREACCESS_STATIC,    // Changes rarely, not lockable
+			STREAMING = SDL_TEXTUREACCESS_STREAMING, // Changes frequently, lockable
+			TARGET    = SDL_TEXTUREACCESS_TARGET     // Texture can be used as a render target
+		};
+		// The texture channel modulation used in Renderer::Copy().
+		enum class Modulate {
+			NONE = SDL_TEXTUREMODULATE_NONE,     // No modulation
+			COLOR = SDL_TEXTUREMODULATE_COLOR,    // srcC = srcC * color
+			ALPHA = SDL_TEXTUREMODULATE_ALPHA     // srcA = srcA * alpha
+		};
+		// Flip constants for CopyEx
+		enum class Flip {
+			NONE       = SDL_FLIP_NONE,       // Do not flip
+			HORIZONTAL = SDL_FLIP_HORIZONTAL, // flip horizontally
+			VERTICAL   = SDL_FLIP_VERTICAL    // flip vertically
+		};
 
 		Renderer& renderer;
 		SDL_Texture* texture;
@@ -738,7 +762,7 @@ namespace SDL {
 		 *
 		 *  \note The contents of the texture are not defined at creation.
 		 */
-		Texture(Renderer& renderer, const Point& size, Access access = Access::SDL_TEXTUREACCESS_STATIC, Uint32 format = SDL_PIXELFORMAT_RGBA32);
+		Texture(Renderer& renderer, const Point& size, Access access = Access::STATIC, Uint32 format = (Uint32)PixelFormatEnum::RGBA32);
 		/**
 		 *  \brief Create a texture from an existing surface.
 		 *
@@ -1009,7 +1033,7 @@ namespace SDL {
 		 *
 		 *  \return 0 on success, or -1 on error
 		 */
-		int CopyEx_Fill(const Rect& src, const Point& center, double angle = 0.0, Flip flipType = Flip::SDL_FLIP_NONE);
+		int CopyEx_Fill(const Rect& src, const Point& center, double angle = 0.0, Flip flipType = Flip::NONE);
 		/**
 		 *  \brief Copy a portion of the texture to the entire current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
 		 *
@@ -1019,7 +1043,7 @@ namespace SDL {
 		 *
 		 *  \return 0 on success, or -1 on error
 		 */
-		int CopyEx_Fill(const Rect& src, double angle = 0.0, Flip flipType = Flip::SDL_FLIP_NONE);
+		int CopyEx_Fill(const Rect& src, double angle = 0.0, Flip flipType = Flip::NONE);
 		/**
 		 *  \brief Copy the texture to the entire current rendering target, rotating it by an angle around the given center.
 		 *
@@ -1029,7 +1053,7 @@ namespace SDL {
 		 *
 		 *  \return 0 on success, or -1 on error
 		 */
-		int CopyEx_Fill(const Point& center, double angle = 0.0, Flip flipType = Flip::SDL_FLIP_NONE);
+		int CopyEx_Fill(const Point& center, double angle = 0.0, Flip flipType = Flip::NONE);
 		/**
 		 *  \brief Copy the texture to the entire current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
 		 *
@@ -1038,7 +1062,7 @@ namespace SDL {
 		 *
 		 *  \return 0 on success, or -1 on error
 		 */
-		int CopyEx_Fill(double angle = 0.0, Flip flipType = Flip::SDL_FLIP_NONE);
+		int CopyEx_Fill(double angle = 0.0, Flip flipType = Flip::NONE);
 		/**
 		 *  \brief Copy a portion of the texture to the current rendering target, rotating it by angle around the given center.
 		 *
@@ -1050,7 +1074,7 @@ namespace SDL {
 		 *
 		 *  \return 0 on success, or -1 on error
 		 */
-		int CopyEx(const Rect* src, const Rect* dst, const Point* center, double angle = 0.0, Flip flipType = Flip::SDL_FLIP_NONE);
+		int CopyEx(const Rect* src, const Rect* dst, const Point* center, double angle = 0.0, Flip flipType = Flip::NONE);
 
 		/**
 		 *  \brief Copy a portion of the texture to the current rendering target, rotating it by an angle around the given center.
@@ -1063,7 +1087,7 @@ namespace SDL {
 		 *
 		 *  \return 0 on success, or -1 on error
 		 */
-		int CopyExF(const Rect& src, const FRect& dst, const FPoint& center, double angle = 0.0, Flip flipType = Flip::SDL_FLIP_NONE);
+		int CopyExF(const Rect& src, const FRect& dst, const FPoint& center, double angle = 0.0, Flip flipType = Flip::NONE);
 		/**
 		 *  \brief Copy a portion of the texture to the current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
 		 *
@@ -1074,7 +1098,7 @@ namespace SDL {
 		 *
 		 *  \return 0 on success, or -1 on error
 		 */
-		int CopyExF(const Rect& src, const FRect& dst, double angle = 0.0, Flip flipType = Flip::SDL_FLIP_NONE);
+		int CopyExF(const Rect& src, const FRect& dst, double angle = 0.0, Flip flipType = Flip::NONE);
 		/**
 		 *  \brief Copy the texture to the current rendering target, rotating it by an angle around the given center.
 		 *
@@ -1085,7 +1109,7 @@ namespace SDL {
 		 *
 		 *  \return 0 on success, or -1 on error
 		 */
-		int CopyExF(const FRect& dst, const FPoint& center, double angle = 0.0, Flip flipType = Flip::SDL_FLIP_NONE);
+		int CopyExF(const FRect& dst, const FPoint& center, double angle = 0.0, Flip flipType = Flip::NONE);
 		/**
 		 *  \brief Copy the texture to the current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2
 		 *
@@ -1095,7 +1119,7 @@ namespace SDL {
 		 *
 		 *  \return 0 on success, or -1 on error
 		 */
-		int CopyExF(const FRect& dst, double angle = 0.0, Flip flipType = Flip::SDL_FLIP_NONE);
+		int CopyExF(const FRect& dst, double angle = 0.0, Flip flipType = Flip::NONE);
 		/**
 		 *  \brief Copy a portion of the texture to the entire current rendering target, rotating it by an angle around the given center
 		 *
@@ -1106,7 +1130,7 @@ namespace SDL {
 		 *
 		 *  \return 0 on success, or -1 on error
 		 */
-		int CopyExF_Fill(const Rect& src, const FPoint& center, double angle = 0.0, Flip flipType = Flip::SDL_FLIP_NONE);
+		int CopyExF_Fill(const Rect& src, const FPoint& center, double angle = 0.0, Flip flipType = Flip::NONE);
 		/**
 		 *  \brief Copy a portion of the texture to the entire current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
 		 *
@@ -1116,7 +1140,7 @@ namespace SDL {
 		 *
 		 *  \return 0 on success, or -1 on error
 		 */
-		int CopyExF_Fill(const Rect& src, double angle = 0.0, Flip flipType = Flip::SDL_FLIP_NONE);
+		int CopyExF_Fill(const Rect& src, double angle = 0.0, Flip flipType = Flip::NONE);
 		/**
 		 *  \brief Copy the texture to the entire current rendering target, rotating it by an angle around the given center.
 		 *
@@ -1126,7 +1150,7 @@ namespace SDL {
 		 *
 		 *  \return 0 on success, or -1 on error
 		 */
-		int CopyExF_Fill(const FPoint& center, double angle = 0.0, Flip flipType = Flip::SDL_FLIP_NONE);
+		int CopyExF_Fill(const FPoint& center, double angle = 0.0, Flip flipType = Flip::NONE);
 		/**
 		 *  \brief Copy the texture to the entire current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
 		 *
@@ -1135,7 +1159,7 @@ namespace SDL {
 		 *
 		 *  \return 0 on success, or -1 on error
 		 */
-		int CopyExF_Fill(double angle = 0.0, Flip flipType = Flip::SDL_FLIP_NONE);
+		int CopyExF_Fill(double angle = 0.0, Flip flipType = Flip::NONE);
 		/**
 		 *  \brief Copy a portion of the texture to the current rendering target, rotating it by angle around the given center.
 		 *
@@ -1147,7 +1171,7 @@ namespace SDL {
 		 *
 		 *  \return 0 on success, or -1 on error
 		 */
-		int CopyExF(const Rect* src, const FRect* dst, const FPoint* center, double angle = 0.0, Flip flipType = Flip::SDL_FLIP_NONE);
+		int CopyExF(const Rect* src, const FRect* dst, const FPoint* center, double angle = 0.0, Flip flipType = Flip::NONE);
 
 		/**
 		 *  \brief Query the format of a texture

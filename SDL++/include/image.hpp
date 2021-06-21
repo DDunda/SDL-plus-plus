@@ -6,13 +6,13 @@ namespace SDL {
 	namespace IMG {
         const SDL_version* Linked_Version() { return IMG_Linked_Version(); }
 
-        typedef enum
+        enum class InitFlags
         {
-            IMG_INIT_JPG = 0x00000001,
-            IMG_INIT_PNG = 0x00000002,
-            IMG_INIT_TIF = 0x00000004,
-            IMG_INIT_WEBP = 0x00000008
-        } InitFlags;
+            JPG  = IMG_INIT_JPG,
+            PNG  = IMG_INIT_PNG,
+            TIF  = IMG_INIT_TIF,
+            WEBP = IMG_INIT_WEBP
+        };
 
         /* Loads dynamic libraries and prepares them for use.  Flags should be
            one or more flags from IMG_InitFlags OR'd together.

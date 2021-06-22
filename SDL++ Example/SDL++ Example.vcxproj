@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{aefd32bc-a756-48be-be56-ce5e9836377c}</ProjectGuid>
-    <RootNamespace>SDL</RootNamespace>
+    <ProjectGuid>{20fad595-5ae7-4978-a03e-f88430ea5978}</ProjectGuid>
+    <RootNamespace>SDLExample</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -72,28 +72,28 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(SDL_mixer)\include\;$(SDLpp)\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(SDL_mixer)\include\;$(SolutionDir)\SDL++\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SDL)\lib\$(PlatformShortName)\;$(SDL_image)\lib\$(PlatformShortName)\;$(SDL_mixer)\lib\$(PlatformShortName)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(ProjectDir)\out\$(Configuration)_$(PlatformShortName)\</OutDir>
     <IntDir>$(ProjectDir)\tmp\$(Configuration)_$(PlatformShortName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(SDL_mixer)\include\;$(SDLpp)\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(SDL_mixer)\include\;$(SolutionDir)\SDL++\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SDL)\lib\$(PlatformShortName)\;$(SDL_image)\lib\$(PlatformShortName)\;$(SDL_mixer)\lib\$(PlatformShortName)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(ProjectDir)\out\$(Configuration)_$(PlatformShortName)\</OutDir>
     <IntDir>$(ProjectDir)\tmp\$(Configuration)_$(PlatformShortName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(SDL_mixer)\include\;$(ProjectDir)\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(SDL_mixer)\include\;$(SolutionDir)\SDL++\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SDL)\lib\$(PlatformShortName)\;$(SDL_image)\lib\$(PlatformShortName)\;$(SDL_mixer)\lib\$(PlatformShortName)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(ProjectDir)\out\$(Configuration)_$(PlatformShortName)\</OutDir>
     <IntDir>$(ProjectDir)\tmp\$(Configuration)_$(PlatformShortName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(SDL_mixer)\include\;$(ProjectDir)\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(SDL_mixer)\include\;$(SolutionDir)\SDL++\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SDL)\lib\$(PlatformShortName)\;$(SDL_image)\lib\$(PlatformShortName)\;$(SDL_mixer)\lib\$(PlatformShortName)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(ProjectDir)\out\$(Configuration)_$(PlatformShortName)\</OutDir>
     <IntDir>$(ProjectDir)\tmp\$(Configuration)_$(PlatformShortName)\</IntDir>
@@ -175,28 +175,8 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\audio.hpp" />
-    <ClInclude Include="include\blendmode.hpp" />
-    <ClInclude Include="include\error.hpp" />
-    <ClInclude Include="include\events.hpp" />
-    <ClInclude Include="include\image.hpp" />
-    <ClInclude Include="include\pixels.hpp" />
-    <ClInclude Include="include\ray.hpp" />
-    <ClInclude Include="include\rect.hpp" />
-    <ClInclude Include="include\render.hpp" />
-    <ClInclude Include="include\scancode.hpp" />
-    <ClInclude Include="include\SDL.hpp" />
-    <ClInclude Include="include\surface.hpp" />
-    <ClInclude Include="include\timer.hpp" />
-    <ClInclude Include="include\video.hpp" />
-    <ClInclude Include="include\mouse.hpp" />
-    <ClInclude Include="include\observer.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\SDL.cpp" />
-    <ClCompile Include="src\ray.cpp" />
-    <ClCompile Include="src\rect.cpp" />
-    <ClCompile Include="src\render.cpp" />
+    <ClCompile Include="..\SDL++\src\SDL.cpp" />
+    <ClCompile Include="Example.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

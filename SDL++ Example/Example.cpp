@@ -1,5 +1,4 @@
 #include<SDL.hpp>
-#include<iostream>
 
 using namespace SDL;
 

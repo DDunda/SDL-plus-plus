@@ -1,4 +1,5 @@
 #include <SDL_events.h>
+#include <bitset>
 #include "observer.hpp"
 
 #include "rect.hpp"
@@ -324,21 +325,21 @@ namespace SDL {
 
 		Uint32 button_up_at[5]{ 0 };
 		Uint32 button_down_at[5]{ 0 };
-		Uint32 scancode_up_at[SDL_NUM_SCANCODES]{ 0 };
-		Uint32 scancode_down_at[SDL_NUM_SCANCODES]{ 0 };
+		std::map<Scancode, Uint32> scancode_up_at;
+		std::map<Scancode, Uint32> scancode_down_at;
 
 		bool prev_buttons[5]{ false };
 		bool buttons[5]{ false };
-		bool prev_scancodes[SDL_NUM_SCANCODES]{ false };
-		bool scancodes[SDL_NUM_SCANCODES]{ false };
+		std::bitset<SDL_NUM_SCANCODES> prev_scancodes;
+		std::bitset<SDL_NUM_SCANCODES> scancodes;
 
-		bool button    (Button i) { return  buttons[(int)i]; }
-		bool buttonDown(Button i) { return !prev_buttons[(int)i] &&  buttons[(int)i]; }
-		bool buttonUp  (Button i) { return  prev_buttons[(int)i] && !buttons[(int)i]; }
+		bool button    (Button i) const { return  buttons[(int)i]; }
+		bool buttonDown(Button i) const { return !prev_buttons[(int)i] &&  buttons[(int)i]; }
+		bool buttonUp  (Button i) const { return  prev_buttons[(int)i] && !buttons[(int)i]; }
 
-		bool scancode    (Scancode i) { return  scancodes[(int)i]; }
-		bool scancodeDown(Scancode i) { return !prev_scancodes[(int)i] &&  scancodes[(int)i]; }
-		bool scancodeUp  (Scancode i) { return  prev_scancodes[(int)i] && !scancodes[(int)i]; }
+		bool scancode    (Scancode i) const { return  scancodes[(int)i]; }
+		bool scancodeDown(Scancode i) const { return !prev_scancodes[(int)i] &&  scancodes[(int)i]; }
+		bool scancodeUp  (Scancode i) const { return  prev_scancodes[(int)i] && !scancodes[(int)i]; }
 
 		void RegisterEventType(Event::Type type, InputObserver& observer) {
 			typed_subjects[type].Register(observer);
@@ -348,9 +349,9 @@ namespace SDL {
 		}
 
 		void UpdateBuffers() {
-			memcpy(&prev_mouse, &mouse, sizeof(Point));
+			prev_mouse = mouse;
 			memcpy(&prev_buttons, &buttons, 5 * sizeof(bool));
-			memcpy(&prev_scancodes, &scancodes, SDL_NUM_SCANCODES * sizeof(bool));
+			prev_scancodes = scancodes;
 		}
 
 		void Notify(Event e) {
@@ -398,14 +399,14 @@ namespace SDL {
 			case Event::Type::KEYDOWN:
 			{
 				Scancode scancode = (Scancode)e.key.keysym.scancode;
-				scancode_down_at[(int)scancode] = timestamp;
+				scancode_down_at[scancode] = timestamp;
 				scancodes[(int)scancode] = true;
 			}	break;
 
 			case Event::Type::KEYUP:
 			{
 				Scancode scancode = (Scancode)e.key.keysym.scancode;
-				scancode_up_at[(int)scancode] = timestamp;
+				scancode_up_at[scancode] = timestamp;
 				scancodes[(int)scancode] = false;
 			}	break;
 

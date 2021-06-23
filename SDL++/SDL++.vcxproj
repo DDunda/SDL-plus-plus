@@ -197,7 +197,6 @@
     <ClCompile Include="src\blendmode.cpp" />
     <ClCompile Include="src\error.cpp" />
     <ClCompile Include="src\image.cpp" />
-    <ClCompile Include="src\init.cpp" />
     <ClCompile Include="src\mouse.cpp" />
     <ClCompile Include="src\pixels.cpp" />
     <ClCompile Include="src\SDL.cpp" />

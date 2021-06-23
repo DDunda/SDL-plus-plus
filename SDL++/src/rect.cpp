@@ -32,6 +32,7 @@ Point FPoint::floor() const { return { (int)std::floor(x), (int)std::floor(y) };
 Point FPoint::round() const { return { (int)std::round(x), (int)std::round(y) }; }
 Point FPoint::ceil()  const { return { (int)std::ceil(x),  (int)std::ceil(y) }; }
 
+FPoint FPoint::clamp (float x1, float x2, float y1, float y2) const { return { std::clamp(x, x1, x2), std::clamp(y, y1, y2) }; }
 FPoint FPoint::clampX(float x1, float x2) const { return { std::clamp(x, x1, x2), y }; }
 FPoint FPoint::clampY(float y1, float y2) const { return { x, std::clamp(y, y1, y2) }; }
 FPoint FPoint::clampR(float r1, float r2) const { float size = mag(); float r = std::min(0.0f, std::clamp(size, r1, r2)); if (size == r) return FPoint(*this); else return *this * (r / size); }
@@ -115,6 +116,7 @@ Point Point::perp() const { return { -y, x }; }
 FPoint Point::norm() const { float size = mag(); return size == 0 ? FPoint(0, 0) : FPoint(x / size, y / size); }
 Point Point::abs() const { return { std::abs(x), std::abs(y) }; }
 
+Point  Point::clamp (int x1, int x2, int y1, int y2) const { return { std::clamp(x, x1, x2), std::clamp(y, y1, y2) }; }
 Point  Point::clampX(int x1, int x2) const { return { std::clamp(x, x1, x2), y }; }
 Point  Point::clampY(int y1, int y2) const { return { x, std::clamp(y, y1, y2) }; }
 FPoint Point::clampR(float r1, float r2) const { float size = mag(); float r = std::min(0.0f, std::clamp(size, r1, r2)); if (size == r) return FPoint(*this); else return *this * (r / size); };
@@ -200,8 +202,8 @@ FPoint FRect::bottomLeft() const { return { pos.x, pos.y + h }; }
 FPoint FRect::bottomRight() const { return pos + size; }
 FPoint FRect::middle() const { return pos + size / 2.0f; }
 
-FPoint FRect::clamp(const Point& v) const { return { std::clamp<float>(v.x, x, x + w), std::clamp<float>(v.y, y, y + h) }; }
-FPoint FRect::clamp(const FPoint& v) const { return { std::clamp<float>(v.x, x, x + w), std::clamp<float>(v.y, y, y + h) }; }
+FPoint FRect::clamp(const  Point& v) const { return v.clamp(v.x, v.x + w, v.y, v.y + h); }
+FPoint FRect::clamp(const FPoint& v) const { return v.clamp(v.x, v.x + w, v.y, v.y + h); }
 
 FRect  FRect::transform(const Rect& target) const { return { (target.x - x) * w, (target.y - y) * h, target.w * w, target.h * h }; }
 FPoint FRect::transform(const Point& target) const { return { (target.x - x) * w, (target.y - y) * h }; }
@@ -295,8 +297,8 @@ Point  Rect::bottomLeft() const { return { pos.x, pos.y + h }; }
 Point  Rect::bottomRight() const { return pos + size; }
 FPoint Rect::middle() const { return pos + size / 2.0f; }
 
-Point  Rect::clamp(const Point& v) const { return v.clampX(x, x + h).clampY(y, y + h); }
-FPoint Rect::clamp(const FPoint& v) const { return v.clampX(x, x + h).clampY(y, y + h); }
+Point  Rect::clamp(const  Point& v) const { return v.clamp(x, x + h, y, y + h); }
+FPoint Rect::clamp(const FPoint& v) const { return v.clamp(x, x + h, y, y + h); }
 
 FPoint Rect::percent(const FPoint& p) const { return pos + size * p; }
 

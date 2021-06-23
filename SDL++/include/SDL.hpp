@@ -28,17 +28,16 @@ namespace SDL {
 	// This object initializes and cleans up specific SDL subsystems.
 	class SubSystem {
 		Uint32 flags;
-		int errorCode;
+		int error;
+
 	public:
 		SubSystem(Uint32 flags) : flags(flags) {
-			errorCode = SDL_InitSubSystem(flags);
+			error = SDL_InitSubSystem(flags);
 		}
 		~SubSystem() {
 			SDL_QuitSubSystem(flags);
 		}
-		constexpr int GetError() {
-			return errorCode;
-		}
+
 		/**
 		 *  \brief This function returns a mask of the specified subsystems which have
 		 *  previously been initialized.

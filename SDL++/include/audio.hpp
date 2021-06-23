@@ -26,13 +26,13 @@ namespace SDL {
     struct AudioFormat {
         SDL_AudioFormat format;
 
-        constexpr Uint8 BitSize() const { return format & SDL_AUDIO_MASK_BITSIZE; }
-        constexpr bool IsFloat() const { return format & SDL_AUDIO_MASK_DATATYPE; }
-        constexpr bool IsBigEndian() const { return format & SDL_AUDIO_MASK_ENDIAN; }
-        constexpr bool IsSigned() const { return format & SDL_AUDIO_MASK_SIGNED; }
-        constexpr bool IsInt() const { return !IsFloat(); }
-        constexpr bool IsLittleEndian() const { return !IsBigEndian(); }
-        constexpr bool IsUnsigned() const { return !IsSigned(); }
+        constexpr Uint8 BitSize() const;
+        constexpr bool IsFloat() const;
+        constexpr bool IsBigEndian() const;
+        constexpr bool IsSigned() const;
+        constexpr bool IsInt() const;
+        constexpr bool IsLittleEndian() const;
+        constexpr bool IsUnsigned() const;
     };
 
     typedef SDL_AudioCallback AudioCallback;
@@ -126,10 +126,7 @@ namespace SDL {
          *  may modify the requested size of the audio buffer, you should allocate
          *  any local mixing buffers after you open the audio device.
          */
-        Audio(AudioSpec& desired, AudioSpec& obtained) {
-            freeAudio = SDL_OpenAudio(&desired, &obtained) != -1;
-            error = !freeAudio ? -1 : 0;
-        }
+        Audio(AudioSpec& desired, AudioSpec& obtained);
 
         /**
          *  This function opens the audio device with the desired parameters, and
@@ -173,15 +170,10 @@ namespace SDL {
          *  may modify the requested size of the audio buffer, you should allocate
          *  any local mixing buffers after you open the audio device.
          */
-        Audio(AudioSpec& desired) {
-            freeAudio = SDL_OpenAudio(&desired, NULL) != -1;
-            error = !freeAudio ? -1 : 0;
-        }
+        Audio(AudioSpec& desired);
 
         // This function shuts down audio processing and closes the audio device.
-        ~Audio() {
-            if (freeAudio) SDL_CloseAudio();
-        }
+        ~Audio();
 
         /**
          *  \name Driver discovery functions
@@ -189,20 +181,20 @@ namespace SDL {
          *  These functions return the list of built in audio drivers, in the
          *  order that they are normally initialized by default.
          */
-        static int GetNumDrivers() { return SDL_GetNumAudioDrivers(); }
-        static const char* GetDriver(int index) { return SDL_GetAudioDriver(index); }
+        static int GetNumDrivers();
+        static const char* GetDriver(int index);
 
         /**
          *  This function returns the name of the current audio driver, or NULL
          *  if no driver has been initialized.
          */
-        static const char* GetCurrentDriver() { return SDL_GetCurrentAudioDriver(); }
+        static const char* GetCurrentDriver();
 
         // Get the current audio state.
-        AudioStatus GetStatus() { return (AudioStatus)SDL_GetAudioStatus(); }
+        AudioStatus GetStatus();
 
         // This function pauses and unpauses the audio callback processing.
-        Audio& Pause(int pause_on) { SDL_PauseAudio(pause_on); return *this; }
+        Audio& Pause(int pause_on);
         /**
          *  This function unpauses the audio callback processing.
          *  It should be called after opening the audio device to start
@@ -210,7 +202,7 @@ namespace SDL {
          *  callback function after opening the audio device. Silence will be
          *  written to the audio device during the pause.
          */
-        Audio& Play() { SDL_PauseAudio(0); return *this; }
+        Audio& Play();
 
         /**
          *  \name Audio lock functions
@@ -221,8 +213,8 @@ namespace SDL {
          *  function or you will cause deadlock.
          */
 
-        Audio& Lock() { SDL_LockAudio(); return *this; }
-        Audio& Unlock() { SDL_UnlockAudio(); return *this; };
+        Audio& Lock();
+        Audio& Unlock();
     };
 
     struct AudioDevice {
@@ -241,7 +233,7 @@ namespace SDL {
         int error = 0;
         bool freeDevice;
 
-        AudioDevice(DeviceID ID, bool free = false) : ID(ID), freeDevice(free && ID > 1) {}
+        AudioDevice(DeviceID ID, bool free = false);
         /**
          *  Open a specific audio device. Passing in a device name of NULL requests
          *  the most reasonable default (and is equivalent to calling SDL_OpenAudio()).
@@ -255,8 +247,7 @@ namespace SDL {
          *
          *  SDL_OpenAudio(), unlike this function, always acts on device ID 1.
          */
-        AudioDevice(const char* device, bool iscapture, const AudioSpec& desired, AudioSpec& obtained, int allowed_changes)
-            : AudioDevice(SDL_OpenAudioDevice(device, iscapture, &desired, &obtained, allowed_changes), true) {}
+        AudioDevice(const char* device, bool iscapture, const AudioSpec& desired, AudioSpec& obtained, int allowed_changes);
         /**
          *  Open a specific audio device. Passing in a device name of NULL requests
          *  the most reasonable default (and is equivalent to calling SDL_OpenAudio()).
@@ -270,8 +261,7 @@ namespace SDL {
          *
          *  SDL_OpenAudio(), unlike this function, always acts on device ID 1.
          */
-        AudioDevice(const char* device, bool iscapture, const AudioSpec& desired)
-            : AudioDevice(SDL_OpenAudioDevice(device, iscapture, &desired, NULL, 0), true) {}
+        AudioDevice(const char* device, bool iscapture, const AudioSpec& desired);
         /**
          *  Opens the most reasonable default device (equivalent to calling SDL_OpenAudio()).
          *
@@ -279,8 +269,7 @@ namespace SDL {
          *
          *  SDL_OpenAudio(), unlike this function, always acts on device ID 1.
          */
-        AudioDevice(bool iscapture, const AudioSpec& desired, AudioSpec& obtained, int allowed_changes)
-            : AudioDevice(SDL_OpenAudioDevice(NULL, iscapture, &desired, &obtained, allowed_changes), true) {}
+        AudioDevice(bool iscapture, const AudioSpec& desired, AudioSpec& obtained, int allowed_changes);
         /**
          *  Opens the most reasonable default device (equivalent to calling SDL_OpenAudio()).
          *
@@ -288,16 +277,13 @@ namespace SDL {
          *
          *  SDL_OpenAudio(), unlike this function, always acts on device ID 1.
          */
-        AudioDevice(bool iscapture, const AudioSpec& desired)
-            : AudioDevice(SDL_OpenAudioDevice(NULL, iscapture, &desired, NULL, 0), true) {}
+        AudioDevice(bool iscapture, const AudioSpec& desired);
 
         // This function shuts down audio processing and closes the audio device.
-        ~AudioDevice() {
-            if (freeDevice) SDL_CloseAudioDevice(ID);
-        }
+        ~AudioDevice();
 
         // Get the current audio state.
-        AudioStatus GetStatus() { return (AudioStatus)SDL_GetAudioDeviceStatus(ID); }
+        AudioStatus GetStatus();
 
         /**
          *  Get the number of available devices exposed by the current driver.
@@ -311,7 +297,7 @@ namespace SDL {
          *  successfully open the default device (NULL for first argument of
          *  SDL_OpenAudioDevice()).
          */
-        static int GetNumDevices(bool iscapture) { return SDL_GetNumAudioDevices(iscapture); }
+        static int GetNumDevices(bool iscapture);
 
         /**
          *  Get the human-readable name of a specific audio device.
@@ -326,10 +312,10 @@ namespace SDL {
          *  string for any length of time, you should make your own copy of it, as it
          *  will be invalid next time any of several other SDL functions is called.
          */
-        const char* GetDeviceName(bool iscapture) { return SDL_GetAudioDeviceName(ID, iscapture); }
+        const char* GetDeviceName(bool iscapture);
 
         // This function pauses and unpauses the audio callback processing.
-        AudioDevice& Pause(int pause_on) { SDL_PauseAudioDevice(ID, pause_on); return *this; }
+        AudioDevice& Pause(int pause_on);
         /**
          *  This function unpauses the audio callback processing.
          *  It should be called after opening the audio device to start
@@ -337,7 +323,7 @@ namespace SDL {
          *  callback function after opening the audio device. Silence will be
          *  written to the audio device during the pause.
          */
-        AudioDevice& Play() { SDL_PauseAudioDevice(ID, 0); return *this; }
+        AudioDevice& Play();
 
         /**
          *  Queue more audio on non-callback devices.
@@ -374,7 +360,7 @@ namespace SDL {
          *  \param data The data to queue to the device for later playback.
          *  \param len The number of bytes (not samples!) to which (data) points.
          */
-        AudioDevice& QueueAudio(const void* data, Uint32 len) { error |= SDL_QueueAudio(ID, data, len); return *this; }
+        AudioDevice& QueueAudio(const void* data, Uint32 len);
 
         /**
          *  Dequeue more audio on non-callback devices.
@@ -417,7 +403,7 @@ namespace SDL {
          *  \param len The number of bytes (not samples!) to which (data) points.
          *  \return number of bytes dequeued, which could be less than requested.
          */
-        AudioDevice DequeueAudio(void* data, Uint32 len) { return SDL_DequeueAudio(ID, data, len); }
+        AudioDevice DequeueAudio(void* data, Uint32 len);
 
         /**
          *  Get the number of bytes of still-queued audio.
@@ -450,7 +436,7 @@ namespace SDL {
          *  \param dev The device ID of which we will query queued audio size.
          *  \return Number of bytes (not samples!) of queued audio.
          */
-        Uint32 GetQueuedAudioSize() { SDL_GetQueuedAudioSize(ID); }
+        Uint32 GetQueuedAudioSize();
 
         /**
          *  Drop any queued audio data. For playback devices, this is any queued data
@@ -481,7 +467,7 @@ namespace SDL {
          *
          *  This function always succeeds and thus returns void.
          */
-        AudioDevice& ClearQueuedAudio() { SDL_ClearQueuedAudio(ID); return *this; }
+        AudioDevice& ClearQueuedAudio();
 
 
         /**
@@ -493,8 +479,8 @@ namespace SDL {
          *  function or you will cause deadlock.
          */
 
-        AudioDevice& Lock() { SDL_LockAudioDevice(ID); }
-        AudioDevice& Unlock() { SDL_UnlockAudioDevice(ID); }
+        AudioDevice& Lock();
+        AudioDevice& Unlock();
     };
 
     struct WAV {
@@ -556,21 +542,15 @@ namespace SDL {
          *  \param audio_len A pointer filled with the length of the audio data buffer in bytes
          *  \return NULL on error, or non-NULL on success.
          */
-        WAV(SDL_RWops* src, int freesrc) {
-            freeWAV = SDL_LoadWAV_RW(src, freesrc, &spec, &audio_buf, &audio_len) != NULL;
-        }
+        WAV(SDL_RWops* src, int freesrc);
         /**
          *  Loads a WAV from a file.
          *  Compatibility convenience function.
          */
-        WAV(const char* file) {
-            freeWAV = SDL_LoadWAV(file, &spec, &audio_buf, &audio_len) != NULL;
-        }
+        WAV(const char* file);
 
         // This function frees data previously allocated with SDL_LoadWAV_RW()
-        ~WAV() {
-            if(freeWAV) SDL_FreeWAV(audio_buf);
-        }
+        ~WAV();
     };
 
     struct AudioCVT {
@@ -586,9 +566,7 @@ namespace SDL {
          *  \return 0 if no conversion is needed, 1 if the audio filter is set up,
          *  or -1 on error.
          */
-        AudioCVT(AudioFormat src_format, Uint8 src_channels, int src_rate, AudioFormat dst_format, Uint8 dst_channels, int dst_rate) {
-            error = SDL_BuildAudioCVT(&cvt, src_format.format, src_channels, src_rate, dst_format.format, dst_channels, dst_rate);
-        }
+        AudioCVT(AudioFormat src_format, Uint8 src_channels, int src_rate, AudioFormat dst_format, Uint8 dst_channels, int dst_rate);
 
         /**
          *  Once you have initialized the \c cvt structure using SDL_BuildAudioCVT(),
@@ -602,7 +580,7 @@ namespace SDL {
          *
          *  \return 0 on success or -1 if \c cvt->buf is NULL.
          */
-        int ConvertAudio() { return SDL_ConvertAudio(&cvt); }
+        int ConvertAudio();
     };
 
     /* SDL_AudioStream is a new audio conversion interface.
@@ -618,7 +596,7 @@ namespace SDL {
         bool freeStream;
         int error = 0;
 
-        AudioStream(SDL_AudioStream* stream, bool free = false) : stream(stream), freeStream(free && stream != NULL) {}
+        AudioStream(SDL_AudioStream* stream, bool free = false);
 
         //  Create a new audio stream
         AudioStream(const AudioFormat src_format,
@@ -626,12 +604,10 @@ namespace SDL {
             const int src_rate,
             const AudioFormat dst_format,
             const Uint8 dst_channels,
-            const int dst_rate) : AudioStream(SDL_NewAudioStream(src_format.format, src_channels, src_rate, dst_format.format, dst_channels, dst_rate), true) {}
+            const int dst_rate);
 
         // Free an audio stream
-        ~AudioStream() {
-            if(freeStream)SDL_FreeAudioStream(stream);
-        }
+        ~AudioStream();
 
         /**
          *  Add data to be converted/resampled to the stream
@@ -640,7 +616,7 @@ namespace SDL {
          *  \param buf A pointer to the audio data to add
          *  \param len The number of bytes to write to the stream
          */
-        AudioStream& Put(const void* buf, int len) { error |= SDL_AudioStreamPut(stream, buf, len); return *this; }
+        AudioStream& Put(const void* buf, int len);
 
         /**
          *  Get converted/resampled data from the stream
@@ -650,7 +626,7 @@ namespace SDL {
          *  \param len The maximum number of bytes to fill
          *  \return The number of bytes read from the stream, or -1 on error
          */
-        int Get(void* buf, int len) { return SDL_AudioStreamGet(stream, buf, len); }
+        int Get(void* buf, int len);
 
         /**
           * Get the number of converted/resampled bytes available. The stream may be
@@ -658,7 +634,7 @@ namespace SDL {
           *  correctly, so this number might be lower than what you expect, or even
           *  be zero. Add more data or flush the stream if you need the data now.
           */
-        int Available() { return SDL_AudioStreamAvailable(stream); }
+        int Available();
 
         /**
           * Get the number of converted/resampled bytes available. The stream may be
@@ -666,7 +642,7 @@ namespace SDL {
           *  correctly, so this number might be lower than what you expect, or even
           *  be zero. Add more data or flush the stream if you need the data now.
           */
-        AudioStream& Available(int& bytes) { bytes = SDL_AudioStreamAvailable(stream); return *this; }
+        AudioStream& Available(int& bytes);
 
         /**
          * Tell the stream that you're done sending data, and anything being buffered
@@ -676,10 +652,10 @@ namespace SDL {
          *  be audio gaps in the output. Generally this is intended to signal the
          *  end of input, so the complete output becomes available.
          */
-        AudioStream& Flush() { error |= SDL_AudioStreamFlush(stream); return *this; }
+        AudioStream& Flush();
 
         // Clear any pending data in the stream without converting it
-        AudioStream& Clear() { SDL_AudioStreamClear(stream); return *this; }
+        AudioStream& Clear();
     };
 
     /**
@@ -689,12 +665,12 @@ namespace SDL {
      *  for full audio volume.  Note this does not change hardware volume.
      *  This is provided for convenience -- you can mix your own audio data.
      */
-    void MixAudio(Uint8* dst, const Uint8* src, Uint32 len, int volume = SDL_MIX_MAXVOLUME) { SDL_MixAudio(dst, src, len, volume); }
+    void MixAudio(Uint8* dst, const Uint8* src, Uint32 len, int volume = SDL_MIX_MAXVOLUME);
 
     /**
      *  This works like MixAudio(), but you specify the audio format instead of
      *  using the format of audio device 1. Thus it can be used when no audio
      *  device is open at all.
      */
-    void MixAudioFormat(Uint8* dst, const Uint8* src, AudioFormat format, Uint32 len, int volume = SDL_MIX_MAXVOLUME) { SDL_MixAudioFormat(dst, src, format.format, len, volume); }
+    void MixAudioFormat(Uint8* dst, const Uint8* src, AudioFormat format, Uint32 len, int volume = SDL_MIX_MAXVOLUME);
 }

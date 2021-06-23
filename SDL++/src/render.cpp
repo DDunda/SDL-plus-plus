@@ -1,5 +1,3 @@
-#pragma once
-
 #include "render.hpp"
 
 using namespace SDL;

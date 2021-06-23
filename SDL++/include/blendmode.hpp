@@ -59,14 +59,5 @@ namespace SDL {
 		BlendFactor srcAlphaFactor,
 		BlendFactor dstAlphaFactor,
 		BlendOperation alphaOperation
-	) {
-		return (BlendMode)SDL_ComposeCustomBlendMode(
-			(SDL_BlendFactor)srcColourFactor,
-			(SDL_BlendFactor)dstColourFactor,
-			(SDL_BlendOperation)colourOperation,
-			(SDL_BlendFactor)srcAlphaFactor,
-			(SDL_BlendFactor)dstAlphaFactor,
-			(SDL_BlendOperation)alphaOperation
-		);
-	}
+	);
 }

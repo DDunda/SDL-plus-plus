@@ -4,33 +4,32 @@
 namespace SDL {
 	// Cursor types creating system cursors
 	enum class SystemCursor {
-		ARROW = SDL_SYSTEM_CURSOR_ARROW,	     /**< Arrow */
-		IBEAM = SDL_SYSTEM_CURSOR_IBEAM,	     /**< I-beam */
-		WAIT = SDL_SYSTEM_CURSOR_WAIT,	         /**< Wait */
-		CROSSHAIR = SDL_SYSTEM_CURSOR_CROSSHAIR, /**< Crosshair */
-		WAITARROW = SDL_SYSTEM_CURSOR_WAITARROW, /**< Small wait cursor (or Wait if not available) */
-		SIZENWSE = SDL_SYSTEM_CURSOR_SIZENWSE,   /**< Double arrow pointing northwest and southeast */
-		SIZENESW = SDL_SYSTEM_CURSOR_SIZENESW,   /**< Double arrow pointing northeast and southwest */
-		SIZEWE = SDL_SYSTEM_CURSOR_SIZEWE,	     /**< Double arrow pointing west and east */
-		SIZENS = SDL_SYSTEM_CURSOR_SIZENS,	     /**< Double arrow pointing north and south */
-		SIZEALL = SDL_SYSTEM_CURSOR_SIZEALL,     /**< Four pointed arrow pointing north, south, east, and west */
-		NO = SDL_SYSTEM_CURSOR_NO,		         /**< Slashed circle or crossbones */
-		HAND = SDL_SYSTEM_CURSOR_HAND,	         /**< Hand */
+		ARROW = SDL_SYSTEM_CURSOR_ARROW,	     // Arrow
+		IBEAM = SDL_SYSTEM_CURSOR_IBEAM,	     // I-beam
+		WAIT = SDL_SYSTEM_CURSOR_WAIT,	         // Wait
+		CROSSHAIR = SDL_SYSTEM_CURSOR_CROSSHAIR, // Crosshair
+		WAITARROW = SDL_SYSTEM_CURSOR_WAITARROW, // Small wait cursor (or Wait if not available)
+		SIZENWSE = SDL_SYSTEM_CURSOR_SIZENWSE,   // Double arrow pointing northwest and southeast
+		SIZENESW = SDL_SYSTEM_CURSOR_SIZENESW,   // Double arrow pointing northeast and southwest
+		SIZEWE = SDL_SYSTEM_CURSOR_SIZEWE,	     // Double arrow pointing west and east
+		SIZENS = SDL_SYSTEM_CURSOR_SIZENS,	     // Double arrow pointing north and south
+		SIZEALL = SDL_SYSTEM_CURSOR_SIZEALL,     // Four pointed arrow pointing north, south, east, and west
+		NO = SDL_SYSTEM_CURSOR_NO,		         // Slashed circle or crossbones
+		HAND = SDL_SYSTEM_CURSOR_HAND,	         // Hand
 		NUM_CURSORS = SDL_NUM_SYSTEM_CURSORS
 	};
 
 	// Scroll direction types for the Scroll event
 	enum class MouseWheelDirection {
-		NORMAL = SDL_MOUSEWHEEL_NORMAL, /**< The scroll direction is normal */
-		FLIPPED = SDL_MOUSEWHEEL_FLIPPED /**< The scroll direction is flipped / natural */
+		NORMAL = SDL_MOUSEWHEEL_NORMAL,  // The scroll direction is normal
+		FLIPPED = SDL_MOUSEWHEEL_FLIPPED // The scroll direction is flipped / natural
 	};
 
 	struct Cursor {
 		SDL_Cursor* cursor;
 		bool freeCursor = false;
 
-		Cursor(SDL_Cursor* cursor = NULL, bool free = false)
-			: cursor(cursor), freeCursor(free) {}
+		Cursor(SDL_Cursor* cursor = NULL, bool free = false);
 
 		/**
 		 *  Create a cursor, using the specified bitmap data and
@@ -48,51 +47,38 @@ namespace SDL {
 		 *										 if not. </td></tr>
 		 *  </table>
 		 */
-		Cursor(const Uint8* data,const Uint8* mask, int w, int h, int hot_x, int hot_y)
-			: Cursor(SDL_CreateCursor(data, mask, w, h, hot_x, hot_y), true) {}
-
+		Cursor(const Uint8* data, const Uint8* mask, int w, int h, int hot_x, int hot_y);
 		// Create a colour cursor.
-		Cursor(Surface& surface, int hot_x, int hot_y)
-			: Cursor(SDL_CreateColorCursor(surface.surface, hot_x, hot_y), true) {}
-
+		Cursor(Surface& surface, int hot_x, int hot_y);
 		// Create a system cursor.
-		Cursor(SystemCursor id)
-			: Cursor(SDL_CreateSystemCursor((SDL_SystemCursor)id), true) {}
+		Cursor(SystemCursor id);
 
 		// Frees a cursor created with SDL_CreateCursor() or similar functions.
-		~Cursor() {
-			if (freeCursor) SDL_FreeCursor(cursor);
-		}
+		~Cursor();
 
 		// Return the active cursor.
-		static Cursor GetCursor() { return SDL_GetCursor(); }
+		static Cursor GetCursor();
 
 		// Return the default cursor.
-		static Cursor GetDefaultCursor() { return SDL_GetDefaultCursor(); }
+		static Cursor GetDefaultCursor();
 
 		// Set the active cursor.
-		void SetActive() { return SDL_SetCursor(cursor); }
+		void SetActive();
 
 		// Show the cursor.
-		void Show() { SDL_ShowCursor(1); }
-
-		//Hide the cursor.
-		void Hide() { SDL_ShowCursor(0); }
-
+		void Show();
+		// Hide the cursor.
+		void Hide();
 		/**
 		 *  Query the current cursor state.
 		 *
 		 *  \return true if the cursor is shown, or false if the cursor is hidden.
 		 */
-		bool Shown() {
-			return SDL_ShowCursor(-1);
-		}
+		bool Shown();
 	};
 
 	// Get the window which currently has mouse focus.
-	Window GetMouseFocus() {
-		return SDL_GetMouseFocus();
-	}
+	Window GetMouseFocus();
 
 	/**
 	 *  \brief Retrieve the current state of the mouse.
@@ -102,9 +88,7 @@ namespace SDL {
 	 *  position relative to the focus window for the currently selected
 	 *  mouse.
 	 */
-	Uint32 GetMouseState(int& x, int& y) {
-		return SDL_GetMouseState(&x, &y);
-	}
+	Uint32 GetMouseState(int& x, int& y);
 
 	/**
 	 *  \brief Retrieve the current state of the mouse.
@@ -112,9 +96,7 @@ namespace SDL {
 	 *  The current button state is returned as a button bitmask, which can
 	 *  be tested using ButtonMask.
 	 */
-	Uint32 GetMouseState() {
-		return SDL_GetMouseState(NULL, NULL);
-	}
+	Uint32 GetMouseState();
 
 	/**
 	 *  \brief Get the current state of the mouse, in relation to the desktop
@@ -137,9 +119,7 @@ namespace SDL {
 	 *  \param y Returns the current Y coord, relative to the desktop.
 	 *  \return The current button state as a bitmask, which can be tested using ButtonMask.
 	 */
-	Uint32 GetGlobalMouseState(int& x, int& y) {
-		return SDL_GetGlobalMouseState(&x, &y);
-	}
+	Uint32 GetGlobalMouseState(int& x, int& y);
 	/**
 	 *  \brief Get the current state of the mouse, in relation to the desktop
 	 *
@@ -159,9 +139,7 @@ namespace SDL {
 	 *
 	 *  \return The current button state as a bitmask, which can be tested using ButtonMask.
 	 */
-	Uint32 GetGlobalMouseState() {
-		return SDL_GetGlobalMouseState(NULL, NULL);
-	}
+	Uint32 GetGlobalMouseState();
 
 	/**
 	 *  Retrieve the relative state of the mouse.
@@ -170,9 +148,7 @@ namespace SDL {
 	 *  be tested using ButtonMask, and x and y are set to the
 	 *  mouse deltas since the last call to GetRelativeMouseState().
 	 */
-	Uint32 GetRelativeMouseState(int& x, int& y) {
-		return SDL_GetRelativeMouseState(&x, &y);
-	}
+	Uint32 GetRelativeMouseState(int& x, int& y);
 
 	/**
 	 *  \brief Moves the mouse to the given position within the window.
@@ -183,9 +159,7 @@ namespace SDL {
 	 *
 	 *  \note This function generates a mouse motion event
 	 */
-	void WarpMouseInWindow(Window& window, int x, int y) {
-		SDL_WarpMouseInWindow(window.window, x, y);
-	}
+	void WarpMouseInWindow(Window& window, int x, int y);
 
 	/**
 	 *  \brief Moves the mouse to the given position in global screen space.
@@ -196,27 +170,8 @@ namespace SDL {
 	 *
 	 *  \note This function generates a mouse motion event
 	 */
-	int WarpMouseGlobal(int x, int y) {
-		return SDL_WarpMouseGlobal(x, y);
-	}
+	int WarpMouseGlobal(int x, int y);
 
-	/**
-	 *  \brief Set relative mouse mode.
-	 *
-	 *  \param enabled Whether or not to enable relative mode
-	 *
-	 *  \return 0 on success, or -1 if relative mode is not supported.
-	 *
-	 *  While the mouse is in relative mode, the cursor is hidden, and the
-	 *  driver will try to report continuous motion in the current window.
-	 *  Only relative motion events will be delivered, the mouse position
-	 *  will not change.
-	 *
-	 *  \note This function will flush any pending mouse motion.
-	 */
-	int SetRelativeMouseMode(bool enabled) {
-		return SDL_SetRelativeMouseMode((SDL_bool)enabled);
-	}
 
 	/**
 	 *  \brief Capture the mouse, to track input outside an SDL window.
@@ -247,14 +202,25 @@ namespace SDL {
 	 *
 	 *  \return 0 on success, or -1 if not supported.
 	 */
-	int CaptureMouse(bool enabled) {
-		return SDL_CaptureMouse((SDL_bool)enabled);
-	}
+	int CaptureMouse(bool enabled);
 
+	/**
+	 *  \brief Set relative mouse mode.
+	 *
+	 *  \param enabled Whether or not to enable relative mode
+	 *
+	 *  \return 0 on success, or -1 if relative mode is not supported.
+	 *
+	 *  While the mouse is in relative mode, the cursor is hidden, and the
+	 *  driver will try to report continuous motion in the current window.
+	 *  Only relative motion events will be delivered, the mouse position
+	 *  will not change.
+	 *
+	 *  \note This function will flush any pending mouse motion.
+	 */
+	int SetRelativeMouseMode(bool enabled);
 	// Query whether relative mouse mode is enabled.
-	bool GetRelativeMouseMode() {
-		return SDL_GetRelativeMouseMode();
-	}
+	bool GetRelativeMouseMode();
 
 	enum class Button {
 		LEFT = SDL_BUTTON_LEFT,

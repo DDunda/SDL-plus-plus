@@ -137,10 +137,10 @@ namespace SDL {
 		 *
 		 *  \note     The palette entries are initialized to white.
 		 */
-		Palette(int ncolours) : palette(SDL_AllocPalette(ncolours)) {}
+		Palette(int ncolours);
 
 		// Free a palette created with SDL_AllocPalette().
-		~Palette() { SDL_FreePalette(palette); }
+		~Palette();
 
 		/**
 		 *  \brief    Set a range of colours in a palette.
@@ -151,7 +151,7 @@ namespace SDL {
 		 *
 		 *  \return   0 on success, or -1 if not all of the colours could be set.
 		 */
-		int SetColours(const Colour* colours, int firstcolour, int ncolours) { return SDL_SetPaletteColors(palette, colours, firstcolour, ncolours); }
+		int SetColours(const Colour* colours, int firstcolour, int ncolours);
 
 		/**
 		 *  \brief    Set a range of colours in a palette.
@@ -161,7 +161,7 @@ namespace SDL {
 		 *
 		 *  \return   0 on success, or -1 if not all of the colours could be set.
 		 */
-		int SetColours(const std::vector<Colour>& colours, int firstcolour) { return SDL_SetPaletteColors(palette, colours.data(), firstcolour, (int)colours.size()); }
+		int SetColours(const std::vector<Colour>& colours, int firstcolour);
 	};
 
 	// \note Everything in the pixel format structure is read-only.
@@ -170,34 +170,34 @@ namespace SDL {
 		SDL_PixelFormat* format;
 
 		// Create an SDL_PixelFormat structure from a pixel format enum.
-		PixelFormat(Uint32 pixel_format) : format(SDL_AllocFormat(pixel_format)) {}
+		PixelFormat(Uint32 pixel_format);
 
 		// Free an SDL_PixelFormat structure.
-		~PixelFormat() { SDL_FreeFormat(format); }
+		~PixelFormat();
 
 		// Get the human readable name of a pixel format
-		const char* GetName() const { return SDL_GetPixelFormatName(format->format); }
+		const char* GetName() const;
 
 		// Set the palette for a pixel format structure.
-		int SetPalette(Palette& palette) { return SDL_SetPixelFormatPalette(format, palette.palette); }
+		int SetPalette(Palette& palette);
 
 		// Maps an RGB triple to an opaque pixel value for a given pixel format.
-		Uint32 MapRGB(Uint8 r, Uint8 g, Uint8 b) const { return SDL_MapRGB(format, r, g, b); }
+		Uint32 MapRGB(Uint8 r, Uint8 g, Uint8 b) const;
 
 		// Maps an RGBA quadruple to a pixel value for a given pixel format.
-		Uint32 MapRGBA(Uint8 r, Uint8 g, Uint8 b, Uint8 a) const { SDL_MapRGBA(format, r, g, b, a); }
+		Uint32 MapRGBA(Uint8 r, Uint8 g, Uint8 b, Uint8 a) const;
 
 		// Maps an RGBA quadruple to a pixel value for a given pixel format.
-		Uint32 MapRGBA(Colour c) const { SDL_MapRGBA(format, c.r, c.g, c.b, c.a); }
+		Uint32 MapRGBA(Colour c) const;
 
 		// Get the RGB components from a pixel of the specified format.
-		void GetRGB(Uint32 pixel, Uint8& r, Uint8& g, Uint8& b) const { SDL_GetRGB(pixel, format, &r, &g, &b); }
+		void GetRGB(Uint32 pixel, Uint8& r, Uint8& g, Uint8& b) const;
 
 		// Get the RGBA components from a pixel of the specified format.
-		void GetRGBA(Uint32 pixel, Uint8& r, Uint8& g, Uint8& b, Uint8& a) const { SDL_GetRGBA(pixel, format, &r, &g, &b, &a); }
+		void GetRGBA(Uint32 pixel, Uint8& r, Uint8& g, Uint8& b, Uint8& a) const;
 
 		// Get the RGBA components from a pixel of the specified format.
-		void GetRGBA(Uint32 pixel, Colour& c) const { SDL_GetRGBA(pixel, format, &c.r, &c.g, &c.b, &c.a); }
+		void GetRGBA(Uint32 pixel, Colour& c) const;
 	};
 
 	/**
@@ -205,14 +205,8 @@ namespace SDL {
 	 *
 	 *  \return The pixel format, or ::SDL_PIXELFORMAT_UNKNOWN if the conversion wasn't possible.
 	 */
-	static PixelFormatEnum MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask) {
-		return (PixelFormatEnum)SDL_MasksToPixelFormatEnum(bpp, Rmask, Gmask, Bmask, Amask);
-	}
+	static PixelFormatEnum MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask);
 
 	// Calculate a 256 entry gamma ramp for a gamma value.
-	static Uint16* CalculateGammaRamp(float gamma) {
-		Uint16* ramp = new Uint16[256];
-		SDL_CalculateGammaRamp(gamma, ramp);
-		return ramp;
-	}
+	static Uint16* CalculateGammaRamp(float gamma);
 }

@@ -6,7 +6,7 @@ namespace SDL {
 
 	// Set the error message for the current thread
 	template<typename... Args>
-	static void SetError(SDL_PRINTF_FORMAT_STRING const char* fmt, Args... args) { SDL_SetError(fmt, args...); }
+	static void SetError(SDL_PRINTF_FORMAT_STRING const char* fmt, Args... args);
 
 	/**
 	 *   \brief    Get the last error message that was set
@@ -19,8 +19,8 @@ namespace SDL {
 	 *
 	 *  \return    A pointer to the last error message that was set
 	 */
-	static const char* GetError() { return SDL_GetError(); }
+	static const char* GetError();
 
 	// Clear the error message for the current thread
-	static void ClearError() { SDL_ClearError(); }
+	static void ClearError();
 }

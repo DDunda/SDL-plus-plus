@@ -2,14 +2,17 @@
 
 #include <SDL.h>
 #include "audio.hpp"
+#include "blendmode.hpp"
 #include "error.hpp"
 #include "events.hpp"
-#include "ray.hpp"
-#include "render.hpp"
-#include "timer.hpp"
-#include "video.hpp"
-
 #include "image.hpp"
+#include "pixels.hpp"
+#include "ray.hpp"
+#include "rect.hpp"
+#include "render.hpp"
+#include "scancode.hpp"
+#include "surface.hpp"
+#include "timer.hpp"
 
 namespace SDL {
 	// This function initializes the subsystems specified by \c flags.

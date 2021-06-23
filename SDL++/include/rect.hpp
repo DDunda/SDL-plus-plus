@@ -48,14 +48,15 @@ namespace SDL {
 		Point round() const;
 		Point ceil()  const;
 
+		FPoint clamp (float x1, float x2, float y1, float y2) const;
 		FPoint clampX(float x1, float x2) const;
 		FPoint clampY(float y1, float y2) const;
 		FPoint clampR(float r1, float r2) const;
 
-		static float    dot(const FPoint& v1, const FPoint& v2);
+		static float  dot  (const FPoint& v1, const FPoint& v2);
 		static float  cross(const FPoint& v1, const FPoint& v2);
-		static FPoint min(const FPoint& v1, const FPoint& v2);
-		static FPoint max(const FPoint& v1, const FPoint& v2);
+		static FPoint min  (const FPoint& v1, const FPoint& v2);
+		static FPoint max  (const FPoint& v1, const FPoint& v2);
 
 		FPoint operator+() const;
 		FPoint operator-() const;
@@ -138,6 +139,7 @@ namespace SDL {
 		FPoint norm() const;
 		Point abs() const;
 
+		Point  clamp (int x1, int x2, int y1, int y2) const;
 		Point  clampX(int x1, int x2) const;
 		Point  clampY(int y1, int y2) const;
 		FPoint clampR(float r1, float r2) const;

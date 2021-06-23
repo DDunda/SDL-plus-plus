@@ -193,6 +193,13 @@
     <ClInclude Include="include\observer.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\audio.cpp" />
+    <ClCompile Include="src\blendmode.cpp" />
+    <ClCompile Include="src\error.cpp" />
+    <ClCompile Include="src\image.cpp" />
+    <ClCompile Include="src\init.cpp" />
+    <ClCompile Include="src\mouse.cpp" />
+    <ClCompile Include="src\pixels.cpp" />
     <ClCompile Include="src\SDL.cpp" />
     <ClCompile Include="src\ray.cpp" />
     <ClCompile Include="src\rect.cpp" />

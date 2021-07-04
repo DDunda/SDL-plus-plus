@@ -354,6 +354,10 @@ namespace SDL {
 		 *  \return   0 on success, or -1 on error
 		 */
 		Renderer& DrawRectF(const FRect* rect);
+		Renderer& DrawRectEx(const Rect& rect, const Point& center, double angle = 0.0);
+		Renderer& DrawRectEx(const Rect& rect, double angle = 0.0);
+		Renderer& DrawRectExF(const FRect& rect, const FPoint& center, double angle = 0.0);
+		Renderer& DrawRectExF(const FRect& rect, double angle = 0.0);
 		/**
 		 *  \brief    Draw some number of rectangles on the current rendering target.
 		 *

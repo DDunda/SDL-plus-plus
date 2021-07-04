@@ -23,7 +23,10 @@ float FPoint::max() const { return std::max(x, y); }
 bool FPoint::nonZero() const { return x != 0 || y != 0; }
 bool FPoint::inRect(const FRect& r) const { return x >= r.x && y >= r.y && x < r.x + r.w && y < r.y + r.h; }
 
-FPoint FPoint::turn(float a) const { return { x * cos(a) - y * sin(a), x * sin(a) + y * cos(a) }; }
+FPoint FPoint::rotate(float rotx, float roty) const { return { x * rotx - y * roty, x * roty + y * rotx }; }
+FPoint FPoint::rotate(float a) const { return rotate(cos(a), sin(a)); }
+FPoint FPoint::rotateAround(FPoint center, float rotx, float roty) const { return (*this - center).rotate(rotx, roty) + center; }
+FPoint FPoint::rotateAround(FPoint center, float a) const { return (*this - center).rotate(a) + center; }
 FPoint FPoint::perp() const { return { -y, x }; }
 FPoint FPoint::norm() const { float size = mag(); return size == 0.0f ? FPoint(0, 0) : FPoint(x / size, y / size); }
 FPoint FPoint::abs() const { return { std::abs(x), std::abs(y) }; }
@@ -111,7 +114,10 @@ int Point::max() const { return std::max(x, y); }
 bool Point::nonZero() const { return x != 0 || y != 0; }
 bool Point::inRect(const Rect& r) const { return x >= r.x && y >= r.y && x < r.x + r.w && y < r.y + r.h; };
 
-FPoint Point::turn(float a) const { return { x * cos(a) - y * sin(a), x * sin(a) + y * cos(a) }; }
+FPoint Point::rotate(float rotx, float roty) const { return { x * rotx - y * roty, x * roty + y * rotx }; }
+FPoint Point::rotate(float a) const { return rotate(cos(a),sin(a)); }
+FPoint Point::rotateAround(Point center, float rotx, float roty) const { return (*this - center).rotate(rotx, roty) + center; }
+FPoint Point::rotateAround(Point center, float a) const { return (*this - center).rotate(a) + center; }
 Point Point::perp() const { return { -y, x }; }
 FPoint Point::norm() const { float size = mag(); return size == 0 ? FPoint(0, 0) : FPoint(x / size, y / size); }
 Point Point::abs() const { return { std::abs(x), std::abs(y) }; }

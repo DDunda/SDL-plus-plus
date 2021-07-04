@@ -63,6 +63,82 @@ Renderer& Renderer::DrawRect(const Rect& rect) { error |= SDL_RenderDrawRect(ren
 Renderer& Renderer::DrawRect(const  Rect* rect) { error |= SDL_RenderDrawRect(renderer, (const SDL_Rect*)rect); return *this; }
 Renderer& Renderer::DrawRectF(const FRect& rect) { error |= SDL_RenderDrawRectF(renderer, &rect.rect); return *this; }
 Renderer& Renderer::DrawRectF(const FRect* rect) { error |= SDL_RenderDrawRectF(renderer, (const SDL_FRect*)rect); return *this; }
+Renderer& Renderer::DrawRectEx(const Rect& rect, const Point& center, double angle)
+{
+	FPoint corners[5];
+	float rotX = cos(angle);
+	float rotY = sin(angle);
+
+	int left = rect.x;
+	int top = rect.y;
+	int right = left + rect.w;
+	int bottom = top + rect.h;
+
+	corners[0] = Point(left,  top)   .rotateAround(center, rotX, rotY);
+	corners[1] = Point(right, top)   .rotateAround(center, rotX, rotY);
+	corners[2] = Point(right, bottom).rotateAround(center, rotX, rotY);
+	corners[3] = Point(left,  bottom).rotateAround(center, rotX, rotY);
+	corners[4] = corners[0];
+
+	DrawLinesF(corners, 5);
+
+	return *this;
+}
+Renderer& Renderer::DrawRectEx(const Rect& rect, double angle)
+{
+	FPoint corners[5];
+
+	FPoint center = { rect.x + rect.w / 2.0f, rect.y + rect.h / 2.0f };
+	FPoint corner1 = FPoint( -rect.w / 2.0, -rect.h / 2.0 ).rotate(angle);
+
+	corners[0] = corner1 + center;
+	corners[1] = FPoint(corner1.y, -corner1.x) + center;
+	corners[2] = FPoint(-corner1.x, -corner1.y) + center;
+	corners[3] = FPoint(-corner1.y, corner1.x) + center;
+	corners[4] = corners[0];
+
+	DrawLinesF(corners, 5);
+
+	return *this;
+}
+Renderer& Renderer::DrawRectExF(const FRect& rect, const FPoint& center, double angle)
+{
+	FPoint corners[5];
+	float rotX = cos(angle);
+	float rotY = sin(angle);
+
+	float left = rect.x;
+	float top = rect.y;
+	float right = left + rect.w;
+	float bottom = top + rect.h;
+
+	corners[0] = FPoint(left, top).rotateAround(center, rotX, rotY);
+	corners[1] = FPoint(right, top).rotateAround(center, rotX, rotY);
+	corners[2] = FPoint(right, bottom).rotateAround(center, rotX, rotY);
+	corners[3] = FPoint(left, bottom).rotateAround(center, rotX, rotY);
+	corners[4] = corners[0];
+
+	DrawLinesF(corners, 5);
+
+	return *this;
+}
+Renderer& Renderer::DrawRectExF(const FRect& rect, double angle)
+{
+	FPoint corners[5];
+
+	FPoint center = { rect.x + rect.w / 2.0f, rect.y + rect.h / 2.0f };
+	FPoint corner1 = FPoint(-rect.w / 2.0, -rect.h / 2.0).rotate(angle);
+
+	corners[0] = corner1 + center;
+	corners[1] = FPoint(corner1.y, -corner1.x) + center;
+	corners[2] = FPoint(-corner1.x, -corner1.y) + center;
+	corners[3] = FPoint(-corner1.y, corner1.x) + center;
+	corners[4] = corners[0];
+
+	DrawLinesF(corners, 5);
+
+	return *this;
+}
 Renderer& Renderer::DrawRects(const Rect* rects, int count) { error |= SDL_RenderDrawRects(renderer, (const SDL_Rect*)rects, count); return *this; }
 Renderer& Renderer::DrawRectsF(const FRect* rects, int count) { error |= SDL_RenderDrawRectsF(renderer, (const SDL_FRect*)rects, count); return *this; }
 Renderer& Renderer::DrawRects(const std::vector<Rect>& rects) { error |= SDL_RenderDrawRects(renderer, (const SDL_Rect*)rects.data(), rects.size()); return *this; }

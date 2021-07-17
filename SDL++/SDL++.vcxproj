@@ -86,8 +86,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(SDL_mixer)\include\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SDL)\lib\$(PlatformShortName)\;$(SDL_image)\lib\$(PlatformShortName)\;$(SDL_mixer)\lib\$(PlatformShortName)\;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SDL)\include\;$(SDL_image)\include\;$(SDL_mixer)\include\;$(SDL_ttf)\include\;$(ProjectDir)include\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SDL)\lib\$(PlatformShortName)\;$(SDL_image)\lib\$(PlatformShortName)\;$(SDL_mixer)\lib\$(PlatformShortName)\;$(SDL_ttf)\lib\$(PlatformShortName)\;$(LibraryPath)</LibraryPath>
     <OutDir>$(ProjectDir)\out\$(Configuration)_$(PlatformShortName)\</OutDir>
     <IntDir>$(ProjectDir)\tmp\$(Configuration)_$(PlatformShortName)\</IntDir>
   </PropertyGroup>
@@ -150,7 +150,7 @@
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SDL)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"&amp;copy "$(SDL_image)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"&amp;copy "$(SDL_mixer)\lib\$(PlatformShortName)\*.dll" "$(OutDir)";</Command>
+      <Command>copy "$(SDL)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"&amp;copy "$(SDL_image)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"&amp;copy "$(SDL_mixer)\lib\$(PlatformShortName)\*.dll" "$(OutDir)"&amp;copy "$(SDL_ttf)\lib\$(PlatformShortName)\*.dll" "$(OutDir)";</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -186,8 +186,10 @@
     <ClInclude Include="include\render.hpp" />
     <ClInclude Include="include\scancode.hpp" />
     <ClInclude Include="include\SDL.hpp" />
+    <ClInclude Include="include\SDL_ttf.hpp" />
     <ClInclude Include="include\surface.hpp" />
     <ClInclude Include="include\timer.hpp" />
+    <ClInclude Include="include\version.hpp" />
     <ClInclude Include="include\video.hpp" />
     <ClInclude Include="include\mouse.hpp" />
     <ClInclude Include="include\observer.hpp" />

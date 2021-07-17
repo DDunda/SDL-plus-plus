@@ -224,6 +224,8 @@ namespace SDL {
 
 		FRect();
 		FRect(float x, float y, float w, float h);
+		FRect(float x, float y, const FPoint& size);
+		FRect(const FPoint& pos, float w, float h);
 		FRect(const FPoint& pos, const FPoint& size);
 		FRect(const FRect& rect);
 		FRect(const SDL_FRect& rect);
@@ -253,8 +255,9 @@ namespace SDL {
 		FRect transform(const FRect& target) const;
 		FPoint transform(const FPoint& target) const;
 
-		bool intersectsPoint(const Point& v) const;
-		bool intersectsPoint(const FPoint& v) const;
+		bool contains(const Point& v) const;
+		bool contains(const FPoint& v) const;
+
 		bool intersectsRect(const Rect& r) const;
 		bool intersectsRect(const FRect& r) const;
 
@@ -320,6 +323,8 @@ namespace SDL {
 
 		Rect();
 		Rect(int x, int y, int w, int h);
+		Rect(int x, int y, const Point& size);
+		Rect(const Point& pos, int w, int h);
 		Rect(const Point& pos, const Point& size);
 		Rect(const Rect& rect);
 		Rect(const SDL_Rect& rect);
@@ -353,8 +358,9 @@ namespace SDL {
 		FRect transform(const FRect& target) const;
 		FPoint transform(const FPoint& target) const;
 
-		bool intersectsPoint(const Point& v) const;
-		bool intersectsPoint(const FPoint& v) const;
+		bool contains(const Point& v) const;
+		bool contains(const FPoint& v) const;
+
 		bool intersectsRect(const Rect& r) const;
 		bool intersectsRect(const FRect& r) const;
 		bool intersectsLine(const Point& P1, const Point& P2);

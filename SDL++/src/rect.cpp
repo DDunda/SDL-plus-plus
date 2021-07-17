@@ -187,6 +187,8 @@ std::ostream& SDL::operator<<(std::ostream& os, const Point& v) { return os << (
 #pragma region FRect
 FRect::FRect() : pos(0, 0), size(0, 0) {}
 FRect::FRect(float x, float y, float w, float h) : x(x), y(y), w(w), h(h) {}
+FRect::FRect(float x, float y, const FPoint& size) : x(x), y(y), size(size) {}
+FRect::FRect(const FPoint& pos, float w, float h) : pos(pos), w(w), h(h) {}
 FRect::FRect(const FPoint& pos, const FPoint& size) : pos(pos), size(size) {}
 FRect::FRect(const FRect& rect) : rect(rect.rect) {}
 FRect::FRect(const SDL_FRect& rect) : rect(rect) {}
@@ -216,8 +218,9 @@ FPoint FRect::transform(const Point& target) const { return { (target.x - x) * w
 FRect  FRect::transform(const FRect& target) const { return { (target.x - x) * w, (target.y - y) * h, target.w * w, target.h * h }; }
 FPoint FRect::transform(const FPoint& target) const { return { (target.x - x) * w, (target.y - y) * h }; }
 
-bool FRect::intersectsPoint(const Point& v) const { return v.x > x && v.y > y && v.x < x + w && v.y < y + h; }
-bool FRect::intersectsPoint(const FPoint& v) const { return v.x > x && v.y > y && v.x < x + w && v.y < y + h; }
+bool FRect::contains(const Point& v) const { return v.x > x && v.y > y && v.x < x + w && v.y < y + h; }
+bool FRect::contains(const FPoint& v) const { return v.x > x && v.y > y && v.x < x + w && v.y < y + h; }
+
 bool FRect::intersectsRect(const  Rect& r) const { return x < r.x + r.w && y < r.y + r.h && x + w > r.x && y + h > r.y; }
 bool FRect::intersectsRect(const FRect& r) const { return x < r.x + r.w && y < r.y + r.h && x + w > r.x && y + h > r.y; }
 
@@ -285,6 +288,8 @@ std::ostream& SDL::operator<<(std::ostream& os, const FRect& r) { return os << (
 #pragma region Rect
 Rect::Rect() : pos(), size() {}
 Rect::Rect(int x, int y, int w, int h) : x(x), y(y), w(w), h(h) {}
+Rect::Rect(int x, int y, const Point& size) : x(x), y(y), size(size) {}
+Rect::Rect(const Point& pos, int w, int h) : pos(pos), w(w), h(h) {}
 Rect::Rect(const Point& pos, const Point& size) : pos(pos), size(size) {}
 Rect::Rect(const Rect& rect) : rect(rect.rect) {}
 Rect::Rect(const SDL_Rect& rect) : rect(rect) {}
@@ -326,8 +331,9 @@ Point  Rect::transform(const Point& target) const { return { (target.x - x) * w,
 FRect  Rect::transform(const FRect& target) const { return { (target.x - x) * w, (target.y - y) * h, target.w * w, target.h * h }; }
 FPoint Rect::transform(const FPoint& target) const { return { (target.x - x) * w, (target.y - y) * h }; }
 
-bool Rect::intersectsPoint(const Point& v) const { return v.x > x && v.y > y && v.x < x + w && v.y < y + h; }
-bool Rect::intersectsPoint(const FPoint& v) const { return v.x > x && v.y > y && v.x < x + w && v.y < y + h; }
+bool Rect::contains(const Point& v) const { return v.x > x && v.y > y && v.x < x + w && v.y < y + h; }
+bool Rect::contains(const FPoint& v) const { return v.x > x && v.y > y && v.x < x + w && v.y < y + h; }
+
 bool Rect::intersectsRect(const Rect& r) const { return x < r.x + r.w && y < r.y + r.h && x + w > r.x && y + h > r.y; }
 bool Rect::intersectsRect(const FRect& r) const { return x < r.x + r.w && y < r.y + r.h && x + w > r.x && y + h > r.y; }
 bool Rect::intersectsLine(const Point& P1, const Point& P2) {

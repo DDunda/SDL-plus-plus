@@ -59,6 +59,6 @@ namespace IMG {
 	int SaveJPG_RW(const Surface& surface, SDL_RWops* dst, int freedst, int quality) { return IMG_SaveJPG_RW(surface.surface, dst, freedst, quality); }
 
 	template <class... Args>
-	int SetError(const char* fmt, Args ...args) { SDL::SetError(fmt, args...); }
-	const char* GetError() { return SDL::GetError(); }
+	int SetError(const char* fmt, Args ...args) { IMG_SetError(fmt, args...); }
+	const char* GetError() { return IMG_GetError(); }
 }

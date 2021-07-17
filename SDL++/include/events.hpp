@@ -310,55 +310,76 @@ namespace SDL {
 		Uint32 RegisterEvents(int numevents) { return SDL_RegisterEvents(numevents); }
 	};
 
-	typedef Subject<const Event&> InputSubject;
-	typedef Observer<const Event&> InputObserver;
+	typedef Observer<const Event&> EventObserver;
+	typedef Listener<const Event&> EventListener;
 
-	struct Input : public InputSubject {
-		std::map<Event::Type, InputSubject> typed_subjects;
-
-		bool running = true;
-		Point prev_mouse;
-		Point mouse;
-		Point windowSize;
-
-		std::map<Event::Type, Uint32> event_at;
-
-		Uint32 button_up_at[5]{ 0 };
-		Uint32 button_down_at[5]{ 0 };
-		std::map<Scancode, Uint32> scancode_up_at;
-		std::map<Scancode, Uint32> scancode_down_at;
+	struct Mouse {
+		Point prev_pos;
+		Point pos;
+		Point delta_pos;
 
 		bool prev_buttons[5]{ false };
 		bool buttons[5]{ false };
+
+		Uint32 button_up_at[5]{ 0 };
+		Uint32 button_down_at[5]{ 0 };
+
+		bool GetButton (SDL::Button i) const { return  buttons[(int)i]; }
+		bool ButtonDown(SDL::Button i) const { return !prev_buttons[(int)i] &&  buttons[(int)i]; }
+		bool ButtonUp  (SDL::Button i) const { return  prev_buttons[(int)i] && !buttons[(int)i]; }
+
+		bool InArea(const SDL::Rect& area) const { return area.contains(pos); }
+	};
+
+	struct Input {
+		Subject<const Event&> event_subject;
+		std::map<Event::Type, Subject<const Event&>> typed_event_subjects;
+
+		Mouse mouse;
+		bool running = true;
+		Point windowSize;
+
+		std::map<Event::Type, Uint32> event_at;
+		std::map<Scancode, Uint32> scancode_up_at;
+		std::map<Scancode, Uint32> scancode_down_at;
+
 		std::bitset<SDL_NUM_SCANCODES> prev_scancodes;
 		std::bitset<SDL_NUM_SCANCODES> scancodes;
 
-		bool button    (Button i) const { return  buttons[(int)i]; }
-		bool buttonDown(Button i) const { return !prev_buttons[(int)i] &&  buttons[(int)i]; }
-		bool buttonUp  (Button i) const { return  prev_buttons[(int)i] && !buttons[(int)i]; }
+		bool MouseInArea(const SDL::Rect& area) const { return mouse.InArea(area); }
 
-		bool scancode    (Scancode i) const { return  scancodes[(int)i]; }
-		bool scancodeDown(Scancode i) const { return !prev_scancodes[(int)i] &&  scancodes[(int)i]; }
-		bool scancodeUp  (Scancode i) const { return  prev_scancodes[(int)i] && !scancodes[(int)i]; }
+		bool GetButton (SDL::Button i) const { return mouse.GetButton(i); }
+		bool ButtonDown(SDL::Button i) const { return mouse.ButtonDown(i); }
+		bool ButtonUp  (SDL::Button i) const { return mouse.ButtonUp(i); }
 
-		void RegisterEventType(Event::Type type, InputObserver& observer) {
-			typed_subjects[type].Register(observer);
+		bool GetScancode (Scancode i) const { return  scancodes[(int)i]; }
+		bool ScancodeDown(Scancode i) const { return !prev_scancodes[(int)i] &&  scancodes[(int)i]; }
+		bool ScancodeUp  (Scancode i) const { return  prev_scancodes[(int)i] && !scancodes[(int)i]; }
+
+		void RegisterEventListener(EventObserver& observer) {
+			event_subject.Register(observer);
 		}
-		void UnregisterEventType(Event::Type type, InputObserver& observer) {
-			typed_subjects[type].Unregister(observer);
+		void UnregisterEventListener(EventObserver& observer) {
+			event_subject.Unregister(observer);
+		}
+		void RegisterTypedEventListener(Event::Type type, EventObserver& observer) {
+			typed_event_subjects[type].Register(observer);
+		}
+		void UnregisterTypedEventListener(Event::Type type, EventObserver& observer) {
+			typed_event_subjects[type].Unregister(observer);
 		}
 
 		void UpdateBuffers() {
-			prev_mouse = mouse;
-			memcpy(&prev_buttons, &buttons, 5 * sizeof(bool));
+			mouse.prev_pos = mouse.pos;
+			memcpy(&mouse.prev_buttons, &mouse.buttons, 5 * sizeof(bool));
 			prev_scancodes = scancodes;
 		}
 
-		void Notify(Event e) {
-			if (typed_subjects.find(e.type) != typed_subjects.end())
-				typed_subjects[e.type].Notify(e);
+		void NotifyListeners(Event e) {
+			if (typed_event_subjects.find(e.type) != typed_event_subjects.end())
+				typed_event_subjects[e.type].Notify(e);
 
-			InputSubject::Notify(e);
+			event_subject.Notify(e);
 		}
 
 		void ProcessEvent(Event e) {
@@ -379,21 +400,21 @@ namespace SDL {
 				break;
 
 			case Event::Type::MOUSEMOTION:
-				mouse = { e.motion.x, e.motion.y };
+				mouse.pos = { e.motion.x, e.motion.y };
 				break;
 
 			case Event::Type::MOUSEBUTTONDOWN:
 			{
 				Uint8 button = e.button.button;
-				button_down_at[button] = timestamp;
-				buttons[button] = true;
+				mouse.button_down_at[button] = timestamp;
+				mouse.buttons[button] = true;
 			}	break;
 
 			case Event::Type::MOUSEBUTTONUP:
 			{
 				Uint8 button = e.button.button;
-				button_up_at[button] = timestamp;
-				buttons[button] = false;
+				mouse.button_up_at[button] = timestamp;
+				mouse.buttons[button] = false;
 			}	break;
 
 			case Event::Type::KEYDOWN:
@@ -413,7 +434,7 @@ namespace SDL {
 			}
 
 			event_at[e.type] = timestamp;
-			Notify(e);
+			NotifyListeners(e);
 		}
 
 		void Update() {
@@ -422,6 +443,8 @@ namespace SDL {
 			UpdateBuffers();
 
 			while(e.Poll()) ProcessEvent(e);
+
+			mouse.delta_pos = mouse.pos - mouse.prev_pos;
 		}
 	};
 }

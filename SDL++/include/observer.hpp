@@ -1,5 +1,6 @@
 #include <vector>
 #include <map>
+#include <functional>
 
 template<typename... Ts>
 class Subject;
@@ -36,4 +37,13 @@ public:
 	virtual void Notify(Ts... args) {
 		for (Observer<Ts...>* o : observers) o->Notify(args...);
 	}
+};
+
+template<typename... Ts>
+class Listener : public Observer<Ts...> {
+protected:
+	std::function<void(Ts...)> function;
+public:
+	Listener(std::function<void(Ts...)> function) : function(function) {};
+	void Notify(Ts... args) { function(args...); }
 };

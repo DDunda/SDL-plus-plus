@@ -39,9 +39,9 @@ namespace SDL {
 #if SDL_VERSION_ATLEAST(2,0,0)
         /* Load an image directly into a render texture.
          */
-        Texture LoadTexture(Renderer& renderer, const char* file);
-        Texture LoadTexture_RW(Renderer& renderer, SDL_RWops* src, int freesrc);
-        Texture LoadTextureTyped_RW(Renderer& renderer, SDL_RWops* src, int freesrc, const char* type);
+        Texture&& LoadTexture(Renderer& renderer, const char* file);
+        Texture&& LoadTexture_RW(Renderer& renderer, SDL_RWops* src, int freesrc);
+        Texture&& LoadTextureTyped_RW(Renderer& renderer, SDL_RWops* src, int freesrc, const char* type);
 #endif /* SDL 2.0 */
 
         /* Functions to detect a file type, given a seekable source */

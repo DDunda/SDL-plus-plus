@@ -1,8 +1,6 @@
 #include "image.hpp"
 
-using namespace SDL;
-
-namespace IMG {
+namespace SDL::IMG {
 	const SDL_version* Linked_Version() { return IMG_Linked_Version(); }
 
 	int Init(int flags) { return IMG_Init(flags); }
@@ -13,25 +11,25 @@ namespace IMG {
 	Surface Load_RW(SDL_RWops* src, int freesrc) { return Surface(IMG_Load_RW(src, freesrc), true); }
 
 #if SDL_VERSION_ATLEAST(2,0,0)
-	Texture LoadTexture(Renderer& renderer, const char* file) { return Texture(renderer, IMG_LoadTexture(renderer.renderer, file), true); }
-	Texture LoadTexture_RW(Renderer& renderer, SDL_RWops* src, int freesrc) { return Texture(renderer, IMG_LoadTexture_RW(renderer.renderer, src, freesrc), true); }
-	Texture LoadTextureTyped_RW(Renderer& renderer, SDL_RWops* src, int freesrc, const char* type) { return Texture(renderer, IMG_LoadTextureTyped_RW(renderer.renderer, src, freesrc, type), true); }
+	Texture&& LoadTexture(Renderer& renderer, const char* file) { return Texture(IMG_LoadTexture(renderer.renderer, file), true); }
+	Texture&& LoadTexture_RW(Renderer& renderer, SDL_RWops* src, int freesrc) { return Texture(IMG_LoadTexture_RW(renderer.renderer, src, freesrc), true); }
+	Texture&& LoadTextureTyped_RW(Renderer& renderer, SDL_RWops* src, int freesrc, const char* type) { return Texture(IMG_LoadTextureTyped_RW(renderer.renderer, src, freesrc, type), true); }
 #endif /* SDL 2.0 */
 
-	bool isICO(SDL_RWops* src) { return IMG_isICO(src); }
-	bool isCUR(SDL_RWops* src) { return IMG_isCUR(src); }
-	bool isBMP(SDL_RWops* src) { return IMG_isBMP(src); }
-	bool isGIF(SDL_RWops* src) { return IMG_isGIF(src); }
-	bool isJPG(SDL_RWops* src) { return IMG_isJPG(src); }
-	bool isLBM(SDL_RWops* src) { return IMG_isLBM(src); }
-	bool isPCX(SDL_RWops* src) { return IMG_isPCX(src); }
-	bool isPNG(SDL_RWops* src) { return IMG_isPNG(src); }
-	bool isPNM(SDL_RWops* src) { return IMG_isPNM(src); }
-	bool isSVG(SDL_RWops* src) { return IMG_isSVG(src); }
-	bool isTIF(SDL_RWops* src) { return IMG_isTIF(src); }
-	bool isXCF(SDL_RWops* src) { return IMG_isXCF(src); }
-	bool isXPM(SDL_RWops* src) { return IMG_isXPM(src); }
-	bool isXV(SDL_RWops* src) { return IMG_isXV(src); }
+	bool isICO (SDL_RWops* src) { return IMG_isICO (src); }
+	bool isCUR (SDL_RWops* src) { return IMG_isCUR (src); }
+	bool isBMP (SDL_RWops* src) { return IMG_isBMP (src); }
+	bool isGIF (SDL_RWops* src) { return IMG_isGIF (src); }
+	bool isJPG (SDL_RWops* src) { return IMG_isJPG (src); }
+	bool isLBM (SDL_RWops* src) { return IMG_isLBM (src); }
+	bool isPCX (SDL_RWops* src) { return IMG_isPCX (src); }
+	bool isPNG (SDL_RWops* src) { return IMG_isPNG (src); }
+	bool isPNM (SDL_RWops* src) { return IMG_isPNM (src); }
+	bool isSVG (SDL_RWops* src) { return IMG_isSVG (src); }
+	bool isTIF (SDL_RWops* src) { return IMG_isTIF (src); }
+	bool isXCF (SDL_RWops* src) { return IMG_isXCF (src); }
+	bool isXPM (SDL_RWops* src) { return IMG_isXPM (src); }
+	bool isXV  (SDL_RWops* src) { return IMG_isXV  (src); }
 	bool isWEBP(SDL_RWops* src) { return IMG_isWEBP(src); }
 
 	Surface LoadICO_RW(SDL_RWops* src) { return Surface(IMG_LoadICO_RW(src), true); }

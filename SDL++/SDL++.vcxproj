@@ -205,6 +205,8 @@
     <ClCompile Include="src\ray.cpp" />
     <ClCompile Include="src\rect.cpp" />
     <ClCompile Include="src\render.cpp" />
+    <ClCompile Include="src\SDL_ttf.cpp" />
+    <ClCompile Include="src\version.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

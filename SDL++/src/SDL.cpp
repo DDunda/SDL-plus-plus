@@ -7,3 +7,5 @@
 #include "ray.cpp"
 #include "rect.cpp"
 #include "render.cpp"
+#include "SDL_ttf.cpp"
+#include "version.cpp"

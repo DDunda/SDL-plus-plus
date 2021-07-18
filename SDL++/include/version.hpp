@@ -1,3 +1,5 @@
+#pragma once
+
 #include <SDL_version.h>
 
 namespace SDL {
@@ -29,9 +31,9 @@ namespace SDL {
 		 *  \sa SDL_version
 		 *  \sa SDL_GetVersion
 		 */
-		Version(Uint8 major = SDL_MAJOR_VERSION, Uint8 minor = SDL_MINOR_VERSION, Uint8 patch = SDL_PATCHLEVEL) { this->major = major, this->minor = minor, this->patch = patch; }
+		Version(Uint8 major = SDL_MAJOR_VERSION, Uint8 minor = SDL_MINOR_VERSION, Uint8 patch = SDL_PATCHLEVEL);
 
-		Version(const SDL_version& v) : Version(v.major, v.minor, v.patch) {}
+		Version(const SDL_version& v);
 
 		/**
 		 *  This macro turns the version numbers into a numeric value:
@@ -41,10 +43,10 @@ namespace SDL {
 		 *
 		 *  This assumes that there will never be more than 100 patchlevels.
 		 */
-		Uint16 AsNum() { return SDL_VERSIONNUM(major, minor, patch); }
+		Uint16 AsNum();
 
 		// This macro will evaluate to true if compiled with SDL at least this value.
-		bool Atleast() { return SDL_VERSION_ATLEAST(major, minor, patch); }
+		bool Atleast();
 	};
 
 	/**
@@ -59,11 +61,7 @@ namespace SDL {
 	 *
 	 *  \sa SDL_VERSION
 	 */
-	Version GetVersion() {
-		Version ver;
-		SDL_GetVersion(&ver);
-		return ver;
-	}
+	Version GetVersion();
 
 	/**
 	 *  \brief Get the version of SDL that is linked against your program.
@@ -77,7 +75,7 @@ namespace SDL {
 	 *
 	 *  \sa SDL_VERSION
 	 */
-	void GetVersion(Version& ver) { SDL_GetVersion(&ver); }
+	void GetVersion(Version& ver);
 
 	/**
 	 *  \brief Get the version of SDL that is linked against your program.
@@ -103,7 +101,7 @@ namespace SDL {
 	 *
 	 *  \sa SDL_VERSION
 	 */
-	void GetVersion(Version* ver) { SDL_GetVersion(ver); }
+	void GetVersion(Version* ver);
 
 	/**
 	 *  \brief   Get the code revision of SDL that is linked against your program.
@@ -112,7 +110,7 @@ namespace SDL {
 	 *           exact revision of the SDL library in use, and is only useful in comparing
 	 *           against other revisions. It is NOT an incrementing number.
 	 */
-	const char* GetRevision() { return SDL_GetRevision(); }
+	const char* GetRevision();
 
 	/**
 	 *  \brief   Get the revision number of SDL that is linked against your program.
@@ -121,5 +119,5 @@ namespace SDL {
 	 *           library in use. It is an incrementing number based on commits to
 	 *           hg.libsdl.org.
 	 */
-	int GetRevisionNumber() { return SDL_GetRevisionNumber(); }
+	int GetRevisionNumber();
 }

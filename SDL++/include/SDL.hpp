@@ -10,6 +10,7 @@
 #include "ray.hpp"
 #include "rect.hpp"
 #include "render.hpp"
+#include "SDL_ttf.hpp"
 #include "surface.hpp"
 #include "timer.hpp"
 

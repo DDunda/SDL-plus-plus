@@ -155,6 +155,38 @@ Renderer& Renderer::FillRectsF(const FRect* rects, int count) { error |= SDL_Ren
 Renderer& Renderer::FillRects(const std::vector< Rect>& rects) { error |= SDL_RenderFillRects(renderer, (const SDL_Rect*)rects.data(), rects.size()); return *this; }
 Renderer& Renderer::FillRectsF(const std::vector<FRect>& rects) { error |= SDL_RenderFillRectsF(renderer, (const SDL_FRect*)rects.data(), rects.size()); return *this; }
 
+Renderer& Renderer::Copy     (Texture& txt, const Rect& src, const Rect& dst) { error |= SDL_RenderCopy(renderer, txt.texture, &src.rect, &dst.rect); return *this; }
+Renderer& Renderer::Copy     (Texture& txt,                  const Rect& dst) { error |= SDL_RenderCopy(renderer, txt.texture, NULL,      &dst.rect); return *this; }
+Renderer& Renderer::Copy_Fill(Texture& txt, const Rect& src                 ) { error |= SDL_RenderCopy(renderer, txt.texture, &src.rect, NULL     ); return *this; }
+Renderer& Renderer::Copy_Fill(Texture& txt                                  ) { error |= SDL_RenderCopy(renderer, txt.texture, NULL,      NULL     ); return *this; }
+Renderer& Renderer::Copy     (Texture& txt, const Rect* src, const Rect* dst) { error |= SDL_RenderCopy(renderer, txt.texture, (SDL_Rect*)src, (SDL_Rect*)dst); return *this; }
+
+Renderer& Renderer::CopyF     (Texture& txt, const Rect& src, const FRect& dst) { error |= SDL_RenderCopyF(renderer, txt.texture, &src.rect, &dst.rect); return *this; }
+Renderer& Renderer::CopyF     (Texture& txt,                  const FRect& dst) { error |= SDL_RenderCopyF(renderer, txt.texture, NULL,      &dst.rect); return *this; }
+Renderer& Renderer::CopyF_Fill(Texture& txt, const Rect& src                  ) { error |= SDL_RenderCopyF(renderer, txt.texture, &src.rect, NULL     ); return *this; }
+Renderer& Renderer::CopyF_Fill(Texture& txt                                   ) { error |= SDL_RenderCopyF(renderer, txt.texture, NULL,      NULL     ); return *this; }
+Renderer& Renderer::CopyF     (Texture& txt, const Rect* src, const FRect* dst) { error |= SDL_RenderCopyF(renderer, txt.texture, (SDL_Rect*)src, (SDL_FRect*)dst); return *this; }
+
+Renderer& Renderer::CopyEx     (Texture& txt, const Rect& src, const Rect& dst, const Point& center, double angle, Flip flipType) { error |= SDL_RenderCopyEx(renderer, txt.texture, &src.rect, &dst.rect, angle, &center.point, (SDL_RendererFlip)flipType); return *this; }
+Renderer& Renderer::CopyEx     (Texture& txt, const Rect& src, const Rect& dst,                      double angle, Flip flipType) { error |= SDL_RenderCopyEx(renderer, txt.texture, &src.rect, &dst.rect, angle, NULL,          (SDL_RendererFlip)flipType); return *this; }
+Renderer& Renderer::CopyEx     (Texture& txt,                  const Rect& dst, const Point& center, double angle, Flip flipType) { error |= SDL_RenderCopyEx(renderer, txt.texture, NULL,      &dst.rect, angle, &center.point, (SDL_RendererFlip)flipType); return *this; }
+Renderer& Renderer::CopyEx     (Texture& txt,                  const Rect& dst,                      double angle, Flip flipType) { error |= SDL_RenderCopyEx(renderer, txt.texture, NULL,      &dst.rect, angle, NULL,          (SDL_RendererFlip)flipType); return *this; }
+Renderer& Renderer::CopyEx_Fill(Texture& txt, const Rect& src,                  const Point& center, double angle, Flip flipType) { error |= SDL_RenderCopyEx(renderer, txt.texture, &src.rect, NULL,      angle, &center.point, (SDL_RendererFlip)flipType); return *this; }
+Renderer& Renderer::CopyEx_Fill(Texture& txt, const Rect& src,                                       double angle, Flip flipType) { error |= SDL_RenderCopyEx(renderer, txt.texture, &src.rect, NULL,      angle, NULL,          (SDL_RendererFlip)flipType); return *this; }
+Renderer& Renderer::CopyEx_Fill(Texture& txt,                                   const Point& center, double angle, Flip flipType) { error |= SDL_RenderCopyEx(renderer, txt.texture, NULL,      NULL,      angle, &center.point, (SDL_RendererFlip)flipType); return *this; }
+Renderer& Renderer::CopyEx_Fill(Texture& txt,                                                        double angle, Flip flipType) { error |= SDL_RenderCopyEx(renderer, txt.texture, NULL,      NULL,      angle, NULL,          (SDL_RendererFlip)flipType); return *this; }
+Renderer& Renderer::CopyEx     (Texture& txt, const Rect* src, const Rect* dst, const Point* center, double angle, Flip flipType) { error |= SDL_RenderCopyEx(renderer, txt.texture, (SDL_Rect*)src, (SDL_Rect*)dst, angle, (SDL_Point*)center, (SDL_RendererFlip)flipType); return *this; }
+
+Renderer& Renderer::CopyExF     (Texture& txt, const Rect& src, const FRect& dst, const FPoint& center, double angle, Flip flipType) { error |= SDL_RenderCopyExF(renderer, txt.texture, &src.rect, &dst.rect, angle, &center.point, (SDL_RendererFlip)flipType); return *this; }
+Renderer& Renderer::CopyExF     (Texture& txt, const Rect& src, const FRect& dst,                       double angle, Flip flipType) { error |= SDL_RenderCopyExF(renderer, txt.texture, &src.rect, &dst.rect, angle, NULL,          (SDL_RendererFlip)flipType); return *this; }
+Renderer& Renderer::CopyExF     (Texture& txt,                  const FRect& dst, const FPoint& center, double angle, Flip flipType) { error |= SDL_RenderCopyExF(renderer, txt.texture, NULL,      &dst.rect, angle, &center.point, (SDL_RendererFlip)flipType); return *this; }
+Renderer& Renderer::CopyExF     (Texture& txt,                  const FRect& dst,                       double angle, Flip flipType) { error |= SDL_RenderCopyExF(renderer, txt.texture, NULL,      &dst.rect, angle, NULL,          (SDL_RendererFlip)flipType); return *this; }
+Renderer& Renderer::CopyExF_Fill(Texture& txt, const Rect& src,                   const FPoint& center, double angle, Flip flipType) { error |= SDL_RenderCopyExF(renderer, txt.texture, &src.rect, NULL,      angle, &center.point, (SDL_RendererFlip)flipType); return *this; }
+Renderer& Renderer::CopyExF_Fill(Texture& txt, const Rect& src,                                         double angle, Flip flipType) { error |= SDL_RenderCopyExF(renderer, txt.texture, &src.rect, NULL,      angle, NULL,          (SDL_RendererFlip)flipType); return *this; }
+Renderer& Renderer::CopyExF_Fill(Texture& txt,                                    const FPoint& center, double angle, Flip flipType) { error |= SDL_RenderCopyExF(renderer, txt.texture, NULL,      NULL,      angle, &center.point, (SDL_RendererFlip)flipType); return *this; }
+Renderer& Renderer::CopyExF_Fill(Texture& txt,                                                          double angle, Flip flipType) { error |= SDL_RenderCopyExF(renderer, txt.texture, NULL,      NULL,      angle, NULL,          (SDL_RendererFlip)flipType); return *this; }
+Renderer& Renderer::CopyExF     (Texture& txt, const Rect* src, const FRect* dst, const FPoint* center, double angle, Flip flipType) { error |= SDL_RenderCopyExF(renderer, txt.texture, (SDL_Rect*)src, (SDL_FRect*)dst, angle, (SDL_FPoint*)center, (SDL_RendererFlip)flipType); return *this; }
+
 int Renderer::GetNumDrivers() { return SDL_GetNumRenderDrivers(); }
 Renderer& Renderer::GetDriverInfo(int index, Info& info) { error |= SDL_GetRenderDriverInfo(index, &info); return *this; }
 
@@ -172,7 +204,7 @@ bool Renderer::TargetSupported() { return SDL_RenderTargetSupported(renderer); }
 Renderer& Renderer::TargetSupported(bool& support) { support = SDL_RenderTargetSupported(renderer); return *this; }
 
 Renderer& Renderer::SetTarget(Texture& texture) { error |= SDL_SetRenderTarget(renderer, texture.texture); return *this; }
-Texture Renderer::GetTarget() { return Texture(*this, SDL_GetRenderTarget(renderer)); }
+Texture Renderer::GetTarget() { return Texture(SDL_GetRenderTarget(renderer), false); }
 Renderer& Renderer::GetTarget(Texture& target) {
 	target.~Texture();
 	target.texture = SDL_GetRenderTarget(renderer);
@@ -223,19 +255,18 @@ Renderer& Renderer::ReadPixels(void* pixels, int pitch, Uint32 format) { error |
 void* Renderer::GetMetalLayer() { return SDL_RenderGetMetalLayer(renderer); }
 void* Renderer::GetMetalCommandEncoder() { return SDL_RenderGetMetalCommandEncoder(renderer); }
 
-Texture::Texture(Texture& txt) : Texture(txt.renderer, txt.texture, false) {}
-Texture::Texture(Texture&& txt) noexcept : Texture(txt.renderer, txt.texture, txt.freeTexture) { txt.freeTexture = false; }
-Texture& Texture::operator=(Texture that)
-{
-	std::swap(renderer, that.renderer);
-	std::swap(texture, that.texture);
-	std::swap(freeTexture, that.freeTexture);
+Texture::Texture() : Texture(NULL, false) {}
+Texture::Texture(Texture& txt) : Texture(txt.texture, false) {}
+Texture::Texture(Texture&& txt) noexcept : Texture(txt.texture, txt.freeTexture) { txt.freeTexture = false; }
+Texture& Texture::operator=(Texture that) {
+	texture = that.texture;
+	freeTexture = false;
 	return *this;
 }
 
-Texture::Texture(Renderer& renderer, SDL_Texture* texture, bool free) : renderer(renderer), texture(texture), freeTexture(free && texture != NULL) {}
-Texture::Texture(Renderer& renderer, const Point& size, Access access, Uint32 format) : Texture(renderer, SDL_CreateTexture(renderer.renderer, format, (SDL_TextureAccess)access, size.x, size.y)) {}
-Texture::Texture(Renderer& renderer, Surface& surface) : Texture(renderer, SDL_CreateTextureFromSurface(renderer.renderer, surface.surface)) {}
+Texture::Texture(SDL_Texture* texture, bool free) : texture(texture), freeTexture(free && texture != NULL) {}
+Texture::Texture(Renderer& renderer, const Point& size, Access access, Uint32 format) : Texture(SDL_CreateTexture(renderer.renderer, format, (SDL_TextureAccess)access, size.x, size.y)) {}
+Texture::Texture(Renderer& renderer, Surface& surface) : Texture(SDL_CreateTextureFromSurface(renderer.renderer, surface.surface)) {}
 
 Texture::~Texture() { if (freeTexture) SDL_DestroyTexture(texture); }
 
@@ -267,38 +298,6 @@ int Texture::UpdateYUVRect(const Rect& rect, const Uint8* Yplane, int Ypitch, co
 int Texture::UpdateYUV(const Uint8* Yplane, int Ypitch, const Uint8* Uplane, int Upitch, const Uint8* Vplane, int Vpitch) {
 	return SDL_UpdateYUVTexture(texture, NULL, Yplane, Ypitch, Uplane, Upitch, Vplane, Vpitch);
 }
-
-int Texture::Copy(const Rect& src, const Rect& dst) { return SDL_RenderCopy(renderer.renderer, texture, &src.rect, &dst.rect); }
-int Texture::Copy(const Rect& dst) { return SDL_RenderCopy(renderer.renderer, texture, NULL, &dst.rect); }
-int Texture::Copy_Fill(const Rect& src) { return SDL_RenderCopy(renderer.renderer, texture, &src.rect, NULL); }
-int Texture::Copy_Fill() { return SDL_RenderCopy(renderer.renderer, texture, NULL, NULL); }
-int Texture::Copy(const Rect* src, const Rect* dst) { return SDL_RenderCopy(renderer.renderer, texture, (SDL_Rect*)src, (SDL_Rect*)dst); }
-
-int Texture::CopyF(const Rect& src, const FRect& dst) { return SDL_RenderCopyF(renderer.renderer, texture, &src.rect, &dst.rect); }
-int Texture::CopyF(const FRect& dst) { return SDL_RenderCopyF(renderer.renderer, texture, NULL, &dst.rect); }
-int Texture::CopyF_Fill(const Rect& src) { return SDL_RenderCopyF(renderer.renderer, texture, &src.rect, NULL); }
-int Texture::CopyF_Fill() { return SDL_RenderCopyF(renderer.renderer, texture, NULL, NULL); }
-int Texture::CopyF(const Rect* src, const FRect* dst) { return SDL_RenderCopyF(renderer.renderer, texture, (SDL_Rect*)src, (SDL_FRect*)dst); }
-
-int Texture::CopyEx(const Rect& src, const Rect& dst, const Point& center, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, &src.rect, &dst.rect, angle, &center.point, (SDL_RendererFlip)flipType); }
-int Texture::CopyEx(const Rect& src, const Rect& dst, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, &src.rect, &dst.rect, angle, NULL, (SDL_RendererFlip)flipType); }
-int Texture::CopyEx(const Rect& dst, const Point& center, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, NULL, &dst.rect, angle, &center.point, (SDL_RendererFlip)flipType); }
-int Texture::CopyEx(const Rect& dst, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, NULL, &dst.rect, angle, NULL, (SDL_RendererFlip)flipType); }
-int Texture::CopyEx_Fill(const Rect& src, const Point& center, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, &src.rect, NULL, angle, &center.point, (SDL_RendererFlip)flipType); }
-int Texture::CopyEx_Fill(const Rect& src, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, &src.rect, NULL, angle, NULL, (SDL_RendererFlip)flipType); }
-int Texture::CopyEx_Fill(const Point& center, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, NULL, NULL, angle, &center.point, (SDL_RendererFlip)flipType); }
-int Texture::CopyEx_Fill(double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, NULL, NULL, angle, NULL, (SDL_RendererFlip)flipType); }
-int Texture::CopyEx(const Rect* src, const Rect* dst, const Point* center, double angle, Flip flipType) { return SDL_RenderCopyEx(renderer.renderer, texture, (SDL_Rect*)src, (SDL_Rect*)dst, angle, (SDL_Point*)center, (SDL_RendererFlip)flipType); }
-
-int Texture::CopyExF(const Rect& src, const FRect& dst, const FPoint& center, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, &src.rect, &dst.rect, angle, &center.point, (SDL_RendererFlip)flipType); }
-int Texture::CopyExF(const Rect& src, const FRect& dst, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, &src.rect, &dst.rect, angle, NULL, (SDL_RendererFlip)flipType); }
-int Texture::CopyExF(const FRect& dst, const FPoint& center, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, NULL, &dst.rect, angle, &center.point, (SDL_RendererFlip)flipType); }
-int Texture::CopyExF(const FRect& dst, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, NULL, &dst.rect, angle, NULL, (SDL_RendererFlip)flipType); }
-int Texture::CopyExF_Fill(const Rect& src, const FPoint& center, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, &src.rect, NULL, angle, &center.point, (SDL_RendererFlip)flipType); }
-int Texture::CopyExF_Fill(const Rect& src, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, &src.rect, NULL, angle, NULL, (SDL_RendererFlip)flipType); }
-int Texture::CopyExF_Fill(const FPoint& center, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, NULL, NULL, angle, &center.point, (SDL_RendererFlip)flipType); }
-int Texture::CopyExF_Fill(double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, NULL, NULL, angle, NULL, (SDL_RendererFlip)flipType); }
-int Texture::CopyExF(const Rect* src, const FRect* dst, const FPoint* center, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.renderer, texture, (SDL_Rect*)src, (SDL_FRect*)dst, angle, (SDL_FPoint*)center, (SDL_RendererFlip)flipType); }
 
 int Texture::QueryFormat(Uint32& format) { return SDL_QueryTexture(texture, &format, NULL, NULL, NULL); }
 int Texture::QueryAccess(int& access) { return SDL_QueryTexture(texture, NULL, &access, NULL, NULL); }

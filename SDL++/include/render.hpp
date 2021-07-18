@@ -474,6 +474,291 @@ namespace SDL {
 		 */
 		Renderer& FillRectsF(const std::vector<FRect>& rects);
 
+		// Flip constants for CopyEx
+		enum class Flip {
+			NONE = SDL_FLIP_NONE,       // Do not flip
+			HORIZONTAL = SDL_FLIP_HORIZONTAL, // flip horizontally
+			VERTICAL = SDL_FLIP_VERTICAL    // flip vertically
+		};
+
+		/**
+		 *  \brief    Copy a portion of the texture to the current rendering target.
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& Copy(Texture& txt, const Rect& src, const Rect& dst);
+		/**
+		 *  \brief    Copy the texture to the current rendering target.
+		 *
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& Copy(Texture& txt, const Rect& dst);
+		/**
+		 *  \brief    Copy a portion of the texture to the entire current rendering target.
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& Copy_Fill(Texture& txt, const Rect& src);
+		/**
+		 *  \brief    Copy the texture to the entire current rendering target.
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& Copy_Fill(Texture& txt);
+		/**
+		 *  \brief    Copy a portion of the texture to the current rendering target.
+		 *
+		 *  \param    srcrect: A pointer to the source rectangle, or NULL for the entire texture.
+		 *  \param    dstrect: A pointer to the destination rectangle, or NULL for the entire rendering target.
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& Copy(Texture& txt, const Rect* src, const Rect* dst);
+
+		/**
+		 *  \brief    Copy a portion of the texture to the current rendering target.
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyF(Texture& txt, const Rect& src, const FRect& dst);
+		/**
+		 *  \brief    Copy the texture to the current rendering target.
+		 *
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyF(Texture& txt, const FRect& dst);
+		/**
+		 *  \brief    Copy a portion of the texture to the entire current rendering target.
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyF_Fill(Texture& txt, const Rect& src);
+		/**
+		 *  \brief    Copy the texture to the entire current rendering target.
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyF_Fill(Texture& txt);
+		/**
+		 *  \brief    Copy a portion of the texture to the current rendering target.
+		 *
+		 *  \param    srcrect: A pointer to the source rectangle, or NULL for the entire
+		 *                     texture.
+		 *  \param    dstrect: A pointer to the destination rectangle, or NULL for the
+		 *                     entire rendering target.
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyF(Texture& txt, const Rect* src, const FRect* dst);
+
+		/**
+		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by an angle around the given center.
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated.
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Renderer::Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyEx(Texture& txt, const Rect& src, const Rect& dst, const Point& center, double angle = 0.0, Flip flipType = Flip::NONE);
+		/**
+		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyEx(Texture& txt, const Rect& src, const Rect& dst, double angle = 0.0, Flip flipType = Flip::NONE);
+		/**
+		 *  \brief    Copy the texture to the current rendering target, rotating it by an angle around the given center.
+		 *
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated (if NULL, rotation will be done around dstrect.w/2, dstrect.h/2).
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyEx(Texture& txt, const Rect& dst, const Point& center, double angle = 0.0, Flip flipType = Flip::NONE);
+		/**
+		 *  \brief    Copy the texture to the current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2
+		 *
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyEx(Texture& txt, const Rect& dst, double angle = 0.0, Flip flipType = Flip::NONE);
+		/**
+		 *  \brief    Copy a portion of the texture to the entire current rendering target, rotating it by an angle around the given center
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated.
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyEx_Fill(Texture& txt, const Rect& src, const Point& center, double angle = 0.0, Flip flipType = Flip::NONE);
+		/**
+		 *  \brief    Copy a portion of the texture to the entire current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyEx_Fill(Texture& txt, const Rect& src, double angle = 0.0, Flip flipType = Flip::NONE);
+		/**
+		 *  \brief    Copy the texture to the entire current rendering target, rotating it by an angle around the given center.
+		 *
+		 *  \param    center: A reference to a point indicating the point around which dstrect will be rotated.
+		 *  \param    angle:  An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:   A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyEx_Fill(Texture& txt, const Point& center, double angle = 0.0, Flip flipType = Flip::NONE);
+		/**
+		 *  \brief    Copy the texture to the entire current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
+		 *
+		 *  \param    angle: An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:  A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyEx_Fill(Texture& txt, double angle = 0.0, Flip flipType = Flip::NONE);
+		/**
+		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by angle around the given center.
+		 *
+		 *  \param    srcrect: A pointer to the source rectangle, or NULL for the entire texture.
+		 *  \param    dstrect: A pointer to the destination rectangle, or NULL for the entire rendering target.
+		 *  \param    center:  A pointer to a point indicating the point around which dstrect will be rotated (if NULL, rotation will be done around dstrect.w/2, dstrect.h/2).
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction.
+		 *  \param    flip:    An Flip value stating which flipping actions should be performed on the texture.
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyEx(Texture& txt, const Rect* src, const Rect* dst, const Point* center, double angle = 0.0, Flip flipType = Flip::NONE);
+
+		/**
+		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by an angle around the given center.
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated.
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyExF(Texture& txt, const Rect& src, const FRect& dst, const FPoint& center, double angle = 0.0, Flip flipType = Flip::NONE);
+		/**
+		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyExF(Texture& txt, const Rect& src, const FRect& dst, double angle = 0.0, Flip flipType = Flip::NONE);
+		/**
+		 *  \brief    Copy the texture to the current rendering target, rotating it by an angle around the given center.
+		 *
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated.
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyExF(Texture& txt, const FRect& dst, const FPoint& center, double angle = 0.0, Flip flipType = Flip::NONE);
+		/**
+		 *  \brief    Copy the texture to the current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2
+		 *
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyExF(Texture& txt, const FRect& dst, double angle = 0.0, Flip flipType = Flip::NONE);
+		/**
+		 *  \brief    Copy a portion of the texture to the entire current rendering target, rotating it by an angle around the given center
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated.
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyExF_Fill(Texture& txt, const Rect& src, const FPoint& center, double angle = 0.0, Flip flipType = Flip::NONE);
+		/**
+		 *  \brief    Copy a portion of the texture to the entire current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyExF_Fill(Texture& txt, const Rect& src, double angle = 0.0, Flip flipType = Flip::NONE);
+		/**
+		 *  \brief    Copy the texture to the entire current rendering target, rotating it by an angle around the given center.
+		 *
+		 *  \param    center: A reference to a point indicating the point around which dstrect will be rotated.
+		 *  \param    angle:  An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:   A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyExF_Fill(Texture& txt, const FPoint& center, double angle = 0.0, Flip flipType = Flip::NONE);
+		/**
+		 *  \brief    Copy the texture to the entire current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
+		 *
+		 *  \param    angle: An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:  A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyExF_Fill(Texture& txt, double angle = 0.0, Flip flipType = Flip::NONE);
+		/**
+		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by angle around the given center.
+		 *
+		 *  \param    srcrect: A pointer to the source rectangle, or NULL for the entire texture.
+		 *  \param    dstrect: A pointer to the destination rectangle, or NULL for the entire rendering target.
+		 *  \param    center:  A pointer to a point indicating the point around which dstrect will be rotated (if NULL, rotation will be done around dstrect.w/2, dstrect.h/2).
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction.
+		 *  \param    flip:    An Flip value stating which flipping actions should be performed on the texture.
+		 *
+		 *  \return   0 on success, or -1 on error
+		 */
+		Renderer& CopyExF(Texture& txt, const Rect* src, const FRect* dst, const FPoint* center, double angle = 0.0, Flip flipType = Flip::NONE);
+
 		/**
 		 *  \brief    Get the number of 2D rendering drivers available for the current
 		 *            display.
@@ -723,6 +1008,7 @@ namespace SDL {
 			Linear  = SDL_ScaleModeLinear,  // linear filtering
 			Best    = SDL_ScaleModeBest     // anisotropic filtering
 		};
+
 		// The access pattern allowed for a texture.
 		enum class Access
 		{
@@ -730,28 +1016,23 @@ namespace SDL {
 			STREAMING = SDL_TEXTUREACCESS_STREAMING, // Changes frequently, lockable
 			TARGET    = SDL_TEXTUREACCESS_TARGET     // Texture can be used as a render target
 		};
+
 		// The texture channel modulation used in Renderer::Copy().
 		enum class Modulate {
 			NONE = SDL_TEXTUREMODULATE_NONE,     // No modulation
 			COLOR = SDL_TEXTUREMODULATE_COLOR,    // srcC = srcC * color
 			ALPHA = SDL_TEXTUREMODULATE_ALPHA     // srcA = srcA * alpha
 		};
-		// Flip constants for CopyEx
-		enum class Flip {
-			NONE       = SDL_FLIP_NONE,       // Do not flip
-			HORIZONTAL = SDL_FLIP_HORIZONTAL, // flip horizontally
-			VERTICAL   = SDL_FLIP_VERTICAL    // flip vertically
-		};
 
-		Renderer& renderer;
 		SDL_Texture* texture;
 		bool freeTexture = false;
 
+		Texture();
 		Texture(Texture& txt);
 		Texture(Texture&& txt) noexcept;
 		Texture& operator=(Texture that);
 
-		Texture(Renderer& renderer, SDL_Texture* texture, bool free = true);
+		Texture(SDL_Texture* texture, bool free = true);
 		/**
 		 *  \brief    Create a texture for a rendering context.
 		 *
@@ -896,284 +1177,6 @@ namespace SDL {
 		 *            this function is available if your pixel data is not contiguous.
 		 */
 		int UpdateYUV(const Uint8* Yplane, int Ypitch, const Uint8* Uplane, int Upitch, const Uint8* Vplane, int Vpitch);
-
-		/**
-		 *  \brief    Copy a portion of the texture to the current rendering target.
-		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int Copy(const Rect& src, const Rect& dst);
-		/**
-		 *  \brief    Copy the texture to the current rendering target.
-		 *
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int Copy(const Rect& dst);
-		/**
-		 *  \brief    Copy a portion of the texture to the entire current rendering target.
-		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int Copy_Fill(const Rect& src);
-		/**
-		 *  \brief    Copy the texture to the entire current rendering target.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int Copy_Fill();
-		/**
-		 *  \brief    Copy a portion of the texture to the current rendering target.
-		 *
-		 *  \param    srcrect: A pointer to the source rectangle, or NULL for the entire texture.
-		 *  \param    dstrect: A pointer to the destination rectangle, or NULL for the entire rendering target.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int Copy(const Rect* src, const Rect* dst);
-
-		/**
-		 *  \brief    Copy a portion of the texture to the current rendering target.
-		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyF(const Rect& src, const FRect& dst);
-		/**
-		 *  \brief    Copy the texture to the current rendering target.
-		 *
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyF(const FRect& dst);
-		/**
-		 *  \brief    Copy a portion of the texture to the entire current rendering target.
-		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyF_Fill(const Rect& src);
-		/**
-		 *  \brief    Copy the texture to the entire current rendering target.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyF_Fill();
-		/**
-		 *  \brief    Copy a portion of the texture to the current rendering target.
-		 *
-		 *  \param    srcrect: A pointer to the source rectangle, or NULL for the entire
-		 *                     texture.
-		 *  \param    dstrect: A pointer to the destination rectangle, or NULL for the
-		 *                     entire rendering target.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyF(const Rect* src, const FRect* dst);
-
-		/**
-		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by an angle around the given center.
-		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated.
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Renderer::Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyEx(const Rect& src, const Rect& dst, const Point& center, double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
-		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyEx(const Rect& src, const Rect& dst, double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy the texture to the current rendering target, rotating it by an angle around the given center.
-		 *
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated (if NULL, rotation will be done around dstrect.w/2, dstrect.h/2).
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyEx(const Rect& dst, const Point& center, double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy the texture to the current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2
-		 *
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyEx(const Rect& dst, double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy a portion of the texture to the entire current rendering target, rotating it by an angle around the given center
-		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated.
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyEx_Fill(const Rect& src, const Point& center, double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy a portion of the texture to the entire current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
-		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyEx_Fill(const Rect& src, double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy the texture to the entire current rendering target, rotating it by an angle around the given center.
-		 *
-		 *  \param    center: A reference to a point indicating the point around which dstrect will be rotated.
-		 *  \param    angle:  An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:   A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyEx_Fill(const Point& center, double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy the texture to the entire current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
-		 *
-		 *  \param    angle: An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:  A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyEx_Fill(double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by angle around the given center.
-		 *
-		 *  \param    srcrect: A pointer to the source rectangle, or NULL for the entire texture.
-		 *  \param    dstrect: A pointer to the destination rectangle, or NULL for the entire rendering target.
-		 *  \param    center:  A pointer to a point indicating the point around which dstrect will be rotated (if NULL, rotation will be done around dstrect.w/2, dstrect.h/2).
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction.
-		 *  \param    flip:    An Flip value stating which flipping actions should be performed on the texture.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyEx(const Rect* src, const Rect* dst, const Point* center, double angle = 0.0, Flip flipType = Flip::NONE);
-
-		/**
-		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by an angle around the given center.
-		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated.
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyExF(const Rect& src, const FRect& dst, const FPoint& center, double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
-		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyExF(const Rect& src, const FRect& dst, double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy the texture to the current rendering target, rotating it by an angle around the given center.
-		 *
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated.
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyExF(const FRect& dst, const FPoint& center, double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy the texture to the current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2
-		 *
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyExF(const FRect& dst, double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy a portion of the texture to the entire current rendering target, rotating it by an angle around the given center
-		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated.
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyExF_Fill(const Rect& src, const FPoint& center, double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy a portion of the texture to the entire current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
-		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyExF_Fill(const Rect& src, double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy the texture to the entire current rendering target, rotating it by an angle around the given center.
-		 *
-		 *  \param    center: A reference to a point indicating the point around which dstrect will be rotated.
-		 *  \param    angle:  An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:   A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyExF_Fill(const FPoint& center, double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy the texture to the entire current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
-		 *
-		 *  \param    angle: An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:  A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyExF_Fill(double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by angle around the given center.
-		 *
-		 *  \param    srcrect: A pointer to the source rectangle, or NULL for the entire texture.
-		 *  \param    dstrect: A pointer to the destination rectangle, or NULL for the entire rendering target.
-		 *  \param    center:  A pointer to a point indicating the point around which dstrect will be rotated (if NULL, rotation will be done around dstrect.w/2, dstrect.h/2).
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction.
-		 *  \param    flip:    An Flip value stating which flipping actions should be performed on the texture.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		int CopyExF(const Rect* src, const FRect* dst, const FPoint* center, double angle = 0.0, Flip flipType = Flip::NONE);
 
 		/**
 		 *  \brief    Query the format of a texture

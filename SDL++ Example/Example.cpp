@@ -11,7 +11,7 @@ int main(int argc, char* argv[]) {
 
 	Input input;
 
-	Mouse& mouse = input.mouse;
+	Point& mouse = input.mouse;
 
 	Window w;
 	Renderer r;
@@ -27,17 +27,17 @@ int main(int argc, char* argv[]) {
 
 	// Listeners are easier than Observers since they use lamdas/function objects rather than inheritence.
 	// This is slower at runtime, but a lot faster to write.
-	EventListener toggle_visibility = {[&](const Event& e) {
+	Listener<const Event&> toggle_visibility = {[&](const Event& e) {
 		if (e.button.button == (Uint8)Button::RIGHT)
 			boxVisible = !boxVisible;
-	}};
-	input.RegisterTypedEventListener(Event::Type::MOUSEBUTTONDOWN, toggle_visibility);
+	} };
+	input.RegisterEventType(Event::Type::MOUSEBUTTONDOWN, toggle_visibility);
 
 	for (int frame = 0; input.running; frame++) {
 		input.Update();
 
-		if (mouse.GetButton(Button::LEFT))
-			rect.pos = mouse.pos;
+		if (input.button(Button::LEFT))
+			rect.pos = mouse;
 
 		r.SetDrawColour(VERY_DARK_BLUE).Clear();
 		if(boxVisible) r.SetDrawColour(WHITE).FillRect(rect);

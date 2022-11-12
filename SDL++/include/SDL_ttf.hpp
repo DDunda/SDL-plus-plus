@@ -14,7 +14,7 @@ namespace SDL::TTF {
        byteswapped.  A UNICODE BOM character in a string will override
        this setting for the remainder of that string.
     */
-    void ByteSwappedUNICODE(int swapped);
+    void ByteSwappedUNICODE(bool swapped);
 
     // Initialize the TTF engine - returns 0 if successful, -1 on error
     int Init();
@@ -91,8 +91,8 @@ namespace SDL::TTF {
 
         // Get the font face attributes, if any
         int FontFaceIsFixedWidth();
-        char* FontFaceFamilyName();
-        char* FontFaceStyleName();
+        const char* FontFaceFamilyName();
+        const char* FontFaceStyleName();
 
         // Check wether a glyph is provided by the font or not
         bool GlyphIsProvided(Uint16 ch);

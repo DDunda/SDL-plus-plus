@@ -4,7 +4,7 @@
 #include "audio.hpp"
 #include "blendmode.hpp"
 #include "error.hpp"
-#include "events.hpp"
+#include "input.hpp"
 #include "image.hpp"
 #include "pixels.hpp"
 #include "ray.hpp"

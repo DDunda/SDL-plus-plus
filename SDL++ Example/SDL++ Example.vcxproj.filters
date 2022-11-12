@@ -15,8 +15,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\SDL++\src\SDL.cpp">
-      <Filter>Resource Files</Filter>
+    <ClCompile Include="..\SDL++\src\*.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Example.cpp">
       <Filter>Source Files</Filter>

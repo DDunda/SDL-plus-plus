@@ -2,7 +2,7 @@
 
 namespace SDL::TTF {
     const Version* Linked_Version() { return (Version*)TTF_Linked_Version(); }
-    void ByteSwappedUNICODE(int swapped) { TTF_ByteSwappedUNICODE(swapped); }
+    void ByteSwappedUNICODE(bool swapped) { TTF_ByteSwappedUNICODE((SDL_bool)swapped); }
     int Init() { return TTF_Init(); }
 
     Font::Font(TTF_Font* font, bool free) : font(font), free(free&& font != NULL) {}
@@ -34,8 +34,8 @@ namespace SDL::TTF {
     long Font::FontFaces() { return TTF_FontFaces(font); }
 
     int Font::FontFaceIsFixedWidth() { return TTF_FontFaceIsFixedWidth(font); }
-    char* Font::FontFaceFamilyName() { return TTF_FontFaceFamilyName(font); }
-    char* Font::FontFaceStyleName() { return TTF_FontFaceStyleName(font); }
+    const char* Font::FontFaceFamilyName() { return TTF_FontFaceFamilyName(font); }
+    const char* Font::FontFaceStyleName() { return TTF_FontFaceStyleName(font); }
 
     bool Font::GlyphIsProvided(Uint16 ch) { return TTF_GlyphIsProvided(font, ch); }
 

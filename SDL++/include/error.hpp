@@ -19,7 +19,7 @@ namespace SDL {
 	 *
 	 *  \return    A pointer to the last error message that was set
 	 */
-	static const char* GetError();
+	const char* GetError();
 
 	// Clear the error message for the current thread
 	static void ClearError();

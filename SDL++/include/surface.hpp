@@ -23,7 +23,9 @@ namespace SDL {
 		// Evaluates to true if the surface needs to be locked before access.
 		bool MustLock() { return (surface->flags & SDL_RLEACCEL) != 0; }
 
-		Surface(SDL_Surface* surface = NULL, bool free = false) : surface(surface), freeSurface(free && surface != NULL) {}
+		Surface(Surface&& _surface) : surface(_surface.surface), freeSurface(_surface.freeSurface) { _surface.surface = NULL; _surface.freeSurface = false; }
+
+		Surface(SDL_Surface* _surface = NULL, bool free = false) : surface(_surface), freeSurface(free && _surface != NULL) {}
 
 		/**
 		 *  \brief    Allocate and free an RGB surface.
@@ -66,6 +68,19 @@ namespace SDL {
 		Surface(const char* file) : Surface(SDL_RWFromFile(file, "rb"), true) {}
 
 		~Surface() { if(freeSurface) SDL_FreeSurface(surface); }
+
+		Surface& operator=(Surface&& other)
+		{
+			if (this != &other)
+			{
+				if(freeSurface) SDL_FreeSurface(surface);
+				surface = other.surface;
+				freeSurface = other.freeSurface;
+				other.surface = NULL;
+				other.freeSurface = false;
+			}
+			return *this;
+		}
 
 		/**
 		 *  \brief    Set the palette used by a surface.

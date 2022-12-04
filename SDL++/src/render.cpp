@@ -257,10 +257,15 @@ void* Renderer::GetMetalCommandEncoder() { return SDL_RenderGetMetalCommandEncod
 
 Texture::Texture() : Texture(NULL, false) {}
 Texture::Texture(Texture& txt) : Texture(txt.texture, false) {}
-Texture::Texture(Texture&& txt) noexcept : Texture(txt.texture, txt.freeTexture) { txt.freeTexture = false; }
-Texture& Texture::operator=(Texture that) {
-	texture = that.texture;
-	freeTexture = false;
+Texture::Texture(Texture&& txt) noexcept : Texture(txt.texture, txt.freeTexture) { txt.texture = NULL; txt.freeTexture = false; }
+Texture& Texture::operator=(Texture&& that) {
+	if (texture != that.texture) {
+		if(freeTexture) SDL_DestroyTexture(texture);
+		texture = that.texture;
+	}
+	freeTexture = that.freeTexture;
+	that.texture = NULL;
+	that.freeTexture = false;
 	return *this;
 }
 

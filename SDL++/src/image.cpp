@@ -11,9 +11,9 @@ namespace SDL::IMG {
 	Surface Load_RW(SDL_RWops* src, int freesrc) { return Surface(IMG_Load_RW(src, freesrc), true); }
 
 #if SDL_VERSION_ATLEAST(2,0,0)
-	Texture&& LoadTexture(Renderer& renderer, const char* file) { return Texture(IMG_LoadTexture(renderer.renderer, file), true); }
-	Texture&& LoadTexture_RW(Renderer& renderer, SDL_RWops* src, int freesrc) { return Texture(IMG_LoadTexture_RW(renderer.renderer, src, freesrc), true); }
-	Texture&& LoadTextureTyped_RW(Renderer& renderer, SDL_RWops* src, int freesrc, const char* type) { return Texture(IMG_LoadTextureTyped_RW(renderer.renderer, src, freesrc, type), true); }
+	Texture LoadTexture(Renderer& renderer, const char* file) { return Texture(IMG_LoadTexture(renderer.renderer, file), true); }
+	Texture LoadTexture_RW(Renderer& renderer, SDL_RWops* src, int freesrc) { return Texture(IMG_LoadTexture_RW(renderer.renderer, src, freesrc), true); }
+	Texture LoadTextureTyped_RW(Renderer& renderer, SDL_RWops* src, int freesrc, const char* type) { return Texture(IMG_LoadTextureTyped_RW(renderer.renderer, src, freesrc, type), true); }
 #endif /* SDL 2.0 */
 
 	bool isICO (SDL_RWops* src) { return IMG_isICO (src); }

@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef SDLpp_pixels_h_
+#define SDLpp_pixels_h_
+
 #include <SDL_pixels.h>
 #include <vector>
 
@@ -210,3 +213,5 @@ namespace SDL {
 	// Calculate a 256 entry gamma ramp for a gamma value.
 	static Uint16* CalculateGammaRamp(float gamma);
 }
+
+#endif

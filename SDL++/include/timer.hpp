@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef SDLpp_timer_h_
+#define SDLpp_timer_h_
+
 #include<SDL_timer.h>
 
 namespace SDL {
@@ -63,3 +66,5 @@ namespace SDL {
 		~Timer() { SDL_RemoveTimer(id); }
 	};
 }
+
+#endif

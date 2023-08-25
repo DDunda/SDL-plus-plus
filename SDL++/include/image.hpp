@@ -1,3 +1,8 @@
+#pragma once
+
+#ifndef SDLpp_image_h_
+#define SDLpp_image_h_
+
 #include <SDL_image.h>
 #include "render.hpp"
 #include "error.hpp"
@@ -91,3 +96,5 @@ namespace SDL {
         const char* GetError();
 	}
 }
+
+#endif

@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef SDLpp_blendmode_h_
+#define SDLpp_blendmode_h_
+
 #include <SDL_blendmode.h>
 
 namespace SDL {
@@ -61,3 +64,5 @@ namespace SDL {
 		BlendOperation alphaOperation
 	);
 }
+
+#endif

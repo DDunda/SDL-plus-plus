@@ -1,3 +1,8 @@
+#pragma once
+
+#ifndef SDLpp_scancode_h_
+#define SDLpp_scancode_h_
+
 #include <SDL_scancode.h>
 namespace SDL {
 	enum class Scancode
@@ -353,3 +358,5 @@ namespace SDL {
 		NUM_SCANCODES = SDL_NUM_SCANCODES // not a key, just marks the number of scancodes for array bounds
 	};
 }
+
+#endif

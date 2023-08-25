@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef SDLpp_version_h_
+#define SDLpp_version_h_
+
 #include <SDL_version.h>
 
 namespace SDL {
@@ -121,3 +124,5 @@ namespace SDL {
 	 */
 	int GetRevisionNumber();
 }
+
+#endif

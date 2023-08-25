@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef SDLpp_audio_h_
+#define SDLpp_audio_h_
+
 #include <SDL_audio.h>
 
 namespace SDL {
@@ -674,3 +677,5 @@ namespace SDL {
      */
     void MixAudioFormat(Uint8* dst, const Uint8* src, AudioFormat format, Uint32 len, int volume = SDL_MIX_MAXVOLUME);
 }
+
+#endif

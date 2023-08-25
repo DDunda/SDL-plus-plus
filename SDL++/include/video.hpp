@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef SDLpp_video_h_
+#define SDLpp_video_h_
+
 #include <SDL_video.h>
 #include "rect.hpp"
 #include "surface.hpp"
@@ -1052,3 +1055,5 @@ namespace SDL {
 		static void SwapWindow(Window& window) { SDL_GL_SwapWindow(window.window); }
 	}
 }
+
+#endif

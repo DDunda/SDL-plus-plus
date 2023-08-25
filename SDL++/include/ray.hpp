@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef SDLpp_ray_h_
+#define SDLpp_ray_h_
+
 #include "rect.hpp"
 #include <string>
 #include <ostream>
@@ -31,3 +34,5 @@ namespace SDL {
 		friend std::ostream& operator<<(std::ostream& os, const Ray& r);
 	};
 }
+
+#endif

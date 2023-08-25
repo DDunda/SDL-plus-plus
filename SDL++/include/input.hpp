@@ -1,3 +1,8 @@
+#pragma once
+
+#ifndef SDLpp_input_h_
+#define SDLpp_input_h_
+
 #include <bitset>
 #include "observer.hpp"
 
@@ -56,3 +61,5 @@ namespace SDL {
 		void Update();
 	};
 }
+
+#endif

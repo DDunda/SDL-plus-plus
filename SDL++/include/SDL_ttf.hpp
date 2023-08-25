@@ -1,3 +1,8 @@
+#pragma once
+
+#ifndef SDLpp_TTF_h_
+#define SDLpp_TTF_h_
+
 #include <SDL_ttf.h>
 #include "rect.hpp"
 #include "version.hpp"
@@ -191,3 +196,5 @@ namespace SDL::TTF {
     // Check if the TTF engine is initialized
     bool WasInit(void);
 }
+
+#endif

@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef SDLpp_surface_h_
+#define SDLpp_surface_h_
+
 #include <SDL_surface.h>
 #include "rect.hpp"
 #include "blendmode.hpp"
@@ -455,3 +458,5 @@ namespace SDL {
 		}
 	}
 }
+
+#endif

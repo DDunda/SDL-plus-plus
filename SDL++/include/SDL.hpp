@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef SDLpp_h_
+#define SDLpp_h_
+
 #include <SDL.h>
 #include "audio.hpp"
 #include "blendmode.hpp"
@@ -49,3 +52,5 @@ namespace SDL {
 		}
 	};
 }
+
+#endif

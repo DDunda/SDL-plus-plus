@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef SDLpp_render_h_
+#define SDLpp_render_h_
+
 #include <tuple>
 #include <SDL_render.h>
 #include <stack>
@@ -1443,3 +1446,5 @@ namespace SDL {
 		int UnbindTexture(Texture& texture);
 	}
 }
+
+#endif

@@ -1,3 +1,8 @@
+#pragma once
+
+#ifndef SDLpp_mouse_h_
+#define SDLpp_mouse_h_
+
 #include <SDL_mouse.h>
 #include "video.hpp"
 
@@ -238,3 +243,5 @@ namespace SDL {
 		X2MASK = SDL_BUTTON_X2MASK
 	};
 }
+
+#endif

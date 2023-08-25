@@ -1,3 +1,8 @@
+#pragma once
+
+#ifndef SDLpp_observer_h_
+#define SDLpp_observer_h_
+
 #include <vector>
 #include <map>
 #include <functional>
@@ -47,3 +52,5 @@ public:
 	Listener(std::function<void(Ts...)> function) : function(function) {};
 	void Notify(Ts... args) { function(args...); }
 };
+
+#endif SDLpp_observer_h_

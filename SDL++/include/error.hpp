@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef SDLpp_error_h_
+#define SDLpp_error_h_
+
 #include <SDL_error.h>
 
 namespace SDL {
@@ -24,3 +27,5 @@ namespace SDL {
 	// Clear the error message for the current thread
 	static void ClearError();
 }
+
+#endif

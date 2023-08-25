@@ -1,3 +1,8 @@
+#pragma once
+
+#ifndef SDLpp_events_h_
+#define SDLpp_events_h_
+
 #include <SDL_events.h>
 
 namespace SDL {
@@ -304,3 +309,5 @@ namespace SDL {
 		Uint32 RegisterEvents(int numevents) { return SDL_RegisterEvents(numevents); }
 	};
 }
+
+#endif

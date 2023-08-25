@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef SDLpp_rect_h_
+#define SDLpp_rect_h_
+
 #include <SDL_rect.h>
 #include <string>
 #include <ostream>
@@ -414,3 +417,5 @@ namespace SDL {
 	std::ostream& operator<<(std::ostream& os, const FRect& r);
 	std::ostream& operator<<(std::ostream& os, const Rect& r);
 }
+
+#endif

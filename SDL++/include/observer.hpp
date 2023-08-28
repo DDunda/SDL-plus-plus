@@ -36,8 +36,11 @@ public:
 		o.subjects.push_back(this);
 	}
 	void Unregister(Observer<Ts...>& o) {
-		observers.erase(std::remove(observers.begin(), observers.end(), &o));
-		o.subjects.erase(std::remove(o.subjects.begin(), o.subjects.end(), this));
+		auto it1 = std::find(observers.begin(), observers.end(), &o);
+		if (it1 != observers.end()) observers.erase(it1);
+
+		auto it2 = std::find(o.subjects.begin(), o.subjects.end(), this);
+		if (it2 != o.subjects.end()) o.subjects.erase(it2);
 	}
 	virtual void Notify(Ts... args) {
 		for (Observer<Ts...>* o : observers) o->Notify(args...);

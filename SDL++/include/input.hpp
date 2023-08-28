@@ -17,48 +17,54 @@ namespace SDL {
 	typedef Subject<const Event&> InputSubject;
 	typedef Observer<const Event&> InputObserver;
 
-	struct Input : public InputSubject {
-		std::map<Event::Type, InputSubject> typed_subjects;
+	class Input : public InputSubject {
+		static Input* instance;
+	public:
+		static std::map<Event::Type, InputSubject*> typed_subjects;
 
-		bool running = true;
-		Point prev_mouse;
-		Point mouse;
-		Point windowSize;
+		static bool running;
+		static Point prev_mouse;
+		static Point mouse;
 
-		std::map<Event::Type, Uint32> event_at;
+		static std::map<Event::Type, Uint32> event_at;
 
-		Uint32 button_up_at[5]{ 0 };
-		Uint32 button_down_at[5]{ 0 };
-		std::map<Scancode, Uint32> scancode_up_at;
-		std::map<Scancode, Uint32> scancode_down_at;
+		static Uint32 button_up_at[5];
+		static Uint32 button_down_at[5];
+		static std::map<Scancode, Uint32> scancode_up_at;
+		static std::map<Scancode, Uint32> scancode_down_at;
 
-		bool prev_buttons[5]{ false };
-		bool buttons[5]{ false };
-		std::bitset<SDL_NUM_SCANCODES> prev_scancodes;
-		std::bitset<SDL_NUM_SCANCODES> scancodes;
+		static bool prev_buttons[5];
+		static bool buttons[5];
+		static std::bitset<SDL_NUM_SCANCODES> prev_scancodes;
+		static std::bitset<SDL_NUM_SCANCODES> scancodes;
 
-		bool button(Button i) const;
-		bool buttonDown(Button i) const;
-		bool buttonUp(Button i) const;
+		static bool button(Button i);
+		static bool buttonDown(Button i);
+		static bool buttonUp(Button i);
 
 		// How long a button has been held for, or was last held for
-		Uint32 buttonDuration(Button i) const;
+		static Uint32 buttonDuration(Button i);
 
-		bool scancode(Scancode i) const;
-		bool scancodeDown(Scancode i) const;
-		bool scancodeUp(Scancode i) const;
+		static bool scancode(Scancode i);
+		static bool scancodeDown(Scancode i);
+		static bool scancodeUp(Scancode i);
 
 		// How long a scancode has been held for, or was last held for
-		Uint32 scancodeDuration(Scancode i);
+		static Uint32 scancodeDuration(Scancode i);
 
-		void RegisterEventType(Event::Type type, InputObserver& observer);
-		void UnregisterEventType(Event::Type type, InputObserver& observer);
+		static void RegisterEventType(Event::Type type, InputObserver& observer);
+		static void UnregisterEventType(Event::Type type, InputObserver& observer);
 
-		void UpdateBuffers();
-		void Notify(Event e);
-		void ProcessEvent(Event e);
+		static void RegisterUntyped(InputObserver& observer);
+		static void UnregisterUntyped(InputObserver& observer);
 
-		void Update();
+		static void UpdateBuffers();
+		static void Notify(Event e);
+		static void ProcessEvent(Event e);
+
+		static int Init();
+		static int Quit();
+		static void Update();
 	};
 }
 

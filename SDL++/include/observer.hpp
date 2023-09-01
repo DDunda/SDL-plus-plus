@@ -17,7 +17,7 @@ protected:
 	std::vector<Subject<Ts...>*> subjects;
 public:
 	~Observer() {
-		for (Subject<Ts...>* subject : subjects) subject->Unregister(*this);
+		for (auto subject : subjects) subject->Unregister(*this);
 	}
 
 	virtual void Notify(Ts... args) = 0;
@@ -29,7 +29,7 @@ protected:
 	std::vector<Observer<Ts...>*> observers;
 public:
 	~Subject() {
-		for (Observer<Ts...>* o : observers) Unregister(*o);
+		for (auto o : observers) Unregister(*o);
 	}
 	void Register(Observer<Ts...>& o) {
 		observers.push_back(&o);
@@ -43,7 +43,7 @@ public:
 		if (it2 != o.subjects.end()) o.subjects.erase(it2);
 	}
 	virtual void Notify(Ts... args) {
-		for (Observer<Ts...>* o : observers) o->Notify(args...);
+		for (auto o : observers) o->Notify(args...);
 	}
 };
 

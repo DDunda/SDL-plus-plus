@@ -13,7 +13,7 @@ Renderer& Renderer::operator=(Renderer that)
 
 Renderer::Renderer(SDL_Renderer* renderer, bool free) : renderer(renderer), freeRenderer(free && renderer != NULL) {}
 Renderer::Renderer(Window& window, Uint32 flags, int index) : Renderer(SDL_CreateRenderer(window.window, index, flags), true) {}
-Renderer::Renderer(Surface& surface) : Renderer(SDL_CreateSoftwareRenderer(surface.surface), true) {}
+Renderer::Renderer(Surface& surface) : Renderer(SDL_CreateSoftwareRenderer(surface.surface.get()), true) {}
 Renderer::Renderer(Window& window) : Renderer(SDL_GetRenderer(window.window), true) {}
 Renderer::~Renderer() { if (freeRenderer) SDL_DestroyRenderer(renderer); }
 
@@ -271,7 +271,7 @@ Texture& Texture::operator=(Texture&& that) {
 
 Texture::Texture(SDL_Texture* texture, bool free) : texture(texture), freeTexture(free && texture != NULL) {}
 Texture::Texture(Renderer& renderer, const Point& size, Access access, Uint32 format) : Texture(SDL_CreateTexture(renderer.renderer, format, (SDL_TextureAccess)access, size.x, size.y)) {}
-Texture::Texture(Renderer& renderer, Surface& surface) : Texture(SDL_CreateTextureFromSurface(renderer.renderer, surface.surface)) {}
+Texture::Texture(Renderer& renderer, Surface& surface) : Texture(SDL_CreateTextureFromSurface(renderer.renderer, surface.surface.get())) {}
 
 Texture::~Texture() { if (freeTexture) SDL_DestroyTexture(texture); }
 
@@ -279,15 +279,15 @@ int Texture::LockRect(const Rect& rect, void*& pixels, int& pitch) { return SDL_
 int Texture::Lock(void*& pixels, int& pitch) { return SDL_LockTexture(texture, NULL, &pixels, &pitch); }
 
 int Texture::LockRectToSurface(const Rect& rect, Surface& surface) {
-	surface.~Surface();
-	int returnVal = SDL_LockTextureToSurface(texture, &rect.rect, &surface.surface);
-	surface.freeSurface = surface.surface != NULL;
+	SDL_Surface* surf;
+	int returnVal = SDL_LockTextureToSurface(texture, &rect.rect, &surf);
+	surface = Surface::FromPtr(surf);
 	return returnVal;
 }
 int Texture::LockToSurface(Surface& surface) {
-	surface.~Surface();
-	int returnVal = SDL_LockTextureToSurface(texture, NULL, &surface.surface);
-	surface.freeSurface = surface.surface != NULL;
+	SDL_Surface* surf;
+	int returnVal = SDL_LockTextureToSurface(texture, NULL, &surf);
+	surface = Surface::FromPtr(surf);
 	return returnVal;
 }
 

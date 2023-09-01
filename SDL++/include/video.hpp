@@ -361,7 +361,7 @@ namespace SDL {
 		 *
 		 *  \param    icon The icon for the window.
 		 */
-		Window& SetIcon(Surface& icon) { SDL_SetWindowIcon(window, icon.surface); return *this; }
+		Window& SetIcon(Surface& icon) { SDL_SetWindowIcon(window, icon.surface.get()); return *this; }
 
 		/**
 		 *  \brief    Associate an arbitrary named pointer with this window.
@@ -639,7 +639,7 @@ namespace SDL {
 		 *
 		 *  \warning  You may not combine this with 3D or the rendering API on this window.
 		 */
-		Surface GetSurface() { return SDL_GetWindowSurface(window); }
+		Surface GetSurface() { return Surface::FromUnownedPtr(SDL_GetWindowSurface(window)); }
 		/**
 		 *  \brief    Get the SDL surface associated with the window.
 		 *
@@ -649,9 +649,7 @@ namespace SDL {
 		 *  \warning  You may not combine this with 3D or the rendering API on this window.
 		 */
 		Window& GetSurface(Surface& surface) {
-			surface.~Surface();
-			surface.surface = SDL_GetWindowSurface(window);
-			surface.freeSurface = false;
+			surface = Surface::FromUnownedPtr(SDL_GetWindowSurface(window));
 			return *this;
 		}
 

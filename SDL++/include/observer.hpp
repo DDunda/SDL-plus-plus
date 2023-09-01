@@ -53,6 +53,10 @@ protected:
 	std::function<void(Ts...)> function;
 public:
 	Listener(std::function<void(Ts...)> function) : function(function) {};
+	Listener(std::function<void(Ts...)> function, Subject<Ts...>& subject) : function(function)
+	{
+		subject.Register(*this);
+	};
 	void Notify(Ts... args) { function(args...); }
 };
 

@@ -5,7 +5,6 @@ using namespace SDL;
 Input* Input::instance = NULL;
 std::map<Event::Type, InputSubject*> Input::typed_subjects = {};
 
-bool Input::running = true;
 Point Input::prev_mouse;
 Point Input::mouse;
 
@@ -44,19 +43,29 @@ Uint32 Input::scancodeDuration(Scancode i) {
 }
 
 void Input::RegisterEventType(Event::Type type, InputObserver& observer) {
-	if (!typed_subjects.contains(type))
+	if (!typed_subjects.count(type))
 	{
 		typed_subjects[type] = new InputSubject();
 	}
 	typed_subjects[type]->Register(observer);
 }
 void Input::UnregisterEventType(Event::Type type, InputObserver& observer) {
-	if (!typed_subjects.contains(type)) return;
+	if (!typed_subjects.count(type)) return;
 	typed_subjects[type]->Unregister(observer);
 }
 
 void Input::RegisterUntyped(InputObserver& observer) { instance->Register(observer); }
 void Input::UnregisterUntyped(InputObserver& observer) { instance->Unregister(observer); }
+
+InputSubject& Input::GetTypedEventSubject(Event::Type type)
+{
+	if (!typed_subjects.count(type))
+	{
+		return *(typed_subjects[type] = new InputSubject());
+	}
+	
+	return *(typed_subjects[type]);
+}
 
 void Input::UpdateBuffers() {
 	prev_mouse = mouse;
@@ -65,7 +74,7 @@ void Input::UpdateBuffers() {
 }
 
 void Input::Notify(Event e) {
-	if (typed_subjects.contains(e.type))
+	if (typed_subjects.count(e.type))
 		typed_subjects[e.type]->Notify(e);
 
 	((InputSubject*)instance)->Notify(e);
@@ -75,10 +84,6 @@ void Input::ProcessEvent(Event e) {
 	Uint32 timestamp = e.common.timestamp;
 
 	switch (e.type) {
-	case Event::Type::QUIT:
-		running = false;
-		break;
-
 	case Event::Type::MOUSEMOTION:
 		mouse = { e.motion.x, e.motion.y };
 		break;

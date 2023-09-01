@@ -22,7 +22,6 @@ namespace SDL {
 	public:
 		static std::map<Event::Type, InputSubject*> typed_subjects;
 
-		static bool running;
 		static Point prev_mouse;
 		static Point mouse;
 
@@ -57,6 +56,8 @@ namespace SDL {
 
 		static void RegisterUntyped(InputObserver& observer);
 		static void UnregisterUntyped(InputObserver& observer);
+
+		static InputSubject& GetTypedEventSubject(Event::Type type);
 
 		static void UpdateBuffers();
 		static void Notify(Event e);

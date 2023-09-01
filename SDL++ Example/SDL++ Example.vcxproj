@@ -175,7 +175,18 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\SDL++\src\*.cpp" />
+    <ClCompile Include="..\SDL++\src\audio.cpp" />
+    <ClCompile Include="..\SDL++\src\blendmode.cpp" />
+    <ClCompile Include="..\SDL++\src\error.cpp" />
+    <ClCompile Include="..\SDL++\src\image.cpp" />
+    <ClCompile Include="..\SDL++\src\input.cpp" />
+    <ClCompile Include="..\SDL++\src\mouse.cpp" />
+    <ClCompile Include="..\SDL++\src\pixels.cpp" />
+    <ClCompile Include="..\SDL++\src\ray.cpp" />
+    <ClCompile Include="..\SDL++\src\rect.cpp" />
+    <ClCompile Include="..\SDL++\src\render.cpp" />
+    <ClCompile Include="..\SDL++\src\SDL_ttf.cpp" />
+    <ClCompile Include="..\SDL++\src\version.cpp" />
     <ClCompile Include="Example.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

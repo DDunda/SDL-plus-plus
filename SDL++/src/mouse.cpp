@@ -7,7 +7,7 @@ Cursor::Cursor(SDL_Cursor* cursor, bool free)
 Cursor::Cursor(const Uint8* data, const Uint8* mask, int w, int h, int hot_x, int hot_y)
 	: Cursor(SDL_CreateCursor(data, mask, w, h, hot_x, hot_y), true) {}
 Cursor::Cursor(Surface& surface, int hot_x, int hot_y)
-	: Cursor(SDL_CreateColorCursor(surface.surface, hot_x, hot_y), true) {}
+	: Cursor(SDL_CreateColorCursor(surface.surface.get(), hot_x, hot_y), true) { }
 Cursor::Cursor(SystemCursor id)
 	: Cursor(SDL_CreateSystemCursor((SDL_SystemCursor)id), true) {}
 Cursor::~Cursor() { if (freeCursor) SDL_FreeCursor(cursor); }

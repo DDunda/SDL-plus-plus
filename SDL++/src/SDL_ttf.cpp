@@ -52,24 +52,24 @@ namespace SDL::TTF {
     int Font::SizeUTF8(const char* text, int* w, int* h) { return TTF_SizeUTF8(font, text, w, h); }
     int Font::SizeUNICODE(const Uint16* text, int* w, int* h) { return TTF_SizeUNICODE(font, text, w, h); }
 
-    Surface Font::RenderText_Solid(const char* text, Colour fg) { return { TTF_RenderText_Solid(font, text, fg), true }; }
-    Surface Font::RenderUTF8_Solid(const char* text, Colour fg) { return { TTF_RenderUTF8_Solid(font, text, fg), true }; }
-    Surface Font::RenderUNICODE_Solid(const Uint16* text, Colour fg) { return { TTF_RenderUNICODE_Solid(font, text, fg), true }; }
-    Surface Font::RenderGlyph_Solid(Uint16 ch, Colour fg) { return { TTF_RenderGlyph_Solid(font, ch, fg), true }; }
+    Surface Font::RenderText_Solid(const char* text, Colour fg) { return Surface::FromPtr(TTF_RenderText_Solid(font, text, fg)); }
+    Surface Font::RenderUTF8_Solid(const char* text, Colour fg) { return Surface::FromPtr(TTF_RenderUTF8_Solid(font, text, fg)); }
+    Surface Font::RenderUNICODE_Solid(const Uint16* text, Colour fg) { return Surface::FromPtr(TTF_RenderUNICODE_Solid(font, text, fg)); }
+    Surface Font::RenderGlyph_Solid(Uint16 ch, Colour fg) { return Surface::FromPtr(TTF_RenderGlyph_Solid(font, ch, fg)); }
 
-    Surface Font::RenderText_Shaded(const char* text, Colour fg, Colour bg) { return { TTF_RenderText_Shaded(font, text, fg, bg), true }; }
-    Surface Font::RenderUTF8_Shaded(const char* text, Colour fg, Colour bg) { return { TTF_RenderUTF8_Shaded(font, text, fg, bg), true }; }
-    Surface Font::RenderUNICODE_Shaded(const Uint16* text, Colour fg, Colour bg) { return { TTF_RenderUNICODE_Shaded(font, text, fg, bg), true }; }
-    Surface Font::RenderGlyph_Shaded(Uint16 ch, Colour fg, Colour bg) { return { TTF_RenderGlyph_Shaded(font, ch, fg, bg), true }; }
+    Surface Font::RenderText_Shaded(const char* text, Colour fg, Colour bg) { return Surface::FromPtr(TTF_RenderText_Shaded(font, text, fg, bg)); }
+    Surface Font::RenderUTF8_Shaded(const char* text, Colour fg, Colour bg) { return Surface::FromPtr(TTF_RenderUTF8_Shaded(font, text, fg, bg)); }
+    Surface Font::RenderUNICODE_Shaded(const Uint16* text, Colour fg, Colour bg) { return Surface::FromPtr(TTF_RenderUNICODE_Shaded(font, text, fg, bg)); }
+    Surface Font::RenderGlyph_Shaded(Uint16 ch, Colour fg, Colour bg) { return Surface::FromPtr(TTF_RenderGlyph_Shaded(font, ch, fg, bg)); }
 
-    Surface Font::RenderText_Blended(const char* text, Colour fg) { return { TTF_RenderText_Blended(font, text, fg), true }; }
-    Surface Font::RenderUTF8_Blended(const char* text, Colour fg) { return { TTF_RenderUTF8_Blended(font, text, fg), true }; }
-    Surface Font::RenderUNICODE_Blended(const Uint16* text, Colour fg) { return { TTF_RenderUNICODE_Blended(font, text, fg), true }; }
-    Surface Font::RenderGlyph_Blended(Uint16 ch, Colour fg) { return { TTF_RenderGlyph_Blended(font, ch, fg), true }; }
+    Surface Font::RenderText_Blended(const char* text, Colour fg) { return Surface::FromPtr(TTF_RenderText_Blended(font, text, fg)); }
+    Surface Font::RenderUTF8_Blended(const char* text, Colour fg) { return Surface::FromPtr(TTF_RenderUTF8_Blended(font, text, fg)); }
+    Surface Font::RenderUNICODE_Blended(const Uint16* text, Colour fg) { return Surface::FromPtr(TTF_RenderUNICODE_Blended(font, text, fg)); }
+    Surface Font::RenderGlyph_Blended(Uint16 ch, Colour fg) { return Surface::FromPtr(TTF_RenderGlyph_Blended(font, ch, fg)); }
 
-    Surface Font::RenderText_Blended_Wrapped(const char* text, Colour fg, Uint32 wrapLength) { return { TTF_RenderText_Blended_Wrapped(font, text, fg, wrapLength), true }; }
-    Surface Font::RenderUTF8_Blended_Wrapped(const char* text, Colour fg, Uint32 wrapLength) { return { TTF_RenderUTF8_Blended_Wrapped(font, text, fg, wrapLength), true }; }
-    Surface Font::RenderUNICODE_Blended_Wrapped(const Uint16* text, Colour fg, Uint32 wrapLength) { return { TTF_RenderUNICODE_Blended_Wrapped(font, text, fg, wrapLength), true }; }
+    Surface Font::RenderText_Blended_Wrapped(const char* text, Colour fg, Uint32 wrapLength) { return Surface::FromPtr(TTF_RenderText_Blended_Wrapped(font, text, fg, wrapLength)); }
+    Surface Font::RenderUTF8_Blended_Wrapped(const char* text, Colour fg, Uint32 wrapLength) { return Surface::FromPtr(TTF_RenderUTF8_Blended_Wrapped(font, text, fg, wrapLength)); }
+    Surface Font::RenderUNICODE_Blended_Wrapped(const Uint16* text, Colour fg, Uint32 wrapLength) { return Surface::FromPtr(TTF_RenderUNICODE_Blended_Wrapped(font, text, fg, wrapLength)); }
 
     int Font::GetFontKerningSizeGlyphs(Uint16 previous_ch, Uint16 ch) { return TTF_GetFontKerningSizeGlyphs(font, previous_ch, ch); }
 

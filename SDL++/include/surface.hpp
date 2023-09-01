@@ -3,6 +3,8 @@
 #ifndef SDLpp_surface_h_
 #define SDLpp_surface_h_
 
+#include <memory>
+
 #include <SDL_surface.h>
 #include "rect.hpp"
 #include "blendmode.hpp"
@@ -19,16 +21,31 @@ namespace SDL {
 	 *  \note     This structure should be treated as read-only, except for \c pixels,
 	 *            which, if not NULL, contains the raw pixel data for the surface.
 	 */
-	struct Surface {
-		SDL_Surface* surface = NULL;
-		bool freeSurface = false;
+	struct Surface
+	{
+		std::shared_ptr<SDL_Surface> surface = NULL;
+
+		// This is custom destructor for smart pointers that destroys SDL_Surfaces through SDL
+		static void DestroySurface(SDL_Surface* surface) { SDL_FreeSurface(surface); }
+
+		// This is custom destructor for smart pointers that does not destroy the Surface. This is for pointers you do not own
+		static void DontDestroySurface(SDL_Surface* surface) {}
+
+		// This creates a smart pointer to an SDL_Surface with a custom destructor
+		static std::shared_ptr<SDL_Surface> MakeSharedPtr(SDL_Surface* surface) { return std::shared_ptr<SDL_Surface>(surface, DestroySurface); }
+
+		// This creates a Surface from a SDL_Surface pointer, taking ownership of the pointer
+		static Surface FromPtr(SDL_Surface* surface) { return Surface(MakeSharedPtr(surface)); }
+
+		// This creates a Surface from a SDL_Surface pointer, but does not take ownership of the pointer
+		static Surface FromUnownedPtr(SDL_Surface* surface) { return Surface(std::shared_ptr<SDL_Surface>(surface, DontDestroySurface)); }
 
 		// Evaluates to true if the surface needs to be locked before access.
 		bool MustLock() { return (surface->flags & SDL_RLEACCEL) != 0; }
 
-		Surface(Surface&& _surface) : surface(_surface.surface), freeSurface(_surface.freeSurface) { _surface.surface = NULL; _surface.freeSurface = false; }
+		Surface(Surface&& _surface) noexcept : surface(_surface.surface) { _surface.surface = NULL; }
 
-		Surface(SDL_Surface* _surface = NULL, bool free = false) : surface(_surface), freeSurface(free && _surface != NULL) {}
+		Surface(std::shared_ptr<SDL_Surface> _surface = NULL) : surface(_surface) {}
 
 		/**
 		 *  \brief    Allocate and free an RGB surface.
@@ -49,38 +66,34 @@ namespace SDL {
 		 *  \return   If the function runs out of memory, surface will be NULL.
 		 */
 		Surface(Uint32 flags, int width, int height, int depth, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask)
-			: Surface(SDL_CreateRGBSurface(flags, width, height, depth, Rmask, Gmask, Bmask, Amask), true) {}
+			: Surface(MakeSharedPtr(SDL_CreateRGBSurface(flags, width, height, depth, Rmask, Gmask, Bmask, Amask))) {}
 
 		Surface(Uint32 flags, int width, int height, Uint32 format)
-			: Surface(SDL_CreateRGBSurfaceWithFormat(flags, width, height, SDL_BITSPERPIXEL(format), format), true) {}
+			: Surface(MakeSharedPtr(SDL_CreateRGBSurfaceWithFormat(flags, width, height, SDL_BITSPERPIXEL(format), format))) {}
 
 		Surface(void* pixels, int width, int height, int depth, int pitch, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask)
-			: Surface(SDL_CreateRGBSurfaceFrom(pixels, width, height, depth, pitch, Rmask, Gmask, Bmask, Amask), true) {}
+			: Surface(MakeSharedPtr(SDL_CreateRGBSurfaceFrom(pixels, width, height, depth, pitch, Rmask, Gmask, Bmask, Amask))) {}
 
 		Surface(void* pixels, int width, int height, int pitch, Uint32 format)
-			: Surface(SDL_CreateRGBSurfaceWithFormatFrom(pixels, width, height, SDL_BITSPERPIXEL(format), pitch, format), true) {}
+			: Surface(MakeSharedPtr(SDL_CreateRGBSurfaceWithFormatFrom(pixels, width, height, SDL_BITSPERPIXEL(format), pitch, format))) {}
 
 		/**
 		 *  \brief    Load a surface from a seekable SDL data stream (memory or file).
 		 *
 		 *  \note     If \c freesrc is true, the stream will be closed after being read.
 		 */
-		Surface(SDL_RWops* src, bool freesrc) : Surface(SDL_LoadBMP_RW(src,freesrc), true) {}
+		Surface(SDL_RWops* src, bool freesrc)
+			: Surface(MakeSharedPtr(SDL_LoadBMP_RW(src, freesrc))) {}
 
 		// Load a surface from a file.
 		Surface(const char* file) : Surface(SDL_RWFromFile(file, "rb"), true) {}
 
-		~Surface() { if(freeSurface) SDL_FreeSurface(surface); }
-
-		Surface& operator=(Surface&& other)
+		constexpr Surface& operator=(Surface&& other) noexcept
 		{
 			if (this != &other)
 			{
-				if(freeSurface) SDL_FreeSurface(surface);
 				surface = other.surface;
-				freeSurface = other.freeSurface;
 				other.surface = NULL;
-				other.freeSurface = false;
 			}
 			return *this;
 		}
@@ -92,7 +105,7 @@ namespace SDL {
 		 *
 		 *  \return   0, or -1 if the surface format doesn't use a palette.
 		 */
-		int SetPalette(Palette& palette) { return SDL_SetSurfacePalette(surface, palette.palette); }
+		int SetPalette(Palette& palette) { return SDL_SetSurfacePalette(surface.get(), palette.palette); }
 
 		/**
 		 *  \brief    Sets up a surface for directly accessing the pixels.
@@ -111,8 +124,8 @@ namespace SDL {
 		 *
 		 *  \return   LockSurface() returns 0, or -1 if the surface couldn't be locked.
 		 */
-		int Lock() { return SDL_LockSurface(surface); }
-		void Unlock() { SDL_UnlockSurface(surface); }
+		int Lock() { return SDL_LockSurface(surface.get()); }
+		void Unlock() { SDL_UnlockSurface(surface.get()); }
 
 		/**
 		 *  \brief    Save a surface to a seekable SDL data stream (memory or file).
@@ -127,10 +140,10 @@ namespace SDL {
 		 *
 		 *  \return   0 if successful or -1 if there was an error.
 		 */
-		int SaveBMP_RW(SDL_RWops* dst, bool freedst) { return SDL_SaveBMP_RW(surface, dst, freedst); }
+		int SaveBMP_RW(SDL_RWops* dst, bool freedst) { return SDL_SaveBMP_RW(surface.get(), dst, freedst); }
 
 		// Save a surface to a file.
-		int SaveBMP(const char* file) { SDL_SaveBMP_RW(surface, SDL_RWFromFile(file, "wb"), true); }
+		int SaveBMP(const char* file) { return SDL_SaveBMP_RW(surface.get(), SDL_RWFromFile(file, "wb"), true); }
 
 		/**
 		 *  \brief    Sets the RLE acceleration hint for a surface.
@@ -140,7 +153,7 @@ namespace SDL {
 		 *
 		 *  \return   0 on success, or -1 if the surface is not valid
 		 */
-		int SetRLE(int flag) { return SDL_SetSurfaceRLE(surface,flag); }
+		int SetRLE(int flag) { return SDL_SetSurfaceRLE(surface.get(), flag); }
 
 		/**
 		  *  \brief   Sets the colour key (transparent pixel) in a blittable surface.
@@ -152,14 +165,14 @@ namespace SDL {
 		  *
 		  *  \return  0 on success, or -1 if the surface is not valid
 		  */
-		int SetColourKey(int flag, Uint32 key) { return SDL_SetColorKey(surface, flag, key); }
+		int SetColourKey(int flag, Uint32 key) { return SDL_SetColorKey(surface.get(), flag, key); }
 
 		/**
 		 *  \brief    Returns whether the surface has a colour key
 		 *
 		 *  \return   true if the surface has a colour key, or false if the surface is NULL or has no colour key
 		 */
-		bool HasColourKey() { return SDL_HasColorKey(surface); }
+		bool HasColourKey() { return SDL_HasColorKey(surface.get()) == SDL_TRUE; }
 
 		/**
 		 *  \brief    Gets the colour key (transparent pixel) in a blittable surface.
@@ -170,9 +183,7 @@ namespace SDL {
 		 *  \return   0 on success, or -1 if the surface is not valid or colourkey is not
 		 *	          enabled.
 		 */
-		int GetColourKey(Uint32& key) {
-			return SDL_GetColorKey(surface, &key);
-		}
+		int GetColourKey(Uint32& key) { return SDL_GetColorKey(surface.get(), &key); }
 
 		/**
 		 *  \brief Set an additional colour value used in blit operations.
@@ -183,9 +194,7 @@ namespace SDL {
 		 *
 		 *  \return   0 on success, or -1 if the surface is not valid.
 		 */
-		int SetColourMod(Uint8 r, Uint8 g, Uint8 b) {
-			return SDL_SetSurfaceColorMod(surface, r, g, b);
-		}
+		int SetColourMod(Uint8 r, Uint8 g, Uint8 b) { return SDL_SetSurfaceColorMod(surface.get(), r, g, b); }
 
 
 		/**
@@ -197,9 +206,7 @@ namespace SDL {
 		 *
 		 *  \return   0 on success, or -1 if the surface is not valid.
 		 */
-		int GetColourMod(Uint8& r, Uint8& g, Uint8& b) {
-			return SDL_GetSurfaceColorMod(surface, &r, &g, &b);
-		}
+		int GetColourMod(Uint8& r, Uint8& g, Uint8& b) { return SDL_GetSurfaceColorMod(surface.get(), &r, &g, &b); }
 
 		/**
 		 *  \brief    Set an additional alpha value used in blit operations.
@@ -208,7 +215,7 @@ namespace SDL {
 		 *
 		 *  \return   0 on success, or -1 if the surface is not valid.
 		 */
-		int SetAlphaMod(Uint8 alpha) { return SDL_SetSurfaceAlphaMod(surface, alpha); }
+		int SetAlphaMod(Uint8 alpha) { return SDL_SetSurfaceAlphaMod(surface.get(), alpha); }
 
 		/**
 		 *  \brief    Get the additional alpha value used in blit operations.
@@ -217,7 +224,7 @@ namespace SDL {
 		 *
 		 *  \return   0 on success, or -1 if the surface is not valid.
 		 */
-		int GetAlphaMod(Uint8& alpha) { return SDL_GetSurfaceAlphaMod(surface, &alpha); }
+		int GetAlphaMod(Uint8& alpha) { return SDL_GetSurfaceAlphaMod(surface.get(), &alpha); }
 
 		/**
 		 *  \brief    Set the blend mode used for blit operations.
@@ -226,7 +233,7 @@ namespace SDL {
 		 *
 		 *  \return   0 on success, or -1 if the parameters are not valid.
 		 */
-		int SetBlendMode(BlendMode blendMode) { return SDL_SetSurfaceBlendMode(surface, (SDL_BlendMode)blendMode); }
+		int SetBlendMode(BlendMode blendMode) { return SDL_SetSurfaceBlendMode(surface.get(), (SDL_BlendMode)blendMode); }
 
 		/**
 		 *  \brief    Get the blend mode used for blit operations.
@@ -235,7 +242,7 @@ namespace SDL {
 		 *
 		 *  \return   0 on success, or -1 if the surface is not valid.
 		 */
-		int GetBlendMode(BlendMode& blendMode) { return SDL_GetSurfaceBlendMode(surface, (SDL_BlendMode*)&blendMode); }
+		int GetBlendMode(BlendMode& blendMode) { return SDL_GetSurfaceBlendMode(surface.get(), (SDL_BlendMode*)&blendMode); }
 
 		/**
 		 *  \brief    Sets the clipping rectangle for the destination surface in a blit.
@@ -248,26 +255,22 @@ namespace SDL {
 		 *            function returns true and blits to the surface will be clipped to
 		 *            the intersection of the surface area and the clipping rectangle.
 		 */
-		bool SetClipRect(const Rect& rect) { SDL_SetClipRect(surface, &rect.rect); }
+		bool SetClipRect(const Rect& rect) { SDL_SetClipRect(surface.get(), &rect.rect); }
 
 		// Disables the clipping rectangle for the destination surface in a blit.
-		bool DisableClip() { SDL_SetClipRect(surface, NULL); }
+		bool DisableClip() { SDL_SetClipRect(surface.get(), NULL); }
 
 		// Gets the clipping rectangle for the destination surface in a blit.
 		Rect GetClipRect() {
 			Rect returnVal;
-			SDL_GetClipRect(surface, &returnVal.rect);
+			SDL_GetClipRect(surface.get(), &returnVal.rect);
 			return returnVal;
 		}
 		// Gets the clipping rectangle for the destination surface in a blit.
-		void GetClipRect(Rect& rect) { SDL_GetClipRect(surface, &rect.rect); }
+		void GetClipRect(Rect& rect) { SDL_GetClipRect(surface.get(), &rect.rect); }
 
 		// Creates a new surface identical to the existing surface
-		Surface Duplicate() {
-			Surface newSurface = Surface(SDL_DuplicateSurface(surface));
-			newSurface.freeSurface = true;
-			return newSurface;
-		}
+		Surface Duplicate() { return FromPtr(SDL_DuplicateSurface(surface.get())); }
 
 		/**
 		 *  \brief    Creates a new surface of the specified format, and then copies and maps
@@ -281,16 +284,8 @@ namespace SDL {
 		 * 
 		 *  \return   If this function fails, it returns a NULL surface.
 		 */
-		Surface ConvertSurface(const PixelFormat& fmt, Uint32 flags) {
-			Surface newSurface = Surface(SDL_ConvertSurface(surface, fmt.format, flags));
-			newSurface.freeSurface = newSurface.surface != NULL;
-			return newSurface;
-		}
-		Surface ConvertSurfaceFormat(Uint32 pixel_format, Uint32 flags) {
-			Surface newSurface = Surface(SDL_ConvertSurfaceFormat(surface, pixel_format, flags));
-			newSurface.freeSurface = newSurface.surface != NULL;
-			return newSurface;
-		}
+		Surface ConvertSurface(const PixelFormat& fmt, Uint32 flags) { return FromPtr(SDL_ConvertSurface(surface.get(), fmt.format, flags)); }
+		Surface ConvertSurfaceFormat(Uint32 pixel_format, Uint32 flags) { return FromPtr(SDL_ConvertSurfaceFormat(surface.get(), pixel_format, flags)); }
 
 		/**
 		 *  \brief    Performs a fast fill of the whole surface with \c colour. 
@@ -300,13 +295,13 @@ namespace SDL {
 		 *
 		 *  \return   0 on success, or -1 on error.
 		 */
-		int Fill(Uint32 colour) { return SDL_FillRect(surface, NULL, colour); }
+		int Fill(Uint32 colour) { return SDL_FillRect(surface.get(), NULL, colour); }
 		/**
 		 *  \brief    Performs a fast fill of the whole surface with r, g, b.
 		 *
 		 *  \return   0 on success, or -1 on error.
 		 */
-		int Fill(Uint8 r, Uint8 g, Uint8 b) { return SDL_FillRect(surface, NULL, ((PixelFormat*)surface->format)->MapRGB(r, g, b)); }
+		int Fill(Uint8 r, Uint8 g, Uint8 b) { return SDL_FillRect(surface.get(), NULL, ( (PixelFormat*)surface->format )->MapRGB(r, g, b)); }
 		/**
 		 *  \brief    Performs a fast fill of the given rectangle with \c colour.
 		 *
@@ -315,15 +310,15 @@ namespace SDL {
 		 *
 		 *  \return   0 on success, or -1 on error.
 		 */
-		int FillRect(const Rect& rect, Uint32 colour) { return SDL_FillRect(surface, &rect.rect, colour); }
+		int FillRect(const Rect& rect, Uint32 colour) { return SDL_FillRect(surface.get(), &rect.rect, colour); }
 		/**
 		 *  \brief    Performs a fast fill of the given rectangle with r, g, b.
 		 *
 		 *  \return   0 on success, or -1 on error.
 		 */
-		int FillRect(const Rect& rect, Uint8 r, Uint8 g, Uint8 b) { return SDL_FillRect(surface, &rect.rect, ((PixelFormat*)surface->format)->MapRGB(r, g, b)); }
-		int FillRects(const Rect* rects, int count, Uint32 colour) { return SDL_FillRects(surface, (const SDL_Rect*)rects, count, colour); }
-		int FillRects(const Rect* rects, int count, Uint8 r, Uint8 g, Uint8 b) { return SDL_FillRects(surface, (const SDL_Rect*)rects, count, ((PixelFormat*)surface->format)->MapRGB(r, g, b)); }
+		int FillRect(const Rect& rect, Uint8 r, Uint8 g, Uint8 b) { return SDL_FillRect(surface.get(), &rect.rect, ((PixelFormat*)surface->format)->MapRGB(r, g, b)); }
+		int FillRects(const Rect* rects, int count, Uint32 colour) { return SDL_FillRects(surface.get(), (const SDL_Rect*)rects, count, colour); }
+		int FillRects(const Rect* rects, int count, Uint8 r, Uint8 g, Uint8 b) { return SDL_FillRects(surface.get(), (const SDL_Rect*)rects, count, ((PixelFormat*)surface->format)->MapRGB(r, g, b)); }
 
 		/**
 		 *  \brief    Performs a fast blit from the source surface to the destination surface.
@@ -383,17 +378,17 @@ namespace SDL {
 		 *  \return   If the blit is successful, it returns 0, otherwise it returns -1
 		 */
 		int BlitSurface(Rect* srcrect, Surface& dst, Rect* dstrect) {
-			return SDL_BlitSurface(surface, (SDL_Rect*)srcrect, dst.surface, (SDL_Rect*)dstrect);
+			return SDL_BlitSurface(surface.get(), (SDL_Rect*)srcrect, dst.surface.get(), (SDL_Rect*)dstrect);
 		}
 
 		// This is the public blit function, SDL_BlitSurface(), and it performs rectangle validation and clipping before passing it to LowerBlit()
 		int UpperBlit(const Rect& srcrect, Surface& dst, Rect& dstrect) {
-			return SDL_UpperBlit(surface, &srcrect.rect, dst.surface, &dstrect.rect);
+			return SDL_UpperBlit(surface.get(), &srcrect.rect, dst.surface.get(), &dstrect.rect);
 		}
 
 		// This is a semi-private blit function and it performs low-level surface blitting only.
 		int LowerBlit(Rect& srcrect, Surface& dst, Rect& dstrect) {
-			return SDL_LowerBlit(surface, &srcrect.rect, dst.surface, &dstrect.rect);
+			return SDL_LowerBlit(surface.get(), &srcrect.rect, dst.surface.get(), &dstrect.rect);
 		}
 
 		/**
@@ -402,11 +397,11 @@ namespace SDL {
 		 *  \note     This function uses a static buffer, and is not thread-safe.
 		 */
 		int SoftStretch(const Rect* srcrect, const Surface& dst, const Rect* dstrect) {
-			return SDL_SoftStretch(surface, (SDL_Rect*)srcrect, dst.surface, (SDL_Rect*)dstrect);
+			return SDL_SoftStretch(surface.get(), (SDL_Rect*)srcrect, dst.surface.get(), (SDL_Rect*)dstrect);
 		}
 
 		int BlitScaled(Rect* srcrect, Surface& dst, Rect* dstrect) {
-			return SDL_BlitScaled(surface, (SDL_Rect*)srcrect, dst.surface, (SDL_Rect*)dstrect);
+			return SDL_BlitScaled(surface.get(), (SDL_Rect*)srcrect, dst.surface.get(), (SDL_Rect*)dstrect);
 		}
 
 		/**
@@ -414,12 +409,12 @@ namespace SDL {
 		 *            rectangle validation and clipping before passing it to SDL_LowerBlitScaled()
 		 */
 		int UpperBlitScaled(const Rect* srcrect, Surface& dst, Rect* dstrect) {
-			return SDL_UpperBlitScaled(surface, (const SDL_Rect*)srcrect, dst.surface, (SDL_Rect*)dstrect);
+			return SDL_UpperBlitScaled(surface.get(), (const SDL_Rect*)srcrect, dst.surface.get(), (SDL_Rect*)dstrect);
 		}
 
 		// This is a semi-private blit function and it performs low-level surface scaled blitting only.
 		int LowerBlitScaled(Rect* srcrect, Surface& dst, Rect* dstrect) {
-			return SDL_LowerBlitScaled(surface, (SDL_Rect*)srcrect, dst.surface, (SDL_Rect*)dstrect);
+			return SDL_LowerBlitScaled(surface.get(), (SDL_Rect*)srcrect, dst.surface.get(), (SDL_Rect*)dstrect);
 		}
 	};
 

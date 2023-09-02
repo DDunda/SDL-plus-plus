@@ -1,7 +1,11 @@
 #include "error.hpp"
 
-template<typename... Args>
-void SDL::SetError(SDL_PRINTF_FORMAT_STRING const char* fmt, Args... args) { SDL_SetError(fmt, args...); }
+namespace SDL {
 
-const char* SDL::GetError() { return SDL_GetError(); }
-void SDL::ClearError() { SDL_ClearError(); }
+	template<typename... Args>
+	void SetError(SDL_PRINTF_FORMAT_STRING const char* fmt, Args... args) { SDL_SetError(fmt, args...); }
+
+	const char* GetError() { return SDL_GetError(); }
+	void ClearError() { SDL_ClearError(); }
+
+}

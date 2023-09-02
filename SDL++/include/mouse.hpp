@@ -3,6 +3,8 @@
 #ifndef SDLpp_mouse_h_
 #define SDLpp_mouse_h_
 
+#include <memory>
+
 #include <SDL_mouse.h>
 #include "video.hpp"
 
@@ -30,11 +32,26 @@ namespace SDL {
 		FLIPPED = SDL_MOUSEWHEEL_FLIPPED // The scroll direction is flipped / natural
 	};
 
-	struct Cursor {
-		SDL_Cursor* cursor;
-		bool freeCursor = false;
+	struct Cursor
+	{
+		// This is custom destructor for smart pointers that destroys SDL_Cursor through SDL
+		static void DestroyCursor(SDL_Cursor* cursor);
 
-		Cursor(SDL_Cursor* cursor = NULL, bool free = false);
+		// This is custom destructor for smart pointers that does not destroy the SDL_Cursor. This is for pointers you do not own
+		static void DontDestroyCursor(SDL_Cursor* cursor);
+
+		// This creates a smart pointer to an SDL_Cursor with a custom destructor
+		static std::shared_ptr<SDL_Cursor> MakeSharedPtr(SDL_Cursor* cursor);
+
+		// This creates a Cursor from a SDL_Cursor pointer, taking ownership of the pointer
+		static Cursor FromPtr(SDL_Cursor* cursor);
+
+		// This creates a Cursor from a SDL_Cursor pointer, but does not take ownership of the pointer
+		static Cursor FromUnownedPtr(SDL_Cursor* cursor);
+
+		std::shared_ptr<SDL_Cursor> cursor = nullptr;
+
+		Cursor(std::shared_ptr<SDL_Cursor> cursor);
 
 		/**
 		 *  Create a cursor, using the specified bitmap data and
@@ -57,9 +74,6 @@ namespace SDL {
 		Cursor(Surface& surface, int hot_x, int hot_y);
 		// Create a system cursor.
 		Cursor(SystemCursor id);
-
-		// Frees a cursor created with SDL_CreateCursor() or similar functions.
-		~Cursor();
 
 		// Return the active cursor.
 		static Cursor GetCursor();

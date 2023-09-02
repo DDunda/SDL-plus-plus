@@ -17,8 +17,22 @@ namespace SDL {
 	 *
 	 *  \sa GetVersion
 	 */
-	typedef struct Version : public SDL_version
+	struct Version : public SDL_version
 	{
+		/**
+		 *  \brief Get the version of SDL that is linked against your program.
+		 *
+		 *  \details If you are linking to SDL dynamically, then it is possible that the
+		 *           current version will be different than the version you compiled against.
+		 *           This function returns the current version, while SDL_VERSION() is a
+		 *           macro that tells you what version you compiled with.
+		 *
+		 *  This function may be called safely at any time, even before SDL_Init().
+		 *
+		 *  \sa SDL_VERSION
+		 */
+		Version();
+
 		/**
 		 *  \brief Macro to determine SDL version program was compiled against.
 		 *
@@ -51,60 +65,6 @@ namespace SDL {
 		// This macro will evaluate to true if compiled with SDL at least this value.
 		bool Atleast();
 	};
-
-	/**
-	 *  \brief Get the version of SDL that is linked against your program.
-	 *
-	 *  \details If you are linking to SDL dynamically, then it is possible that the
-	 *           current version will be different than the version you compiled against.
-	 *           This function returns the current version, while SDL_VERSION() is a
-	 *           macro that tells you what version you compiled with.
-	 *
-	 *  This function may be called safely at any time, even before SDL_Init().
-	 *
-	 *  \sa SDL_VERSION
-	 */
-	Version GetVersion();
-
-	/**
-	 *  \brief Get the version of SDL that is linked against your program.
-	 *
-	 *  \details If you are linking to SDL dynamically, then it is possible that the
-	 *           current version will be different than the version you compiled against.
-	 *           This function returns the current version, while SDL_VERSION() is a
-	 *           macro that tells you what version you compiled with.
-	 *
-	 *  This function may be called safely at any time, even before SDL_Init().
-	 *
-	 *  \sa SDL_VERSION
-	 */
-	void GetVersion(Version& ver);
-
-	/**
-	 *  \brief Get the version of SDL that is linked against your program.
-	 *
-	 *  \details If you are linking to SDL dynamically, then it is possible that the
-	 *           current version will be different than the version you compiled against.
-	 *           This function returns the current version, while SDL_VERSION() is a
-	 *           macro that tells you what version you compiled with.
-	 *
-	 *  \code
-	 *  SDL_version compiled;
-	 *  SDL_version linked;
-	 *
-	 *  SDL_VERSION(&compiled);
-	 *  SDL_GetVersion(&linked);
-	 *  printf("We compiled against SDL version %d.%d.%d ...\n",
-	 *         compiled.major, compiled.minor, compiled.patch);
-	 *  printf("But we linked against SDL version %d.%d.%d.\n",
-	 *         linked.major, linked.minor, linked.patch);
-	 *  \endcode
-	 *
-	 *  This function may be called safely at any time, even before SDL_Init().
-	 *
-	 *  \sa SDL_VERSION
-	 */
-	void GetVersion(Version* ver);
 
 	/**
 	 *  \brief   Get the code revision of SDL that is linked against your program.

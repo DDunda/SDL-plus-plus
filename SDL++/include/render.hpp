@@ -3,6 +3,8 @@
 #ifndef SDLpp_render_h_
 #define SDLpp_render_h_
 
+#include <memory>
+
 #include <tuple>
 #include <SDL_render.h>
 #include <stack>
@@ -13,7 +15,8 @@ namespace SDL {
 	struct Texture;
 
 	// A structure representing rendering state
-	struct Renderer {
+	struct Renderer
+	{
 		// Flags used when creating a rendering context
 		enum class Flags
 		{
@@ -22,18 +25,30 @@ namespace SDL {
 			PRESENTVSYNC  = SDL_RENDERER_PRESENTVSYNC,     // Present is synchronized with the refresh rate
 			TARGETTEXTURE = SDL_RENDERER_TARGETTEXTURE     // The renderer supports rendering to texture
 		};
+
 		// Information on the capabilities of a render driver or context.
 		typedef SDL_RendererInfo Info;
 
-		SDL_Renderer* renderer = nullptr;
-		bool freeRenderer = false;
+		// This is custom destructor for smart pointers that destroys SDL_Renderers through SDL
+		static void DestroyRenderer(SDL_Renderer* renderer);
+
+		// This is custom destructor for smart pointers that does not destroy the Renderer. This is for pointers you do not own
+		static void DontDestroyRenderer(SDL_Renderer* renderer);
+
+		// This creates a smart pointer to an SDL_Renderer with a custom destructor
+		static std::shared_ptr<SDL_Renderer> MakeSharedPtr(SDL_Renderer* renderer);
+
+		// This creates a Renderer from a SDL_Renderer pointer, taking ownership of the pointer
+		static Renderer FromPtr(SDL_Renderer* renderer);
+
+		// This creates a Renderer from a SDL_Renderer pointer, but does not take ownership of the pointer
+		static Renderer FromUnownedPtr(SDL_Renderer* renderer);
+
+		std::shared_ptr<SDL_Renderer> renderer = nullptr;
 		int error = 0;
 
-		Renderer(const Renderer& r);
-		Renderer(Renderer&& r) noexcept;
-		Renderer& operator=(Renderer that);
+		Renderer(std::shared_ptr<SDL_Renderer> _renderer = nullptr);
 
-		Renderer(SDL_Renderer* renderer = NULL, bool free = false);
 		/**
 		 *  \brief    Create a 2D rendering context for a window.
 		 *
@@ -45,6 +60,7 @@ namespace SDL {
 		 *  \return   A valid rendering context or NULL if there was an error.
 		 */
 		Renderer(Window& window, Uint32 flags, int index = -1);
+
 		/**
 		 *  \brief    Create a 2D software rendering context for a surface.
 		 *
@@ -53,12 +69,13 @@ namespace SDL {
 		 *  \return   A valid rendering context or NULL if there was an error.
 		 */
 		Renderer(Surface& surface);
+
 		// Get the renderer associated with a window.
 		Renderer(Window& window);
-		~Renderer();
 
-		// Resets the error
-		Renderer& FlushError();
+		Renderer(const Renderer& r);
+		Renderer(Renderer&& r) noexcept;
+		Renderer& operator=(Renderer that);
 
 		/**
 		 *  \brief    Set the drawing scale for rendering on the current target.
@@ -204,6 +221,9 @@ namespace SDL {
 		 *            at all, instead flushing them to the OS immediately.
 		 */
 		Renderer& Flush();
+
+		// Resets the error
+		constexpr Renderer& FlushError() { error = 0; return *this; }
 
 		// Update the screen with rendering performed.
 		Renderer& Present();
@@ -357,10 +377,10 @@ namespace SDL {
 		 *  \return   0 on success, or -1 on error
 		 */
 		Renderer& DrawRectF(const FRect* rect);
-		Renderer& DrawRectEx(const Rect& rect, const Point& center, double angle = 0.0);
-		Renderer& DrawRectEx(const Rect& rect, double angle = 0.0);
-		Renderer& DrawRectExF(const FRect& rect, const FPoint& center, double angle = 0.0);
-		Renderer& DrawRectExF(const FRect& rect, double angle = 0.0);
+		Renderer& DrawRectEx(const Rect& rect, const Point& center, float angle = 0.0);
+		Renderer& DrawRectEx(const Rect& rect, float angle = 0.0);
+		Renderer& DrawRectExF(const FRect& rect, const FPoint& center, float angle = 0.0);
+		Renderer& DrawRectExF(const FRect& rect, float angle = 0.0);
 		/**
 		 *  \brief    Draw some number of rectangles on the current rendering target.
 		 *
@@ -808,21 +828,35 @@ namespace SDL {
 		/**
 		 * \brief     Set a texture as the current rendering target.
 		 *
-		 * \param     texture: The targeted texture, which must be created with the SDL_TEXTUREACCESS_TARGET flag, or NULL for the default render target
+		 * \param     texture: The targeted texture, which must be created with the SDL_TEXTUREACCESS_TARGET flag.
 		 *
 		 * \return    0 on success, or -1 on error
 		 */
 		Renderer& SetTarget(Texture& texture);
 		/**
-		 * \brief     Get the current render target or NULL for the default render target.
+		 * \brief     Set the default render target as the current rendering target.
 		 *
-		 * \return    The current render target
+		 * \return    0 on success, or -1 on error
+		 */
+		Renderer& ClearTarget();
+		/**
+		 * Get the current render target.
+		 *
+		 * The default render target is the window for which the renderer was created,
+		 * and is reported as NULL here.
+		 *
+		 * \param renderer the rendering context
+		 * \returns the current render target or NULL for the default render target.
 		 */
 		Texture GetTarget();
 		/**
-		 * \brief     Get the current render target or NULL for the default render target.
+		 * Get the current render target.
 		 *
-		 * \return    The current render target
+		 * The default render target is the window for which the renderer was created,
+		 * and is reported as NULL here.
+		 *
+		 * \param renderer the rendering context
+		 * \returns the current render target or NULL for the default render target.
 		 */
 		Renderer& GetTarget(Texture& target);
 
@@ -1027,15 +1061,33 @@ namespace SDL {
 			ALPHA = SDL_TEXTUREMODULATE_ALPHA     // srcA = srcA * alpha
 		};
 
-		SDL_Texture* texture;
-		bool freeTexture = false;
+		// Information on the capabilities of a render driver or context.
+		typedef SDL_RendererInfo Info;
+
+		// This is custom destructor for smart pointers that destroys SDL_Texture through SDL
+		static void DestroyTexture(SDL_Texture* texture);
+
+		// This is custom destructor for smart pointers that does not destroy the Texture. This is for pointers you do not own
+		static void DontDestroyTexture(SDL_Texture* texture);
+
+		// This creates a smart pointer to an SDL_Texture with a custom destructor
+		static std::shared_ptr<SDL_Texture> MakeSharedPtr(SDL_Texture* texture);
+
+		// This creates a Texture from a SDL_Texture pointer, taking ownership of the pointer
+		static Texture FromPtr(SDL_Texture* texture);
+
+		// This creates a Texture from a SDL_Texture pointer, but does not take ownership of the pointer
+		static Texture FromUnownedPtr(SDL_Texture* texture);
+
+		std::shared_ptr<SDL_Texture> texture = nullptr;
+
+		Texture(std::shared_ptr<SDL_Texture> texture);
 
 		Texture();
 		Texture(Texture& txt);
 		Texture(Texture&& txt) noexcept;
-		Texture& operator=(Texture&& that);
+		Texture& operator=(Texture&& that) noexcept;
 
-		Texture(SDL_Texture* texture, bool free = true);
 		/**
 		 *  \brief    Create a texture for a rendering context.
 		 *
@@ -1062,8 +1114,6 @@ namespace SDL {
 		 *  \note     The surface is not modified or freed by this function.
 		 */
 		Texture(Renderer& renderer, Surface& surface);
-
-		~Texture();
 
 		/**
 		 *  \brief    Lock a portion of the texture for write-only pixel access.
@@ -1352,77 +1402,77 @@ namespace SDL {
 	 */
 	int CreateWindowAndRenderer(const Point& size, Window& window, Renderer& renderer, Uint32 window_flags = SDL_WINDOW_SHOWN & SDL_WINDOW_RESIZABLE);
 
-	const Colour VERY_LIGHT_RED = { 255, 191, 191, 255 };
-	const Colour VERY_LIGHT_ORANGE = { 255, 223, 191, 255 };
-	const Colour VERY_LIGHT_YELLOW = { 255, 255, 191, 255 };
-	const Colour VERY_LIGHT_LIME = { 223, 255, 191, 255 };
-	const Colour VERY_LIGHT_GREEN = { 191, 255, 191, 255 };
-	const Colour VERY_LIGHT_TURQUOISE = { 191, 255, 223, 255 };
-	const Colour VERY_LIGHT_CYAN = { 191, 255, 255, 255 };
-	const Colour VERY_LIGHT_AZURE = { 191, 223, 255, 255 };
-	const Colour VERY_LIGHT_BLUE = { 191, 191, 255, 255 };
-	const Colour VERY_LIGHT_VIOLET = { 223, 191, 255, 255 };
-	const Colour VERY_LIGHT_MAGENTA = { 255, 191, 255, 255 };
-	const Colour VERY_LIGHT_RASPBERRY = { 255, 191, 223, 255 };
+	constexpr Colour VERY_LIGHT_RED = { 255, 191, 191, 255 };
+	constexpr Colour VERY_LIGHT_ORANGE = { 255, 223, 191, 255 };
+	constexpr Colour VERY_LIGHT_YELLOW = { 255, 255, 191, 255 };
+	constexpr Colour VERY_LIGHT_LIME = { 223, 255, 191, 255 };
+	constexpr Colour VERY_LIGHT_GREEN = { 191, 255, 191, 255 };
+	constexpr Colour VERY_LIGHT_TURQUOISE = { 191, 255, 223, 255 };
+	constexpr Colour VERY_LIGHT_CYAN = { 191, 255, 255, 255 };
+	constexpr Colour VERY_LIGHT_AZURE = { 191, 223, 255, 255 };
+	constexpr Colour VERY_LIGHT_BLUE = { 191, 191, 255, 255 };
+	constexpr Colour VERY_LIGHT_VIOLET = { 223, 191, 255, 255 };
+	constexpr Colour VERY_LIGHT_MAGENTA = { 255, 191, 255, 255 };
+	constexpr Colour VERY_LIGHT_RASPBERRY = { 255, 191, 223, 255 };
 
-	const Colour LIGHT_RED = { 255, 128, 128, 255 };
-	const Colour LIGHT_ORANGE = { 255, 191, 128, 255 };
-	const Colour LIGHT_YELLOW = { 255, 255, 128, 255 };
-	const Colour LIGHT_LIME = { 191, 255, 128, 255 };
-	const Colour LIGHT_GREEN = { 128, 255, 128, 255 };
-	const Colour LIGHT_TURQUOISE = { 128, 255, 191, 255 };
-	const Colour LIGHT_CYAN = { 128, 255, 255, 255 };
-	const Colour LIGHT_AZURE = { 128, 191, 255, 255 };
-	const Colour LIGHT_BLUE = { 128, 128, 255, 255 };
-	const Colour LIGHT_VIOLET = { 191, 128, 255, 255 };
-	const Colour LIGHT_MAGENTA = { 255, 128, 255, 255 };
-	const Colour LIGHT_RASPBERRY = { 255, 128, 191, 255 };
+	constexpr Colour LIGHT_RED = { 255, 128, 128, 255 };
+	constexpr Colour LIGHT_ORANGE = { 255, 191, 128, 255 };
+	constexpr Colour LIGHT_YELLOW = { 255, 255, 128, 255 };
+	constexpr Colour LIGHT_LIME = { 191, 255, 128, 255 };
+	constexpr Colour LIGHT_GREEN = { 128, 255, 128, 255 };
+	constexpr Colour LIGHT_TURQUOISE = { 128, 255, 191, 255 };
+	constexpr Colour LIGHT_CYAN = { 128, 255, 255, 255 };
+	constexpr Colour LIGHT_AZURE = { 128, 191, 255, 255 };
+	constexpr Colour LIGHT_BLUE = { 128, 128, 255, 255 };
+	constexpr Colour LIGHT_VIOLET = { 191, 128, 255, 255 };
+	constexpr Colour LIGHT_MAGENTA = { 255, 128, 255, 255 };
+	constexpr Colour LIGHT_RASPBERRY = { 255, 128, 191, 255 };
 
-	const Colour RED = { 255, 0, 0, 255 };
-	const Colour ORANGE = { 255, 128, 0, 255 };
-	const Colour YELLOW = { 255, 255, 0, 255 };
-	const Colour LIME = { 128, 255, 0, 255 };
-	const Colour GREEN = { 0, 255, 0, 255 };
-	const Colour TURQUOISE = { 0, 255, 128, 255 };
-	const Colour CYAN = { 0, 255, 255, 255 };
-	const Colour AZURE = { 0, 128, 255, 255 };
-	const Colour BLUE = { 0, 0, 255, 255 };
-	const Colour VIOLET = { 128, 0, 255, 255 };
-	const Colour MAGENTA = { 255, 0, 255, 255 };
-	const Colour RASPBERRY = { 255, 0, 128, 255 };
+	constexpr Colour RED = { 255, 0, 0, 255 };
+	constexpr Colour ORANGE = { 255, 128, 0, 255 };
+	constexpr Colour YELLOW = { 255, 255, 0, 255 };
+	constexpr Colour LIME = { 128, 255, 0, 255 };
+	constexpr Colour GREEN = { 0, 255, 0, 255 };
+	constexpr Colour TURQUOISE = { 0, 255, 128, 255 };
+	constexpr Colour CYAN = { 0, 255, 255, 255 };
+	constexpr Colour AZURE = { 0, 128, 255, 255 };
+	constexpr Colour BLUE = { 0, 0, 255, 255 };
+	constexpr Colour VIOLET = { 128, 0, 255, 255 };
+	constexpr Colour MAGENTA = { 255, 0, 255, 255 };
+	constexpr Colour RASPBERRY = { 255, 0, 128, 255 };
 
-	const Colour DARK_RED = { 128, 0, 0, 255 };
-	const Colour DARK_ORANGE = { 128, 64, 0, 255 };
-	const Colour DARK_YELLOW = { 128, 128, 0, 255 };
-	const Colour DARK_LIME = { 64, 128, 0, 255 };
-	const Colour DARK_GREEN = { 0, 128, 0, 255 };
-	const Colour DARK_TURQUOISE = { 0, 128, 64, 255 };
-	const Colour DARK_CYAN = { 0, 128, 128, 255 };
-	const Colour DARK_AZURE = { 0, 64, 128, 255 };
-	const Colour DARK_BLUE = { 0, 0, 128, 255 };
-	const Colour DARK_VIOLET = { 64, 0, 128, 255 };
-	const Colour DARK_MAGENTA = { 128, 0, 128, 255 };
-	const Colour DARK_RASPBERRY = { 128, 0, 64, 255 };
+	constexpr Colour DARK_RED = { 128, 0, 0, 255 };
+	constexpr Colour DARK_ORANGE = { 128, 64, 0, 255 };
+	constexpr Colour DARK_YELLOW = { 128, 128, 0, 255 };
+	constexpr Colour DARK_LIME = { 64, 128, 0, 255 };
+	constexpr Colour DARK_GREEN = { 0, 128, 0, 255 };
+	constexpr Colour DARK_TURQUOISE = { 0, 128, 64, 255 };
+	constexpr Colour DARK_CYAN = { 0, 128, 128, 255 };
+	constexpr Colour DARK_AZURE = { 0, 64, 128, 255 };
+	constexpr Colour DARK_BLUE = { 0, 0, 128, 255 };
+	constexpr Colour DARK_VIOLET = { 64, 0, 128, 255 };
+	constexpr Colour DARK_MAGENTA = { 128, 0, 128, 255 };
+	constexpr Colour DARK_RASPBERRY = { 128, 0, 64, 255 };
 
-	const Colour VERY_DARK_RED = { 64, 0, 0, 255 };
-	const Colour VERY_DARK_ORANGE = { 64, 32, 0, 255 };
-	const Colour VERY_DARK_YELLOW = { 64, 64, 0, 255 };
-	const Colour VERY_DARK_LIME = { 32, 64, 0, 255 };
-	const Colour VERY_DARK_GREEN = { 0, 64, 0, 255 };
-	const Colour VERY_DARK_TURQUOISE = { 0, 64, 32, 255 };
-	const Colour VERY_DARK_CYAN = { 0, 64, 64, 255 };
-	const Colour VERY_DARK_AZURE = { 0, 32, 64, 255 };
-	const Colour VERY_DARK_BLUE = { 0, 0, 64, 255 };
-	const Colour VERY_DARK_VIOLET = { 32, 0, 64, 255 };
-	const Colour VERY_DARK_MAGENTA = { 64, 0, 64, 255 };
-	const Colour VERY_DARK_RASPBERRY = { 64, 0, 32, 255 };
+	constexpr Colour VERY_DARK_RED = { 64, 0, 0, 255 };
+	constexpr Colour VERY_DARK_ORANGE = { 64, 32, 0, 255 };
+	constexpr Colour VERY_DARK_YELLOW = { 64, 64, 0, 255 };
+	constexpr Colour VERY_DARK_LIME = { 32, 64, 0, 255 };
+	constexpr Colour VERY_DARK_GREEN = { 0, 64, 0, 255 };
+	constexpr Colour VERY_DARK_TURQUOISE = { 0, 64, 32, 255 };
+	constexpr Colour VERY_DARK_CYAN = { 0, 64, 64, 255 };
+	constexpr Colour VERY_DARK_AZURE = { 0, 32, 64, 255 };
+	constexpr Colour VERY_DARK_BLUE = { 0, 0, 64, 255 };
+	constexpr Colour VERY_DARK_VIOLET = { 32, 0, 64, 255 };
+	constexpr Colour VERY_DARK_MAGENTA = { 64, 0, 64, 255 };
+	constexpr Colour VERY_DARK_RASPBERRY = { 64, 0, 32, 255 };
 
-	const Colour WHITE = { 255, 255, 255, 255 };
-	const Colour LIGHT_GREY = { 191, 191, 191, 255 };
-	const Colour GREY = { 128, 128, 128, 255 };
-	const Colour DARK_GREY = { 64, 64, 64, 255 };
-	const Colour VERY_DARK_GREY = { 32, 32, 32, 255 };
-	const Colour BLACK = { 0, 0, 0, 255 };
+	constexpr Colour WHITE = { 255, 255, 255, 255 };
+	constexpr Colour LIGHT_GREY = { 191, 191, 191, 255 };
+	constexpr Colour GREY = { 128, 128, 128, 255 };
+	constexpr Colour DARK_GREY = { 64, 64, 64, 255 };
+	constexpr Colour VERY_DARK_GREY = { 32, 32, 32, 255 };
+	constexpr Colour BLACK = { 0, 0, 0, 255 };
 
 	namespace GL {
 		/**

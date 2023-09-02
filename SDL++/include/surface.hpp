@@ -23,7 +23,7 @@ namespace SDL {
 	 */
 	struct Surface
 	{
-		std::shared_ptr<SDL_Surface> surface = NULL;
+		std::shared_ptr<SDL_Surface> surface = nullptr;
 
 		// This is custom destructor for smart pointers that destroys SDL_Surfaces through SDL
 		static void DestroySurface(SDL_Surface* surface) { SDL_FreeSurface(surface); }
@@ -43,9 +43,9 @@ namespace SDL {
 		// Evaluates to true if the surface needs to be locked before access.
 		bool MustLock() { return (surface->flags & SDL_RLEACCEL) != 0; }
 
-		Surface(Surface&& _surface) noexcept : surface(_surface.surface) { _surface.surface = NULL; }
+		Surface(Surface&& _surface) noexcept : surface(_surface.surface) { _surface.surface = nullptr; }
 
-		Surface(std::shared_ptr<SDL_Surface> _surface = NULL) : surface(_surface) {}
+		Surface(std::shared_ptr<SDL_Surface> _surface = nullptr) : surface(_surface) {}
 
 		/**
 		 *  \brief    Allocate and free an RGB surface.
@@ -105,7 +105,7 @@ namespace SDL {
 		 *
 		 *  \return   0, or -1 if the surface format doesn't use a palette.
 		 */
-		int SetPalette(Palette& palette) { return SDL_SetSurfacePalette(surface.get(), palette.palette); }
+		int SetPalette(Palette& palette) { return SDL_SetSurfacePalette(surface.get(), palette.palette.get()); }
 
 		/**
 		 *  \brief    Sets up a surface for directly accessing the pixels.
@@ -284,7 +284,7 @@ namespace SDL {
 		 * 
 		 *  \return   If this function fails, it returns a NULL surface.
 		 */
-		Surface ConvertSurface(const PixelFormat& fmt, Uint32 flags) { return FromPtr(SDL_ConvertSurface(surface.get(), fmt.format, flags)); }
+		Surface ConvertSurface(const PixelFormat& fmt, Uint32 flags) { return FromPtr(SDL_ConvertSurface(surface.get(), fmt.format.get(), flags)); }
 		Surface ConvertSurfaceFormat(Uint32 pixel_format, Uint32 flags) { return FromPtr(SDL_ConvertSurfaceFormat(surface.get(), pixel_format, flags)); }
 
 		/**

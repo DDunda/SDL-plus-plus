@@ -1,20 +1,31 @@
 #include "image.hpp"
 
-namespace SDL::IMG {
+namespace SDL::IMG
+{
 	const SDL_version* Linked_Version() { return IMG_Linked_Version(); }
 
 	int Init(int flags) { return IMG_Init(flags); }
 	void Quit() { IMG_Quit(); }
 
+#pragma region Load Surface
+
 	Surface LoadTyped_RW(SDL_RWops* src, int freesrc, const char* type) { return Surface::FromPtr(IMG_LoadTyped_RW(src, freesrc, type)); }
 	Surface Load(const char* file) { return Surface::FromPtr(IMG_Load(file)); }
 	Surface Load_RW(SDL_RWops* src, int freesrc) { return Surface::FromPtr(IMG_Load_RW(src, freesrc)); }
 
+#pragma endregion
+
+#pragma region Load Texture
+
 #if SDL_VERSION_ATLEAST(2,0,0)
-	Texture LoadTexture(Renderer& renderer, const char* file) { return Texture(IMG_LoadTexture(renderer.renderer, file), true); }
-	Texture LoadTexture_RW(Renderer& renderer, SDL_RWops* src, int freesrc) { return Texture(IMG_LoadTexture_RW(renderer.renderer, src, freesrc), true); }
-	Texture LoadTextureTyped_RW(Renderer& renderer, SDL_RWops* src, int freesrc, const char* type) { return Texture(IMG_LoadTextureTyped_RW(renderer.renderer, src, freesrc, type), true); }
+	Texture LoadTexture(Renderer& renderer, const char* file) { return Texture::FromPtr(IMG_LoadTexture(renderer.renderer.get(), file)); }
+	Texture LoadTexture_RW(Renderer& renderer, SDL_RWops* src, int freesrc) { return Texture::FromPtr(IMG_LoadTexture_RW(renderer.renderer.get(), src, freesrc)); }
+	Texture LoadTextureTyped_RW(Renderer& renderer, SDL_RWops* src, int freesrc, const char* type) { return Texture::FromPtr(IMG_LoadTextureTyped_RW(renderer.renderer.get(), src, freesrc, type)); }
 #endif /* SDL 2.0 */
+
+#pragma endregion
+
+#pragma region Check Type
 
 	bool isICO (SDL_RWops* src) { return IMG_isICO (src); }
 	bool isCUR (SDL_RWops* src) { return IMG_isCUR (src); }
@@ -31,6 +42,10 @@ namespace SDL::IMG {
 	bool isXPM (SDL_RWops* src) { return IMG_isXPM (src); }
 	bool isXV  (SDL_RWops* src) { return IMG_isXV  (src); }
 	bool isWEBP(SDL_RWops* src) { return IMG_isWEBP(src); }
+
+#pragma endregion
+
+#pragma region Load Surface (Typed)
 
 	Surface LoadICO_RW (SDL_RWops* src) { return Surface::FromPtr(IMG_LoadICO_RW (src)); }
 	Surface LoadCUR_RW (SDL_RWops* src) { return Surface::FromPtr(IMG_LoadCUR_RW (src)); }
@@ -49,12 +64,18 @@ namespace SDL::IMG {
 	Surface LoadXV_RW  (SDL_RWops* src) { return Surface::FromPtr(IMG_LoadXV_RW  (src)); }
 	Surface LoadWEBP_RW(SDL_RWops* src) { return Surface::FromPtr(IMG_LoadWEBP_RW(src)); }
 
+#pragma endregion
+
 	Surface ReadXPMFromArray(char*& xpm) { return Surface::FromPtr(IMG_ReadXPMFromArray(&xpm)); }
+
+#pragma region Save Surface
 
 	int SavePNG(const Surface& surface, const char* file) { return IMG_SavePNG(surface.surface.get(), file); }
 	int SavePNG_RW(const Surface& surface, SDL_RWops* dst, int freedst) { return IMG_SavePNG_RW(surface.surface.get(), dst, freedst); }
 	int SaveJPG(const Surface& surface, const char* file, int quality) { return IMG_SaveJPG(surface.surface.get(), file, quality); }
 	int SaveJPG_RW(const Surface& surface, SDL_RWops* dst, int freedst, int quality) { return IMG_SaveJPG_RW(surface.surface.get(), dst, freedst, quality); }
+
+#pragma endregion
 
 	template <class... Args>
 	int SetError(const char* fmt, Args ...args) { IMG_SetError(fmt, args...); }

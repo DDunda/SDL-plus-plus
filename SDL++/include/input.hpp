@@ -3,6 +3,7 @@
 #ifndef SDLpp_input_h_
 #define SDLpp_input_h_
 
+#include <array>
 #include <bitset>
 #include "observer.hpp"
 
@@ -27,13 +28,13 @@ namespace SDL {
 
 		static std::map<Event::Type, Uint32> event_at;
 
-		static Uint32 button_up_at[5];
-		static Uint32 button_down_at[5];
+		static std::array<Uint32, 5> button_up_at;
+		static std::array<Uint32, 5> button_down_at;
 		static std::map<Scancode, Uint32> scancode_up_at;
 		static std::map<Scancode, Uint32> scancode_down_at;
 
-		static bool prev_buttons[5];
-		static bool buttons[5];
+		static std::array<bool, 5> prev_buttons;
+		static std::array<bool, 5> buttons;
 		static std::bitset<SDL_NUM_SCANCODES> prev_scancodes;
 		static std::bitset<SDL_NUM_SCANCODES> scancodes;
 
@@ -54,16 +55,28 @@ namespace SDL {
 		static void RegisterEventType(Event::Type type, InputObserver& observer);
 		static void UnregisterEventType(Event::Type type, InputObserver& observer);
 
-		static void RegisterUntyped(InputObserver& observer);
-		static void UnregisterUntyped(InputObserver& observer);
+		static constexpr void RegisterUntyped  (InputObserver& observer) { instance->Register(observer);   }
+		static constexpr void UnregisterUntyped(InputObserver& observer) { instance->Unregister(observer); }
 
 		static InputSubject& GetTypedEventSubject(Event::Type type);
 
-		static void UpdateBuffers();
+		static constexpr void UpdateBuffers()
+		{
+			prev_mouse = mouse;
+			prev_buttons = buttons;
+			prev_scancodes = scancodes;
+		}
+
 		static void Notify(Event e);
 		static void ProcessEvent(Event e);
 
-		static int Init();
+		static constexpr int Init()
+		{
+			if (instance != NULL) return 1;
+
+			instance = new Input();
+			return 0;
+		}
 		static int Quit();
 		static void Update();
 	};

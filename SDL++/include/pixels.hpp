@@ -3,6 +3,8 @@
 #ifndef SDLpp_pixels_h_
 #define SDLpp_pixels_h_
 
+#include <memory>
+
 #include <SDL_pixels.h>
 #include <vector>
 
@@ -130,7 +132,24 @@ namespace SDL {
 
 	struct Palette
 	{
-		SDL_Palette* palette;
+		// This is custom destructor for smart pointers that destroys SDL_Palette through SDL
+		static void DestroyPalette(SDL_Palette* palette);
+
+		// This is custom destructor for smart pointers that does not destroy the Palette. This is for pointers you do not own
+		static void DontDestroyPalette(SDL_Palette* palette);
+
+		// This creates a smart pointer to an SDL_Palette with a custom destructor
+		static std::shared_ptr<SDL_Palette> MakeSharedPtr(SDL_Palette* palette);
+
+		// This creates a Palette from a SDL_Palette pointer, taking ownership of the pointer
+		static Palette FromPtr(SDL_Palette* palette);
+
+		// This creates a Palette from a SDL_Palette pointer, but does not take ownership of the pointer
+		static Palette FromUnownedPtr(SDL_Palette* palette);
+
+		std::shared_ptr<SDL_Palette> palette = nullptr;
+
+		Palette(std::shared_ptr<SDL_Palette> palette);
 
 		/**
 		 *  \brief    Create a palette structure with the specified number of colour
@@ -141,9 +160,6 @@ namespace SDL {
 		 *  \note     The palette entries are initialized to white.
 		 */
 		Palette(int ncolours);
-
-		// Free a palette created with SDL_AllocPalette().
-		~Palette();
 
 		/**
 		 *  \brief    Set a range of colours in a palette.
@@ -170,13 +186,27 @@ namespace SDL {
 	// \note Everything in the pixel format structure is read-only.
 	struct PixelFormat
 	{
-		SDL_PixelFormat* format;
+		// This is custom destructor for smart pointers that destroys SDL_PixelFormat through SDL
+		static void DestroyPixelFormat(SDL_PixelFormat* format);
+
+		// This is custom destructor for smart pointers that does not destroy the PixelFormat. This is for pointers you do not own
+		static void DontDestroyPixelFormat(SDL_PixelFormat* format);
+
+		// This creates a smart pointer to an SDL_PixelFormat with a custom destructor
+		static std::shared_ptr<SDL_PixelFormat> MakeSharedPtr(SDL_PixelFormat* format);
+
+		// This creates a PixelFormat from a SDL_PixelFormat pointer, taking ownership of the pointer
+		static PixelFormat FromPtr(SDL_PixelFormat* format);
+
+		// This creates a PixelFormat from a SDL_PixelFormat pointer, but does not take ownership of the pointer
+		static PixelFormat FromUnownedPtr(SDL_PixelFormat* format);
+
+		std::shared_ptr<SDL_PixelFormat> format = nullptr;
+
+		PixelFormat(std::shared_ptr<SDL_PixelFormat> format);
 
 		// Create an SDL_PixelFormat structure from a pixel format enum.
 		PixelFormat(Uint32 pixel_format);
-
-		// Free an SDL_PixelFormat structure.
-		~PixelFormat();
 
 		// Get the human readable name of a pixel format
 		const char* GetName() const;

@@ -3,6 +3,8 @@
 #ifndef SDLpp_TTF_h_
 #define SDLpp_TTF_h_
 
+#include <memory>
+
 #include <SDL_ttf.h>
 #include "rect.hpp"
 #include "version.hpp"
@@ -26,18 +28,30 @@ namespace SDL::TTF {
 
     // The internal structure containing font information
     struct Font {
-        TTF_Font* font;
-        bool free;
 
-        Font(TTF_Font* font = NULL, bool free = false);
+        // This is custom destructor for smart pointers that destroys TTF_Font through SDL
+        static void DestroyFont(TTF_Font* font);
+
+        // This is custom destructor for smart pointers that does not destroy the TTF_Font. This is for pointers you do not own
+        static void DontDestroyFont(TTF_Font* font);
+
+        // This creates a smart pointer to an TTF_Font with a custom destructor
+        static std::shared_ptr<TTF_Font> MakeSharedPtr(TTF_Font* font);
+
+        // This creates a Font from a TTF_Font pointer, taking ownership of the pointer
+        static Font FromPtr(TTF_Font* font);
+
+        // This creates a Font from a TTF_Font pointer, but does not take ownership of the pointer
+        static Font FromUnownedPtr(TTF_Font* font);
+
+        std::shared_ptr<TTF_Font> font = nullptr;
+
+        Font(std::shared_ptr<TTF_Font> font);
 
         Font(const char* file, int ptsize);
         Font(const char* file, int ptsize, long index);
         Font(SDL_RWops* src, bool freesrc, int ptsize);
         Font(SDL_RWops* src, bool freesrc, int ptsize, long index);
-
-        /* Close an opened font file */
-        ~Font();
 
         enum class Style {
             Normal = TTF_STYLE_NORMAL,
@@ -90,6 +104,9 @@ namespace SDL::TTF {
         bool GetKerning();
         // Set whether or not kerning is allowed for this font
         void SetKerning(bool allowed);
+
+        // Get the kerning size of two glyphs
+        int GetFontKerningSizeGlyphs(Uint16 previous_ch, Uint16 ch);
 
         // Get the number of faces of the font
         long FontFaces();
@@ -185,9 +202,6 @@ namespace SDL::TTF {
         Surface RenderText_Blended_Wrapped(const char* text, Colour fg, Uint32 wrapLength);
         Surface RenderUTF8_Blended_Wrapped(const char* text, Colour fg, Uint32 wrapLength);
         Surface RenderUNICODE_Blended_Wrapped(const Uint16* text, Colour fg, Uint32 wrapLength);
-
-        // Get the kerning size of two glyphs
-        int GetFontKerningSizeGlyphs(Uint16 previous_ch, Uint16 ch);
     };
 
     // De-initialize the TTF engine

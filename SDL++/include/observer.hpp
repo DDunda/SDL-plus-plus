@@ -14,7 +14,7 @@ template<typename... Ts>
 class Observer {
 	friend class Subject<Ts...>;
 protected:
-	std::vector<Subject<Ts...>*> subjects;
+	std::vector<Subject<Ts...>*> subjects = {};
 public:
 	~Observer() {
 		for (auto subject : subjects) subject->Unregister(*this);
@@ -26,16 +26,16 @@ public:
 template<typename... Ts>
 class Subject {
 protected:
-	std::vector<Observer<Ts...>*> observers;
+	std::vector<Observer<Ts...>*> observers = {};
 public:
 	~Subject() {
 		for (auto o : observers) Unregister(*o);
 	}
-	void Register(Observer<Ts...>& o) {
+	constexpr void Register(Observer<Ts...>& o) {
 		observers.push_back(&o);
 		o.subjects.push_back(this);
 	}
-	void Unregister(Observer<Ts...>& o) {
+	constexpr void Unregister(Observer<Ts...>& o) {
 		auto it1 = std::find(observers.begin(), observers.end(), &o);
 		if (it1 != observers.end()) observers.erase(it1);
 
@@ -52,8 +52,8 @@ class Listener : public Observer<Ts...> {
 protected:
 	std::function<void(Ts...)> function;
 public:
-	Listener(std::function<void(Ts...)> function) : function(function) {};
-	Listener(std::function<void(Ts...)> function, Subject<Ts...>& subject) : function(function)
+	constexpr Listener(std::function<void(Ts...)> function) : function(function) {};
+	constexpr Listener(std::function<void(Ts...)> function, Subject<Ts...>& subject) : function(function)
 	{
 		subject.Register(*this);
 	};

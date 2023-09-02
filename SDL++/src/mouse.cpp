@@ -1,62 +1,91 @@
 #include "mouse.hpp"
 
-using namespace SDL;
+namespace SDL {
 
-Cursor::Cursor(SDL_Cursor* cursor, bool free)
-	: cursor(cursor), freeCursor(free) {}
-Cursor::Cursor(const Uint8* data, const Uint8* mask, int w, int h, int hot_x, int hot_y)
-	: Cursor(SDL_CreateCursor(data, mask, w, h, hot_x, hot_y), true) {}
-Cursor::Cursor(Surface& surface, int hot_x, int hot_y)
-	: Cursor(SDL_CreateColorCursor(surface.surface.get(), hot_x, hot_y), true) { }
-Cursor::Cursor(SystemCursor id)
-	: Cursor(SDL_CreateSystemCursor((SDL_SystemCursor)id), true) {}
-Cursor::~Cursor() { if (freeCursor) SDL_FreeCursor(cursor); }
+#pragma region Cursor
 
-Cursor Cursor::GetCursor() { return SDL_GetCursor(); }
-Cursor Cursor::GetDefaultCursor() { return SDL_GetDefaultCursor(); }
+#pragma region Safety
 
-void Cursor::SetActive() { return SDL_SetCursor(cursor); }
+	void Cursor::DestroyCursor(SDL_Cursor* cursor) { SDL_FreeCursor(cursor); }
+	void Cursor::DontDestroyCursor(SDL_Cursor* cursor) {}
+	std::shared_ptr<SDL_Cursor> Cursor::MakeSharedPtr(SDL_Cursor* cursor) { return std::shared_ptr<SDL_Cursor>(cursor, DestroyCursor); }
+	Cursor Cursor::FromPtr(SDL_Cursor* cursor) { return Cursor(MakeSharedPtr(cursor)); }
+	Cursor Cursor::FromUnownedPtr(SDL_Cursor* cursor) { return Cursor(std::shared_ptr<SDL_Cursor>(cursor, DontDestroyCursor)); }
 
-void Cursor::Show() { SDL_ShowCursor(1); }
-void Cursor::Hide() { SDL_ShowCursor(0); }
-bool Cursor::Shown() { return SDL_ShowCursor(-1); }
+#pragma endregion
 
-Window GetMouseFocus() {
-	return SDL_GetMouseFocus();
-}
+#pragma region Costructors
 
-Uint32 GetMouseState(int& x, int& y) {
-	return SDL_GetMouseState(&x, &y);
-}
-Uint32 GetMouseState() {
-	return SDL_GetMouseState(NULL, NULL);
-}
+	Cursor::Cursor(std::shared_ptr<SDL_Cursor> cursor)
+		: cursor(cursor) {}
+	Cursor::Cursor(const Uint8* data, const Uint8* mask, int w, int h, int hot_x, int hot_y)
+		: Cursor(FromPtr(SDL_CreateCursor(data, mask, w, h, hot_x, hot_y))) {}
+	Cursor::Cursor(Surface& surface, int hot_x, int hot_y)
+		: Cursor(FromPtr(SDL_CreateColorCursor(surface.surface.get(), hot_x, hot_y))) { }
+	Cursor::Cursor(SystemCursor id)
+		: Cursor(FromPtr(SDL_CreateSystemCursor((SDL_SystemCursor)id))) {}
 
-Uint32 GetGlobalMouseState(int& x, int& y) {
-	return SDL_GetGlobalMouseState(&x, &y);
-}
-Uint32 GetGlobalMouseState() {
-	return SDL_GetGlobalMouseState(NULL, NULL);
-}
+	Cursor Cursor::GetCursor() { return FromUnownedPtr(SDL_GetCursor()); }
+	Cursor Cursor::GetDefaultCursor() { return FromUnownedPtr(SDL_GetDefaultCursor()); }
 
-Uint32 GetRelativeMouseState(int& x, int& y) {
-	return SDL_GetRelativeMouseState(&x, &y);
-}
+#pragma endregion
 
-void WarpMouseInWindow(Window& window, int x, int y) {
-	SDL_WarpMouseInWindow(window.window, x, y);
-}
-int WarpMouseGlobal(int x, int y) {
-	return SDL_WarpMouseGlobal(x, y);
-}
+	void Cursor::SetActive() { return SDL_SetCursor(cursor.get()); }
 
-int CaptureMouse(bool enabled) {
-	return SDL_CaptureMouse((SDL_bool)enabled);
-}
+	void Cursor::Show() { SDL_ShowCursor(1); }
+	void Cursor::Hide() { SDL_ShowCursor(0); }
+	bool Cursor::Shown() { return SDL_ShowCursor(-1); }
 
-int SetRelativeMouseMode(bool enabled) {
-	return SDL_SetRelativeMouseMode((SDL_bool)enabled);
-}
-bool GetRelativeMouseMode() {
-	return SDL_GetRelativeMouseMode();
+#pragma endregion
+
+#pragma region Mouse Information
+
+	Window GetMouseFocus() {
+		return Window::FromUnownedPtr(SDL_GetMouseFocus());
+	}
+
+	Uint32 GetMouseState(int& x, int& y) {
+		return SDL_GetMouseState(&x, &y);
+	}
+	Uint32 GetMouseState() {
+		return SDL_GetMouseState(NULL, NULL);
+	}
+
+	Uint32 GetGlobalMouseState(int& x, int& y) {
+		return SDL_GetGlobalMouseState(&x, &y);
+	}
+	Uint32 GetGlobalMouseState() {
+		return SDL_GetGlobalMouseState(NULL, NULL);
+	}
+
+	Uint32 GetRelativeMouseState(int& x, int& y) {
+		return SDL_GetRelativeMouseState(&x, &y);
+	}
+
+#pragma endregion
+
+#pragma region Mouse Control
+
+	void WarpMouseInWindow(Window& window, int x, int y) {
+		SDL_WarpMouseInWindow(window.window.get(), x, y);
+	}
+
+	int WarpMouseGlobal(int x, int y) {
+		return SDL_WarpMouseGlobal(x, y);
+	}
+
+	int CaptureMouse(bool enabled) {
+		return SDL_CaptureMouse((SDL_bool)enabled);
+	}
+
+	int SetRelativeMouseMode(bool enabled) {
+		return SDL_SetRelativeMouseMode((SDL_bool)enabled);
+	}
+
+	bool GetRelativeMouseMode() {
+		return SDL_GetRelativeMouseMode();
+	}
+
+#pragma endregion
+
 }

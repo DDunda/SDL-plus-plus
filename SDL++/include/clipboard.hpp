@@ -14,7 +14,7 @@ namespace SDL
      * \returns 0 on success or a negative error code on failure; call
      *          SDL_GetError() for more information.
      */
-    int SetClipboardText(const char* text) { return SetClipboardText(text); }
+    int SetClipboardText(const char* text) { return SDL_SetClipboardText(text); }
 
     /**
      * Get UTF-8 text from the clipboard, which must be freed with SDL_free().

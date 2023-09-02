@@ -5,6 +5,7 @@
 
 #include <SDL.h>
 #include "audio.hpp"
+#include "clipboard.hpp"
 #include "blendmode.hpp"
 #include "error.hpp"
 #include "input.hpp"
@@ -15,6 +16,7 @@
 #include "render.hpp"
 #include "SDL_ttf.hpp"
 #include "surface.hpp"
+#include "shape.hpp"
 #include "timer.hpp"
 
 namespace SDL {

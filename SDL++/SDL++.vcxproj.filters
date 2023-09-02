@@ -68,6 +68,12 @@
     <ClInclude Include="include\input.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\shape.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\clipboard.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ray.cpp">

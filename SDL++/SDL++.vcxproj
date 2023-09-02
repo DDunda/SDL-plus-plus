@@ -177,6 +177,7 @@
   <ItemGroup>
     <ClInclude Include="include\audio.hpp" />
     <ClInclude Include="include\blendmode.hpp" />
+    <ClInclude Include="include\clipboard.hpp" />
     <ClInclude Include="include\error.hpp" />
     <ClInclude Include="include\events.hpp" />
     <ClInclude Include="include\image.hpp" />
@@ -194,6 +195,7 @@
     <ClInclude Include="include\mouse.hpp" />
     <ClInclude Include="include\observer.hpp" />
     <ClInclude Include="include\input.hpp" />
+    <ClInclude Include="include\shape.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\input.cpp" />

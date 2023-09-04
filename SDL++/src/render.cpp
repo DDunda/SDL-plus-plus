@@ -25,15 +25,16 @@ namespace SDL {
 	Renderer::Renderer(Window& window)
 		: Renderer(MakeSharedPtr(SDL_GetRenderer(window.window.get()))) {}
 
+	Renderer::Renderer()
+		: Renderer(nullptr) {}
 	Renderer::Renderer(const Renderer& r)
-		: renderer(r.renderer) {}
+		: Renderer(r.renderer) {}
 	Renderer::Renderer(Renderer&& r) noexcept
-		: renderer(r.renderer) {}
-	Renderer& Renderer::operator=(Renderer that)
-	{
-		std::swap(renderer, that.renderer);
-		return *this;
-	}
+		{ std::swap(renderer, r.renderer); }
+	Renderer& Renderer::operator=(const Renderer& that)
+		{ renderer = that.renderer; return *this; }
+	Renderer& Renderer::operator=(Renderer&& that) noexcept
+		{ std::swap(renderer, that.renderer); return *this; }
 
 #pragma endregion 
 
@@ -322,19 +323,17 @@ namespace SDL {
 		: Texture(FromPtr(SDL_CreateTexture(renderer.renderer.get(), format, (SDL_TextureAccess)access, size.x, size.y))) {}
 	Texture::Texture(Renderer& renderer, Surface& surface)
 		: Texture(FromPtr(SDL_CreateTextureFromSurface(renderer.renderer.get(), surface.surface.get()))) {}
+
 	Texture::Texture()
 		: Texture(nullptr) {}
-	Texture::Texture(Texture& txt)
+	Texture::Texture(const Texture& txt)
 		: Texture(txt.texture) {}
 	Texture::Texture(Texture&& txt) noexcept
-		: Texture(txt.texture) {
-		txt.texture = NULL;
-	}
+		{ std::swap(texture, txt.texture); }
+	Texture& Texture::operator=(const Texture& that) noexcept
+		{ texture = that.texture; return *this; }
 	Texture& Texture::operator=(Texture&& that) noexcept
-	{
-		std::swap(texture, that.texture);
-		return *this;
-	}
+		{ std::swap(texture, that.texture); return *this; }
 
 #pragma endregion 
 
@@ -407,11 +406,11 @@ namespace SDL {
 		return returnVal;
 	}
 
-	namespace GL {
+	namespace GL
+	{
 
-		int GL::BindTexture(Texture& texture, FPoint& texsize) { return SDL_GL_BindTexture(texture.texture.get(), &texsize.w, &texsize.h); }
+		bool GL::BindTexture(Texture& texture, FPoint& texsize) { return SDL_GL_BindTexture(texture.texture.get(), &texsize.w, &texsize.h) == 0; }
 
-		int GL::UnbindTexture(Texture& texture) { return SDL_GL_UnbindTexture(texture.texture.get()); }
-
+		bool GL::UnbindTexture(Texture& texture) { return SDL_GL_UnbindTexture(texture.texture.get()) == 0; }
 	}
 }

@@ -43,9 +43,8 @@ namespace SDL {
 		// Evaluates to true if the surface needs to be locked before access.
 		bool MustLock() { return (surface->flags & SDL_RLEACCEL) != 0; }
 
-		Surface(Surface&& _surface) noexcept : surface(_surface.surface) { _surface.surface = nullptr; }
-
-		Surface(std::shared_ptr<SDL_Surface> _surface = nullptr) : surface(_surface) {}
+		inline Surface(std::shared_ptr<SDL_Surface> _surface = nullptr)
+			: surface(_surface) {}
 
 		/**
 		 *  \brief    Allocate and free an RGB surface.
@@ -65,16 +64,16 @@ namespace SDL {
 		 *
 		 *  \return   If the function runs out of memory, surface will be NULL.
 		 */
-		Surface(Uint32 flags, int width, int height, int depth, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask)
+		inline Surface(Uint32 flags, int width, int height, int depth, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask)
 			: Surface(MakeSharedPtr(SDL_CreateRGBSurface(flags, width, height, depth, Rmask, Gmask, Bmask, Amask))) {}
 
-		Surface(Uint32 flags, int width, int height, Uint32 format)
+		inline Surface(Uint32 flags, int width, int height, Uint32 format)
 			: Surface(MakeSharedPtr(SDL_CreateRGBSurfaceWithFormat(flags, width, height, SDL_BITSPERPIXEL(format), format))) {}
 
-		Surface(void* pixels, int width, int height, int depth, int pitch, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask)
+		inline Surface(void* pixels, int width, int height, int depth, int pitch, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask)
 			: Surface(MakeSharedPtr(SDL_CreateRGBSurfaceFrom(pixels, width, height, depth, pitch, Rmask, Gmask, Bmask, Amask))) {}
 
-		Surface(void* pixels, int width, int height, int pitch, Uint32 format)
+		inline Surface(void* pixels, int width, int height, int pitch, Uint32 format)
 			: Surface(MakeSharedPtr(SDL_CreateRGBSurfaceWithFormatFrom(pixels, width, height, SDL_BITSPERPIXEL(format), pitch, format))) {}
 
 		/**
@@ -82,21 +81,22 @@ namespace SDL {
 		 *
 		 *  \note     If \c freesrc is true, the stream will be closed after being read.
 		 */
-		Surface(SDL_RWops* src, bool freesrc)
+		inline Surface(SDL_RWops* src, bool freesrc)
 			: Surface(MakeSharedPtr(SDL_LoadBMP_RW(src, freesrc))) {}
 
 		// Load a surface from a file.
-		Surface(const char* file) : Surface(SDL_RWFromFile(file, "rb"), true) {}
+		inline Surface(const char* file) : Surface(SDL_RWFromFile(file, "rb"), true) {}
 
-		constexpr Surface& operator=(Surface&& other) noexcept
-		{
-			if (this != &other)
-			{
-				surface = other.surface;
-				other.surface = NULL;
-			}
-			return *this;
-		}
+		inline Surface()
+			: Surface(nullptr) {};
+		inline Surface(const Surface& s)
+			: Surface(s.surface) {};
+		inline Surface(Surface&& s) noexcept
+			{ std::swap(surface, s.surface); }
+		inline Surface& operator=(const Surface& that)
+			{ surface = that.surface; };
+		inline Surface& operator=(Surface&& that) noexcept
+			{ std::swap(surface, that.surface); return *this; }
 
 		/**
 		 *  \brief    Set the palette used by a surface.

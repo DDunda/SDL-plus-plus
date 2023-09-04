@@ -47,7 +47,7 @@ namespace SDL {
 		std::shared_ptr<SDL_Renderer> renderer = nullptr;
 		int error = 0;
 
-		Renderer(std::shared_ptr<SDL_Renderer> _renderer = nullptr);
+		Renderer(std::shared_ptr<SDL_Renderer> _renderer);
 
 		/**
 		 *  \brief    Create a 2D rendering context for a window.
@@ -73,9 +73,11 @@ namespace SDL {
 		// Get the renderer associated with a window.
 		Renderer(Window& window);
 
+		Renderer();
 		Renderer(const Renderer& r);
 		Renderer(Renderer&& r) noexcept;
-		Renderer& operator=(Renderer that);
+		Renderer& operator=(const Renderer& r);
+		Renderer& operator=(Renderer&& r) noexcept;
 
 		/**
 		 *  \brief    Set the drawing scale for rendering on the current target.
@@ -1084,8 +1086,9 @@ namespace SDL {
 		Texture(std::shared_ptr<SDL_Texture> texture);
 
 		Texture();
-		Texture(Texture& txt);
+		Texture(const Texture& txt);
 		Texture(Texture&& txt) noexcept;
+		Texture& operator=(const Texture& that) noexcept;
 		Texture& operator=(Texture&& that) noexcept;
 
 		/**
@@ -1482,18 +1485,18 @@ namespace SDL {
 		 *  \param    texture: The SDL texture to bind
 		 *  \param    texsize: A reference to floats that will be filled with the texture size
 		 *
-		 *  \return   0 on success, or -1 if the operation is not supported
+		 *  \return   true on success, or false if the operation is not supported
 		 */
-		int BindTexture(Texture& texture, FPoint& texsize);
+		bool BindTexture(Texture& texture, FPoint& texsize);
 
 		/**
 		 *  \brief    Unbind a texture from the current OpenGL/ES/ES2 context.
 		 *
 		 *  \param    texture: The SDL texture to unbind
 		 *
-		 *  \return   0 on success, or -1 if the operation is not supported
+		 *  \return   true on success, or false if the operation is not supported
 		 */
-		int UnbindTexture(Texture& texture);
+		bool UnbindTexture(Texture& texture);
 	}
 }
 

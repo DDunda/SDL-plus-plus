@@ -18,9 +18,12 @@ namespace SDL {
 	typedef Subject<const Event&> InputSubject;
 	typedef Observer<const Event&> InputObserver;
 
-	class Input : public InputSubject {
-		static Input* instance;
+	typedef ISubject<const Event&> IInputSubject;
+	typedef IObserver<const Event&> IInputObserver;
+
+	class Input {
 	public:
+		static InputSubject* untyped_subject;
 		static std::map<Event::Type, InputSubject*> typed_subjects;
 
 		static Point prev_mouse;
@@ -52,33 +55,58 @@ namespace SDL {
 		// How long a scancode has been held for, or was last held for
 		static Uint32 scancodeDuration(Scancode i);
 
-		static void RegisterEventType(Event::Type type, InputObserver& observer);
-		static void UnregisterEventType(Event::Type type, InputObserver& observer);
+		static void RegisterEventType(Event::Type type, IInputObserver& observer);
+		static void UnregisterEventType(Event::Type type, IInputObserver& observer);
 
-		static constexpr void RegisterUntyped  (InputObserver& observer) { instance->Register(observer);   }
-		static constexpr void UnregisterUntyped(InputObserver& observer) { instance->Unregister(observer); }
+		static inline void RegisterUntyped  (IInputObserver& observer) { untyped_subject->Register(observer);   }
+		static inline void UnregisterUntyped(IInputObserver& observer) { untyped_subject->Unregister(observer); }
 
+		static constexpr InputSubject& GetUntypedEventSubject() { return *untyped_subject; }
 		static InputSubject& GetTypedEventSubject(Event::Type type);
 
-		static constexpr void UpdateBuffers()
+		static inline void UpdateBuffers()
 		{
 			prev_mouse = mouse;
 			prev_buttons = buttons;
 			prev_scancodes = scancodes;
 		}
 
-		static void Notify(Event e);
-		static void ProcessEvent(Event e);
-
-		static constexpr int Init()
+		static inline void Notify(const Event& e)
 		{
-			if (instance != NULL) return 1;
+			if (typed_subjects.count(e.type))
+				typed_subjects[e.type]->Notify(e);
 
-			instance = new Input();
+			untyped_subject->Notify(e);
+		}
+
+		static void ProcessEvent(const Event& e);
+
+		static inline int Init()
+		{
+			untyped_subject = new InputSubject();
 			return 0;
 		}
-		static int Quit();
-		static void Update();
+
+		static inline int Quit()
+		{
+			for (auto pair : typed_subjects) delete pair.second;
+
+			typed_subjects.clear();
+
+			if (untyped_subject != nullptr) {
+				delete untyped_subject;
+				untyped_subject = nullptr;
+			}
+
+			return 0;
+		}
+
+		static inline void Update()
+		{
+			Event e;
+			UpdateBuffers();
+			while (e.Poll()) ProcessEvent(e);
+		}
 	};
 }
 

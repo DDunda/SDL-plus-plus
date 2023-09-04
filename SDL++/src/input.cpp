@@ -2,8 +2,6 @@
 
 namespace SDL
 {
-	Input* Input::instance = NULL;
-
 	Point Input::prev_mouse;
 	Point Input::mouse;
 
@@ -50,18 +48,19 @@ namespace SDL
 #pragma endregion
 
 #pragma region Events
-
+	
+	InputSubject* Input::untyped_subject = nullptr;
 	std::map<Event::Type, InputSubject*> Input::typed_subjects = {};
 	std::map<Event::Type, Uint32> Input::event_at = {};
 
-	void Input::RegisterEventType(Event::Type type, InputObserver& observer) {
+	void Input::RegisterEventType(Event::Type type, IInputObserver& observer) {
 		if (!typed_subjects.count(type))
 		{
 			typed_subjects[type] = new InputSubject();
 		}
 		typed_subjects[type]->Register(observer);
 	}
-	void Input::UnregisterEventType(Event::Type type, InputObserver& observer) {
+	void Input::UnregisterEventType(Event::Type type, IInputObserver& observer) {
 		if (!typed_subjects.count(type)) return;
 		typed_subjects[type]->Unregister(observer);
 	}
@@ -76,15 +75,9 @@ namespace SDL
 		return *(typed_subjects[type]);
 	}
 
-	void Input::Notify(Event e) {
-		if (typed_subjects.count(e.type))
-			typed_subjects[e.type]->Notify(e);
-
-		((InputSubject*)instance)->Notify(e);
-	}
-
-	void Input::ProcessEvent(Event e) {
-		Uint32 timestamp = e.common.timestamp;
+	void Input::ProcessEvent(const Event& e)
+	{
+		const Uint32 timestamp = e.common.timestamp;
 
 		switch (e.type) {
 		case Event::Type::MOUSEMOTION:
@@ -92,18 +85,14 @@ namespace SDL
 			break;
 
 		case Event::Type::MOUSEBUTTONDOWN:
-		{
-			Uint8 button = e.button.button;
-			button_down_at[button] = timestamp;
-			buttons[button] = true;
-		}	break;
+			button_down_at[e.button.button] = timestamp;
+			buttons[e.button.button] = true;
+			break;
 
 		case Event::Type::MOUSEBUTTONUP:
-		{
-			Uint8 button = e.button.button;
-			button_up_at[button] = timestamp;
-			buttons[button] = false;
-		}	break;
+			button_up_at[e.button.button] = timestamp;
+			buttons[e.button.button] = false;
+			break;
 
 		case Event::Type::KEYDOWN:
 		{
@@ -126,22 +115,4 @@ namespace SDL
 	}
 
 #pragma endregion
-
-	int Input::Quit()
-	{
-		if (instance == NULL) return 1;
-
-		for (auto pair : typed_subjects) delete pair.second;
-
-		typed_subjects.clear();
-
-		delete instance;
-		return 0;
-	}
-
-	void Input::Update() {
-		Event e;
-		UpdateBuffers();
-		while (e.Poll()) ProcessEvent(e);
-	}
 };

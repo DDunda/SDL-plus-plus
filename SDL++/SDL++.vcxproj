@@ -180,7 +180,9 @@
     <ClInclude Include="include\clipboard.hpp" />
     <ClInclude Include="include\error.hpp" />
     <ClInclude Include="include\events.hpp" />
-    <ClInclude Include="include\image.hpp" />
+    <ClInclude Include="include\hidapi.hpp" />
+    <ClInclude Include="include\hints.hpp" />
+    <ClInclude Include="include\SDL_image.hpp" />
     <ClInclude Include="include\pixels.hpp" />
     <ClInclude Include="include\ray.hpp" />
     <ClInclude Include="include\rect.hpp" />
@@ -202,7 +204,7 @@
     <ClCompile Include="src\audio.cpp" />
     <ClCompile Include="src\blendmode.cpp" />
     <ClCompile Include="src\error.cpp" />
-    <ClCompile Include="src\image.cpp" />
+    <ClCompile Include="src\SDL_image.cpp" />
     <ClCompile Include="src\mouse.cpp" />
     <ClCompile Include="src\pixels.cpp" />
     <ClCompile Include="src\ray.cpp" />

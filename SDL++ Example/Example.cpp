@@ -1,9 +1,10 @@
 #include<SDL.hpp>
-
-using namespace SDL;
+//#include<SDL_image.hpp>
 
 SDL_HitTestResult hit_test(SDL_Window* win, const SDL_Point* point, void* data)
 {
+	using namespace SDL;
+
 	Point size;
 
 	SDL_GetWindowSize(win, &size.w, &size.h);
@@ -34,10 +35,9 @@ SDL_HitTestResult hit_test(SDL_Window* win, const SDL_Point* point, void* data)
 	return (SDL_HitTestResult)(point->y < 50 ? HitTestResult::DRAGGABLE : HitTestResult::NORMAL);
 }
 
-int main(int argc, char* argv[])
+void Program(int argc, char* argv[])
 {
-	Init();
-	Input::Init();
+	using namespace SDL;
 
 	Point& mouse = Input::mouse;
 
@@ -103,10 +103,20 @@ int main(int argc, char* argv[])
 		Delay(16);
 	}
 
-	Input::Quit();
-	Quit();
-
 	w.SetHitTest(NULL, NULL);
+}
+
+int main(int argc, char* argv[])
+{
+	SDL::Init();
+	//SDL::IMG::Init(IMG_INIT_PNG);
+	SDL::Input::Init();
+
+	Program(argc, argv);
+
+	SDL::Input::Quit();
+	//SDL::IMG::Quit();
+	SDL::Quit();
 
 	return 0;
 }

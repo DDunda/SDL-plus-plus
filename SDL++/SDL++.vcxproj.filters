@@ -23,7 +23,7 @@
     <ClInclude Include="include\events.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\image.hpp">
+    <ClInclude Include="include\SDL_image.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\pixels.hpp">
@@ -74,6 +74,12 @@
     <ClInclude Include="include\clipboard.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\hints.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hidapi.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ray.cpp">
@@ -91,7 +97,7 @@
     <ClCompile Include="src\mouse.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\image.cpp">
+    <ClCompile Include="src\SDL_image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\blendmode.cpp">

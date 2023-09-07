@@ -177,7 +177,6 @@
   <ItemGroup>
     <ClCompile Include="..\SDL++\src\audio.cpp" />
     <ClCompile Include="..\SDL++\src\blendmode.cpp" />
-    <ClCompile Include="..\SDL++\src\error.cpp" />
     <ClCompile Include="..\SDL++\src\input.cpp" />
     <ClCompile Include="..\SDL++\src\mouse.cpp" />
     <ClCompile Include="..\SDL++\src\pixels.cpp" />

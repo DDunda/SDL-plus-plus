@@ -155,7 +155,6 @@
   <ItemGroup>
     <ClCompile Include="$(SDLpp)\src\audio.cpp" />
     <ClCompile Include="$(SDLpp)\src\blendmode.cpp" />
-    <ClCompile Include="$(SDLpp)\src\error.cpp" />
     <ClCompile Include="$(SDLpp)\src\input.cpp" />
     <ClCompile Include="$(SDLpp)\src\mouse.cpp" />
     <ClCompile Include="$(SDLpp)\src\pixels.cpp" />

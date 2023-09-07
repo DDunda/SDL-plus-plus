@@ -24,9 +24,6 @@
     <ClCompile Include="..\SDL++\src\blendmode.cpp">
       <Filter>SDL++</Filter>
     </ClCompile>
-    <ClCompile Include="..\SDL++\src\error.cpp">
-      <Filter>SDL++</Filter>
-    </ClCompile>
     <ClCompile Include="..\SDL++\src\input.cpp">
       <Filter>SDL++</Filter>
     </ClCompile>

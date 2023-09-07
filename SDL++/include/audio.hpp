@@ -704,21 +704,58 @@ namespace SDL {
 		AudioStream& Clear();
 	};
 
-	/**
-	 *  This takes two audio buffers of the playing audio format and mixes
-	 *  them, performing addition, volume adjustment, and overflow clipping.
-	 *  The volume ranges from 0 - 128, and should be set to ::SDL_MIX_MAXVOLUME
-	 *  for full audio volume.  Note this does not change hardware volume.
-	 *  This is provided for convenience -- you can mix your own audio data.
-	 */
-	void MixAudio(Uint8* dst, const Uint8* src, Uint32 len, int volume = SDL_MIX_MAXVOLUME);
+
+	constexpr unsigned MIX_MAXVOLUME = SDL_MIX_MAXVOLUME;
 
 	/**
-	 *  This works like MixAudio(), but you specify the audio format instead of
-	 *  using the format of audio device 1. Thus it can be used when no audio
-	 *  device is open at all.
+	 * This function is a legacy means of mixing audio.
+	 *
+	 * This function is equivalent to calling...
+	 *
+	 * ```c
+	 * MixAudioFormat(dst, src, format, len, volume);
+	 * ```
+	 *
+	 * ...where `format` is the obtained format of the audio device from the
+	 * legacy SDL_OpenAudio() function.
+	 *
+	 * \param dst the destination for the mixed audio
+	 * \param src the source audio buffer to be mixed
+	 * \param len the length of the audio buffer in bytes
+	 * \param volume ranges from 0 - 128, and should be set to MIX_MAXVOLUME
+	 *               for full audio volume
 	 */
-	void MixAudioFormat(Uint8* dst, const Uint8* src, AudioFormat format, Uint32 len, int volume = SDL_MIX_MAXVOLUME);
+	void MixAudio(Uint8* dst, const Uint8* src, Uint32 len, int volume = MIX_MAXVOLUME);
+
+	/**
+	 * Mix audio data in a specified format.
+	 *
+	 * This takes an audio buffer `src` of `len` bytes of `format` data and mixes
+	 * it into `dst`, performing addition, volume adjustment, and overflow
+	 * clipping. The buffer pointed to by `dst` must also be `len` bytes of
+	 * `format` data.
+	 *
+	 * This is provided for convenience -- you can mix your own audio data.
+	 *
+	 * Do not use this function for mixing together more than two streams of
+	 * sample data. The output from repeated application of this function may be
+	 * distorted by clipping, because there is no accumulator with greater range
+	 * than the input (not to mention this being an inefficient way of doing it).
+	 *
+	 * It is a common misconception that this function is required to write audio
+	 * data to an output stream in an audio callback. While you can do that,
+	 * MixAudioFormat() is really only needed when you're mixing a single
+	 * audio stream with a volume adjustment.
+	 *
+	 * \param dst the destination for the mixed audio
+	 * \param src the source audio buffer to be mixed
+	 * \param format the SDL_AudioFormat structure representing the desired audio
+	 *               format
+	 * \param len the length of the audio buffer in bytes
+	 * \param volume ranges from 0 - 128, and should be set to MIX_MAXVOLUME
+	 *               for full audio volume
+	 */
+	void MixAudioFormat(Uint8* dst, const Uint8* src, AudioFormat format, Uint32 len, int volume = MIX_MAXVOLUME);
 }
 
 #endif

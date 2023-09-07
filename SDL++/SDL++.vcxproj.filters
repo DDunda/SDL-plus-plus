@@ -80,6 +80,9 @@
     <ClInclude Include="include\hidapi.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\SDL_mixer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ray.cpp">
@@ -101,9 +104,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\blendmode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\error.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\pixels.cpp">

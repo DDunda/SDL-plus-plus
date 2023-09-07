@@ -1,5 +1,6 @@
 #include<SDL.hpp>
 //#include<SDL_image.hpp>
+//#include<SDL_mixer.hpp>
 
 SDL_HitTestResult hit_test(SDL_Window* win, const SDL_Point* point, void* data)
 {
@@ -110,11 +111,13 @@ int main(int argc, char* argv[])
 {
 	SDL::Init();
 	//SDL::IMG::Init(IMG_INIT_PNG);
+	//SDL::Mix::Init(MIX_INIT_MP3 | MIX_INIT_OGG);
 	SDL::Input::Init();
 
 	Program(argc, argv);
 
 	SDL::Input::Quit();
+	//SDL::Mix::Quit();
 	//SDL::IMG::Quit();
 	SDL::Quit();
 

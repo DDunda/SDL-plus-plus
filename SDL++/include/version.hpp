@@ -1,7 +1,6 @@
+#ifndef SDL_version_hpp_
+#define SDL_version_hpp_
 #pragma once
-
-#ifndef SDLpp_version_h_
-#define SDLpp_version_h_
 
 #include <SDL_version.h>
 
@@ -28,6 +27,7 @@ namespace SDL
 		inline constexpr Version(const SDL_version& v)
 			: SDL_version(v) {}
 
+#if SDL_MAJOR_VERSION < 3
 		/**
 		 *  \brief    This macro turns the version numbers into a numeric value:
 		 *  \verbatim
@@ -38,6 +38,7 @@ namespace SDL
 		 */
 		inline constexpr Uint16 AsNum() const
 			{ return SDL_VERSIONNUM(major, minor, patch); }
+#endif
 
 		inline constexpr bool operator==(const Version& other) const
 		{
@@ -91,22 +92,50 @@ namespace SDL
 		{ return SDL_VERSION_ATLEAST(major, minor, patch); }
 
 	/**
-	 *  \brief   Get the code revision of SDL that is linked against your program.
+	 * Get the code revision of SDL that is linked against your program.
 	 *
-	 *  \details Returns an arbitrary string (a hash value) uniquely identifying the
-	 *           exact revision of the SDL library in use, and is only useful in comparing
-	 *           against other revisions. It is NOT an incrementing number.
+	 * This value is the revision of the code you are linked with and may be
+	 * different from the code you are compiling with, which is found in the
+	 * constant SDL_REVISION.
+	 *
+	 * The revision is arbitrary string (a hash value) uniquely identifying the
+	 * exact revision of the SDL library in use, and is only useful in comparing
+	 * against other revisions. It is NOT an incrementing number.
+	 *
+	 * If SDL wasn't built from a git repository with the appropriate tools, this
+	 * will return an empty string.
+	 *
+	 * Prior to SDL 2.0.16, before development moved to GitHub, this returned a
+	 * hash for a Mercurial repository.
+	 *
+	 * You shouldn't use this function for anything but logging it for debugging
+	 * purposes. The string is not intended to be reliable in any way.
+	 *
+	 * \returns an arbitrary string, uniquely identifying the exact revision of
+	 *          the SDL library in use.
 	 */
-	const char* GetRevision();
+	inline const char* GetRevision()
+		{ return SDL_GetRevision(); }
 
-	/**
-	 *  \brief   Get the revision number of SDL that is linked against your program.
-	 *
-	 *  \details Returns a number uniquely identifying the exact revision of the SDL
-	 *           library in use. It is an incrementing number based on commits to
-	 *           hg.libsdl.org.
-	 */
-	int GetRevisionNumber();
+	 /**
+	  * Obsolete function, do not use.
+	  *
+	  * When SDL was hosted in a Mercurial repository, and was built carefully,
+	  * this would return the revision number that the build was created from. This
+	  * number was not reliable for several reasons, but more importantly, SDL is
+	  * now hosted in a git repository, which does not offer numbers at all, only
+	  * hashes. This function only ever returns zero now. Don't use it.
+	  *
+	  * Before SDL 2.0.16, this might have returned an unreliable, but non-zero
+	  * number.
+	  *
+	  * \deprecated Use SDL_GetRevision() instead; if SDL was carefully built, it
+	  *             will return a git hash.
+	  *
+	  * \returns zero, always, in modern SDL releases.
+	  */
+	inline int GetRevisionNumber()
+		{ return SDL_GetRevisionNumber(); }
 }
 
 #endif

@@ -1,6 +1,7 @@
 #include<SDL_ttf.hpp>
 
-namespace SDL::TTF {
+namespace SDL::TTF
+{
 	const Version* Linked_Version() { return (Version*)TTF_Linked_Version(); }
 	void ByteSwappedUNICODE(bool swapped) { TTF_ByteSwappedUNICODE((SDL_bool)swapped); }
 	int Init() { return TTF_Init(); }

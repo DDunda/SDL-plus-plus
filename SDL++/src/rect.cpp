@@ -36,10 +36,10 @@ namespace SDL
 
 	FPoint& FPoint::operator*=(double m) { x *= m; y *= m; return *this; }
 	FPoint& FPoint::operator/=(double m) { x /= m; y /= m; return *this; }
-	FPoint& FPoint::operator*=(float m) { x *= m; y *= m; return *this; }
-	FPoint& FPoint::operator/=(float m) { x /= m; y /= m; return *this; }
-	FPoint& FPoint::operator*=(int m) { x *= m; y *= m; return *this; }
-	FPoint& FPoint::operator/=(int m) { x /= m; y /= m; return *this; }
+	FPoint& FPoint::operator*=(float m ) { x *= m; y *= m; return *this; }
+	FPoint& FPoint::operator/=(float m ) { x /= m; y /= m; return *this; }
+	FPoint& FPoint::operator*=(int m   ) { x *= m; y *= m; return *this; }
+	FPoint& FPoint::operator/=(int m   ) { x /= m; y /= m; return *this; }
 #pragma endregion
 
 #pragma endregion
@@ -71,10 +71,10 @@ namespace SDL
 
 	Point& Point::operator*=(double m) { x *= m; y *= m; return *this; }
 	Point& Point::operator/=(double m) { x /= m; y /= m; return *this; }
-	Point& Point::operator*=(float m) { x *= m; y *= m; return *this; }
-	Point& Point::operator/=(float m) { x /= m; y /= m; return *this; }
-	Point& Point::operator/=(int m) { x /= m; y /= m; return *this; }
-	Point& Point::operator*=(int m) { x *= m; y *= m; return *this; }
+	Point& Point::operator*=(float m ) { x *= m; y *= m; return *this; }
+	Point& Point::operator/=(float m ) { x /= m; y /= m; return *this; }
+	Point& Point::operator/=(int m   ) { x /= m; y /= m; return *this; }
+	Point& Point::operator*=(int m   ) { x *= m; y *= m; return *this; }
 #pragma endregion
 
 #pragma endregion
@@ -119,19 +119,6 @@ namespace SDL
 
 	float Rect::diagonal() const { return size.mag(); }
 
-	template <typename iterator>
-	bool Rect::enclosePoints(iterator begin, iterator end, const Rect& clip) {
-		std::vector<SDL_Point> points;
-		points.insert(points.begin(), begin, end);
-		return SDL_EnclosePoints(points.data(), points.size(), &clip.rect, &rect);
-	}
-	template <typename iterator>
-	bool Rect::enclosePoints(iterator begin, iterator end) {
-		std::vector<SDL_Point> points;
-		points.insert(points.begin(), begin, end);
-		return SDL_EnclosePoints(points.data(), points.size(), NULL, &rect);
-	}
-
 	bool Rect::intersectsLine(const Point& P1, const Point& P2) {
 		Rect result(P1, P2);
 		return SDL_IntersectRectAndLine(&rect, &result.x, &result.y, &result.w, &result.h);
@@ -160,15 +147,6 @@ namespace SDL
 	Rect& Rect::operator*=(int m) { size *= m; return *this; }
 	Rect& Rect::operator/=(int m) { size /= m; return *this; }
 #pragma endregion
-
-#pragma endregion
-
-#pragma region Stream Serialisation
-
-	std::ostream& SDL::operator<<(std::ostream& os, const FPoint& v) { return os << (std::string)v; }
-	std::ostream& SDL::operator<<(std::ostream& os, const  Point& v) { return os << (std::string)v; }
-	std::ostream& SDL::operator<<(std::ostream& os, const  FRect& r) { return os << (std::string)r; }
-	std::ostream& SDL::operator<<(std::ostream& os, const   Rect& r) { return os << (std::string)r; }
 
 #pragma endregion
 }

@@ -1,10 +1,11 @@
+#ifndef SDL_scancode_hpp_
+#define SDL_scancode_hpp_
 #pragma once
 
-#ifndef SDLpp_scancode_h_
-#define SDLpp_scancode_h_
-
 #include <SDL_scancode.h>
-namespace SDL {
+
+namespace SDL
+{
 	enum class Scancode
 	{
 		UNKNOWN = SDL_SCANCODE_UNKNOWN,

@@ -1,14 +1,17 @@
+#include <SDL_version.h>
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+#ifndef SDL_mouse_hpp_
+#define SDL_mouse_hpp_
 #pragma once
 
-#ifndef SDLpp_mouse_h_
-#define SDLpp_mouse_h_
+#include <SDL_mouse.h>
+
+#include "video.hpp"
 
 #include <memory>
 
-#include <SDL_mouse.h>
-#include "video.hpp"
-
-namespace SDL {
+namespace SDL
+{
 	// Cursor types creating system cursors
 	enum class SystemCursor {
 		ARROW = SDL_SYSTEM_CURSOR_ARROW,	     // Arrow
@@ -117,48 +120,73 @@ namespace SDL {
 	 */
 	Uint32 GetMouseState();
 
+#if SDL_VERSION_ATLEAST(2, 0, 4)
 	/**
 	 *  \brief Get the current state of the mouse, in relation to the desktop
 	 *
-	 *  This works just like SDL_GetMouseState(), but the coordinates will be
+	 *  This works just like GetMouseState(), but the coordinates will be
 	 *  reported relative to the top-left of the desktop. This can be useful if
 	 *  you need to track the mouse outside of a specific window and
-	 *  SDL_CaptureMouse() doesn't fit your needs. For example, it could be
+	 *  CaptureMouse() doesn't fit your needs. For example, it could be
 	 *  useful if you need to track the mouse while dragging a window, where
 	 *  coordinates relative to a window might not be in sync at all times.
 	 *
-	 *  \note SDL_GetMouseState() returns the mouse position as SDL understands
+	 *  \note GetMouseState() returns the mouse position as SDL understands
 	 *		it from the last pump of the event queue. This function, however,
 	 *		queries the OS for the current mouse position, and as such, might
 	 *		be a slightly less efficient function. Unless you know what you're
 	 *		doing and have a good reason to use this function, you probably want
-	 *		SDL_GetMouseState() instead.
+	 *		GetMouseState() instead.
 	 *
 	 *  \param x Returns the current X coord, relative to the desktop.
 	 *  \param y Returns the current Y coord, relative to the desktop.
 	 *  \return The current button state as a bitmask, which can be tested using ButtonMask.
 	 */
-	Uint32 GetGlobalMouseState(int& x, int& y);
+	inline Uint32 GetGlobalMouseState(int& x, int& y) { return SDL_GetGlobalMouseState(&x, &y); }
+
 	/**
 	 *  \brief Get the current state of the mouse, in relation to the desktop
 	 *
-	 *  This works just like SDL_GetMouseState(), but the coordinates will be
+	 *  This works just like GetMouseState(), but the coordinates will be
 	 *  reported relative to the top-left of the desktop. This can be useful if
 	 *  you need to track the mouse outside of a specific window and
-	 *  SDL_CaptureMouse() doesn't fit your needs. For example, it could be
+	 *  CaptureMouse() doesn't fit your needs. For example, it could be
 	 *  useful if you need to track the mouse while dragging a window, where
 	 *  coordinates relative to a window might not be in sync at all times.
 	 *
-	 *  \note SDL_GetMouseState() returns the mouse position as SDL understands
+	 *  \note GetMouseState() returns the mouse position as SDL understands
 	 *		it from the last pump of the event queue. This function, however,
 	 *		queries the OS for the current mouse position, and as such, might
 	 *		be a slightly less efficient function. Unless you know what you're
 	 *		doing and have a good reason to use this function, you probably want
-	 *		SDL_GetMouseState() instead.
+	 *		GetMouseState() instead.
+	 *
+	 *  \param pos Returns the current coordinates, relative to the desktop.
+	 *  \return The current button state as a bitmask, which can be tested using ButtonMask.
+	 */
+	inline Uint32 GetGlobalMouseState(Point& pos) { return GetGlobalMouseState(pos.x, pos.y); }
+
+	/**
+	 *  \brief Get the current state of the mouse, in relation to the desktop
+	 *
+	 *  This works just like GetMouseState(), but the coordinates will be
+	 *  reported relative to the top-left of the desktop. This can be useful if
+	 *  you need to track the mouse outside of a specific window and
+	 *  CaptureMouse() doesn't fit your needs. For example, it could be
+	 *  useful if you need to track the mouse while dragging a window, where
+	 *  coordinates relative to a window might not be in sync at all times.
+	 *
+	 *  \note GetMouseState() returns the mouse position as SDL understands
+	 *		it from the last pump of the event queue. This function, however,
+	 *		queries the OS for the current mouse position, and as such, might
+	 *		be a slightly less efficient function. Unless you know what you're
+	 *		doing and have a good reason to use this function, you probably want
+	 *		GetMouseState() instead.
 	 *
 	 *  \return The current button state as a bitmask, which can be tested using ButtonMask.
 	 */
-	Uint32 GetGlobalMouseState();
+	inline Uint32 GetGlobalMouseState() { return SDL_GetGlobalMouseState(NULL, NULL); }
+#endif
 
 	/**
 	 *  Retrieve the relative state of the mouse.
@@ -258,4 +286,5 @@ namespace SDL {
 	};
 }
 
+#endif
 #endif

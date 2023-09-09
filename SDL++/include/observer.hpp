@@ -1,7 +1,6 @@
+#ifndef observer_hpp_
+#define observer_hpp_
 #pragma once
-
-#ifndef SDLpp_observer_h_
-#define SDLpp_observer_h_
 
 #include <vector>
 #include <map>

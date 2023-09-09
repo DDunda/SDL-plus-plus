@@ -21,9 +21,6 @@
     <ClCompile Include="..\SDL++\src\audio.cpp">
       <Filter>SDL++</Filter>
     </ClCompile>
-    <ClCompile Include="..\SDL++\src\blendmode.cpp">
-      <Filter>SDL++</Filter>
-    </ClCompile>
     <ClCompile Include="..\SDL++\src\input.cpp">
       <Filter>SDL++</Filter>
     </ClCompile>
@@ -33,22 +30,13 @@
     <ClCompile Include="..\SDL++\src\pixels.cpp">
       <Filter>SDL++</Filter>
     </ClCompile>
-    <ClCompile Include="..\SDL++\src\ray.cpp">
-      <Filter>SDL++</Filter>
-    </ClCompile>
     <ClCompile Include="..\SDL++\src\rect.cpp">
       <Filter>SDL++</Filter>
     </ClCompile>
     <ClCompile Include="..\SDL++\src\render.cpp">
       <Filter>SDL++</Filter>
     </ClCompile>
-    <ClCompile Include="..\SDL++\src\SDL_image.cpp">
-      <Filter>SDL++</Filter>
-    </ClCompile>
     <ClCompile Include="..\SDL++\src\SDL_ttf.cpp">
-      <Filter>SDL++</Filter>
-    </ClCompile>
-    <ClCompile Include="..\SDL++\src\version.cpp">
       <Filter>SDL++</Filter>
     </ClCompile>
     <ClCompile Include="Example.cpp">

@@ -1,7 +1,7 @@
 #include "render.hpp"
 
-namespace SDL {
-
+namespace SDL
+{
 #pragma region Renderer
 
 #pragma region Safety

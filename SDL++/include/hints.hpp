@@ -1,9 +1,11 @@
+#include <SDL_version.h>
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+#ifndef SDL_hints_hpp_
+#define SDL_hints_hpp_
 #pragma once
 
-#ifndef SDLpp_hints_h_
-#define SDLpp_hints_h_
-
 #include <SDL_hints.h>
+
 #include <string>
 
 namespace SDL
@@ -57,6 +59,7 @@ namespace SDL
 	inline bool SetHint(const std::string& name, const std::string& value)
 		{ return SDL_SetHint(name.c_str(), value.c_str()); }
 
+#if SDL_VERSION_ATLEAST(2, 24, 0)
 	/**
 	 * Reset a hint to the default value.
 	 *
@@ -71,7 +74,9 @@ namespace SDL
 		{ return SDL_ResetHint(name) == SDL_TRUE; }
 	inline bool ResetHint(const std::string& name)
 		{ return ResetHint(name.c_str()); }
+#endif
 
+#if SDL_VERSION_ATLEAST(2, 26, 0)
 	/**
 	 * Reset all hints to the default values.
 	 *
@@ -81,6 +86,7 @@ namespace SDL
 	 */
 	inline void ResetHints()
 		{ SDL_ResetHints(); }
+#endif
 
 	/**
 	 * Get the value of a hint.
@@ -119,6 +125,7 @@ namespace SDL
 		return true;
 	}
 
+#if SDL_VERSION_ATLEAST(2, 0, 5)
 	/**
 	 * Get the boolean value of a hint variable.
 	 *
@@ -132,6 +139,7 @@ namespace SDL
 	inline bool GetHintBoolean(const std::string& name, bool default_value)
 		{ return GetHintBoolean(name.c_str(), default_value); }
 
+
 	/**
 	 * Get the boolean value of a hint variable.
 	 *
@@ -142,6 +150,7 @@ namespace SDL
 		{ return GetHintBoolean(name, false); }
 	inline bool GetHintBoolean(const std::string& name)
 		{ return GetHintBoolean(name.c_str()); }
+#endif
 
 	/**
 	 * Type definition of the hint callback function.
@@ -192,4 +201,5 @@ namespace SDL
 	inline void ClearHints() { SDL_ClearHints(); }
 }
 
+#endif
 #endif

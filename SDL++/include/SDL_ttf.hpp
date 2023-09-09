@@ -1,16 +1,17 @@
+#include <SDL_ttf.h>
+#if SDL_TTF_VERSION_ATLEAST(2,0,12)
+#ifndef SDL_ttf_hpp_
+#define SDL_ttf_hpp_
 #pragma once
 
-#ifndef SDLpp_TTF_h_
-#define SDLpp_TTF_h_
-
-#include <memory>
-
-#include <SDL_ttf.h>
 #include "rect.hpp"
 #include "version.hpp"
 #include "video.hpp"
 
-namespace SDL::TTF {
+#include <memory>
+
+namespace SDL::TTF
+{
     /** This function gets the version of the dynamically linked SDL_ttf library.
      *  It should NOT be used to fill a version structure, instead you should
      *  use the SDL_TTF_VERSION() macro.
@@ -53,7 +54,8 @@ namespace SDL::TTF {
         Font(SDL_RWops* src, bool freesrc, int ptsize);
         Font(SDL_RWops* src, bool freesrc, int ptsize, long index);
 
-        enum class Style {
+        enum class Style
+        {
             Normal = TTF_STYLE_NORMAL,
             Bold = TTF_STYLE_BOLD,
             Italic = TTF_STYLE_ITALIC,
@@ -62,7 +64,8 @@ namespace SDL::TTF {
         };
 
         // Set and retrieve FreeType hinter settings
-        enum class Hinting {
+        enum class Hinting
+        {
             NORMAL = TTF_HINTING_NORMAL,
             LIGHT = TTF_HINTING_LIGHT,
             MONO = TTF_HINTING_MONO,
@@ -141,9 +144,9 @@ namespace SDL::TTF {
         int SizeUNICODE(const Uint16* text, int* w, int* h);
 
         /* Create an 8-bit palettized surface and render the given text at
-           fast quality with the given font and color.  The 0 pixel is the
-           colorkey, giving a transparent background, and the 1 pixel is set
-           to the text color.
+           fast quality with the given font and colour.  The 0 pixel is the
+           colourkey, giving a transparent background, and the 1 pixel is set
+           to the text colour.
            This function returns the new surface, or NULL if there was an error.
         */
         Surface RenderText_Solid(const char* text, Colour fg);
@@ -151,17 +154,17 @@ namespace SDL::TTF {
         Surface RenderUNICODE_Solid(const Uint16* text, Colour fg);
 
         /* Create an 8-bit palettized surface and render the given glyph at
-           fast quality with the given font and color.  The 0 pixel is the
-           colorkey, giving a transparent background, and the 1 pixel is set
-           to the text color.  The glyph is rendered without any padding or
+           fast quality with the given font and colour.  The 0 pixel is the
+           colourkey, giving a transparent background, and the 1 pixel is set
+           to the text colour.  The glyph is rendered without any padding or
            centering in the X direction, and aligned normally in the Y direction.
            This function returns the new surface, or NULL if there was an error.
         */
         Surface RenderGlyph_Solid(Uint16 ch, Colour fg);
 
         /* Create an 8-bit palettized surface and render the given text at
-           high quality with the given font and colors.  The 0 pixel is background,
-           while other pixels have varying degrees of the foreground color.
+           high quality with the given font and colours.  The 0 pixel is background,
+           while other pixels have varying degrees of the foreground colour.
            This function returns the new surface, or NULL if there was an error.
         */
         Surface RenderText_Shaded(const char* text, Colour fg, Colour bg);
@@ -169,8 +172,8 @@ namespace SDL::TTF {
         Surface RenderUNICODE_Shaded(const Uint16* text, Colour fg, Colour bg);
 
         /* Create an 8-bit palettized surface and render the given glyph at
-           high quality with the given font and colors.  The 0 pixel is background,
-           while other pixels have varying degrees of the foreground color.
+           high quality with the given font and colours.  The 0 pixel is background,
+           while other pixels have varying degrees of the foreground colour.
            The glyph is rendered without any padding or centering in the X
            direction, and aligned normally in the Y direction.
            This function returns the new surface, or NULL if there was an error.
@@ -178,7 +181,7 @@ namespace SDL::TTF {
         Surface RenderGlyph_Shaded(Uint16 ch, Colour fg, Colour bg);
 
         /* Create a 32-bit ARGB surface and render the given text at high quality,
-           using alpha blending to dither the font with the given color.
+           using alpha blending to dither the font with the given colour.
            This function returns the new surface, or NULL if there was an error.
         */
         Surface RenderText_Blended(const char* text, Colour fg);
@@ -186,7 +189,7 @@ namespace SDL::TTF {
         Surface RenderUNICODE_Blended(const Uint16* text, Colour fg);
 
         /* Create a 32-bit ARGB surface and render the given glyph at high quality,
-           using alpha blending to dither the font with the given color.
+           using alpha blending to dither the font with the given colour.
            The glyph is rendered without any padding or centering in the X
            direction, and aligned normally in the Y direction.
            This function returns the new surface, or NULL if there was an error.
@@ -194,7 +197,7 @@ namespace SDL::TTF {
         Surface RenderGlyph_Blended(Uint16 ch, Colour fg);
 
         /* Create a 32-bit ARGB surface and render the given text at high quality,
-           using alpha blending to dither the font with the given color.
+           using alpha blending to dither the font with the given colour.
            Text is wrapped to multiple lines on line endings and on word boundaries
            if it extends beyond wrapLength in pixels.
            This function returns the new surface, or NULL if there was an error.
@@ -211,4 +214,5 @@ namespace SDL::TTF {
     bool WasInit(void);
 }
 
+#endif
 #endif

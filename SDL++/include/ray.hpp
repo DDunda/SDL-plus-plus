@@ -1,56 +1,63 @@
+#ifndef SDL_ray_hpp_
+#define SDL_ray_hpp_
 #pragma once
 
-#ifndef SDLpp_ray_h_
-#define SDLpp_ray_h_
-
 #include "rect.hpp"
-#include <string>
-#include <ostream>
-namespace SDL {
-	struct RayContact {
-		bool contact = false;
-		FPoint point = { 0,0 };
-		FPoint normal = { 0,0 };
-		float time = 0;
-	};
 
-	struct Ray {
+#include <ostream>
+#include <string>
+
+namespace SDL
+{
+	struct Ray
+	{
+		struct Contact
+		{
+			bool contact = false;
+			FPoint point = { 0,0 };
+			FPoint normal = { 0,0 };
+			float time = 0;
+		};
+
 		FPoint origin;
 		FPoint dir;
 
-		constexpr Ray(                         ) : origin(0,0   ), dir(0,0) {}
-		constexpr Ray(FPoint origin, FPoint dir) : origin(origin), dir(dir) {}
+		inline constexpr Ray(                         ) : origin(0,0   ), dir(0,0) {}
+		inline constexpr Ray(FPoint origin, FPoint dir) : origin(origin), dir(dir) {}
 
-		operator std::string() const;
+		inline operator std::string() const { return "(" + (std::string)origin + " -> " + (std::string)dir + ")"; }
 
-#undef min
-
-		constexpr RayContact intersectRect(const Rect& rect) const
+		inline constexpr Contact IntersectRect(const Rect& rect) const
 		{
 			// Broad collision check
-			if (!rectsIntersect(rect, FRect(FPoint::min(origin, origin + dir), dir.abs()))) return { false };
+			if (!RectsIntersect(rect, FRect(FPoint::min(origin, origin + dir), dir.abs()))) return { false };
 
 			if (dir.x == 0 && dir.y == 0) return { false }; // No ray
-			if (dir.y == 0) { // Horizontal
-				float invX = 1.f / dir.x;
-				float nearX = (rect.pos.x - origin.x) * invX;
-				float farX = (rect.pos.x + rect.size.x - origin.x) * invX;
-				float time = std::min(nearX, farX);
 
-				return {
+			if (dir.y == 0) // Horizontal
+			{
+				const float invX = 1.f / dir.x;
+				const float nearX = (rect.pos.x - origin.x) * invX;
+				const float farX = (rect.pos.x + rect.size.x - origin.x) * invX;
+				const float time = std::min(nearX, farX);
+
+				return Contact
+				{
 					true,
 					origin + time * dir,
 					dir.x < 0 ? FPoint(1,0) : FPoint(-1,0),
 					time,
 				};
 			}
-			if (dir.x == 0) { // Vertical
-				float invY = 1.f / dir.y;
-				float nearY = (rect.pos.y - origin.y) * invY;
-				float farY = (rect.pos.y + rect.size.y - origin.y) * invY;
-				float time = std::min(nearY, farY);
+			if (dir.x == 0) // Vertical
+			{
+				const float invY = 1.f / dir.y;
+				const float nearY = (rect.pos.y - origin.y) * invY;
+				const float farY = (rect.pos.y + rect.size.y - origin.y) * invY;
+				const float time = std::min(nearY, farY);
 
-				return {
+				return Contact
+				{
 					true,
 					origin + time * dir,
 					dir.y < 0 ? FPoint(0,1) : FPoint(0,-1),
@@ -58,7 +65,7 @@ namespace SDL {
 				};
 			}
 
-			FPoint invDir = 1.f / dir;
+			const FPoint invDir = 1.f / dir;
 
 			// Normalised proportion of ray
 			FPoint nearNorm = (rect.pos - origin) * invDir;
@@ -69,7 +76,8 @@ namespace SDL {
 
 			if (nearNorm.x > farNorm.y || nearNorm.y > farNorm.x || nearNorm.max() > 1) return { false };
 
-			RayContact hit{
+			Contact hit
+			{
 				true,
 				{ 0, 0 },
 				{ 0, 0 },
@@ -84,32 +92,37 @@ namespace SDL {
 			return hit;
 		}
 
-		constexpr RayContact intersectRect(const FRect& rect) const
+		inline constexpr Contact IntersectRect(const FRect& rect) const
 		{
 			// Broad collision check
-			if (!rectsIntersect(rect, FRect(FPoint::min(origin, origin + dir), dir.abs()))) return { false };
+			if (!RectsIntersect(rect, FRect(FPoint::min(origin, origin + dir), dir.abs()))) return { false };
 			
 			if (dir.x == 0 && dir.y == 0) return { false }; // No ray
-			if (dir.y == 0) { // Horizontal
-				float invX = 1.f / dir.x;
-				float nearX = (rect.pos.x - origin.x) * invX;
-				float farX = (rect.pos.x + rect.size.x - origin.x) * invX;
-				float time = std::min(nearX, farX);
 
-				return {
+			if (dir.y == 0) // Horizontal
+			{
+				const float invX = 1.f / dir.x;
+				const float nearX = (rect.pos.x - origin.x) * invX;
+				const float farX = (rect.pos.x + rect.size.x - origin.x) * invX;
+				const float time = std::min(nearX, farX);
+
+				return Contact
+				{
 					true,
 					origin + time * dir,
 					dir.x < 0 ? FPoint(1.f,0.f) : FPoint(-1.f,0.f),
 					time,
 				};
 			}
-			if (dir.x == 0) { // Vertical
-				float invY = 1.f / dir.y;
-				float nearY = (rect.pos.y - origin.y) * invY;
-				float farY = (rect.pos.y + rect.size.y - origin.y) * invY;
-				float time = std::min(nearY, farY);
+			if (dir.x == 0) // Vertical
+			{
+				const float invY = 1.f / dir.y;
+				const float nearY = (rect.pos.y - origin.y) * invY;
+				const float farY = (rect.pos.y + rect.size.y - origin.y) * invY;
+				const float time = std::min(nearY, farY);
 
-				return {
+				return Contact
+				{
 					true,
 					origin + time * dir,
 					dir.y < 0 ? FPoint(0.f,1.f) : FPoint(0.f,-1.f),
@@ -117,7 +130,7 @@ namespace SDL {
 				};
 			}
 
-			FPoint invDir = 1.f / dir;
+			const FPoint invDir = 1.f / dir;
 
 			// Normalised proportion of ray
 			FPoint nearNorm = (rect.pos - origin) * invDir;
@@ -128,7 +141,8 @@ namespace SDL {
 
 			if (nearNorm.x > farNorm.y || nearNorm.y > farNorm.x || nearNorm.max() > 1) return { false };
 
-			RayContact hit {
+			Contact hit
+			{
 				true,
 				{ 0, 0 },
 				{ 0, 0 },
@@ -144,15 +158,15 @@ namespace SDL {
 			return { true };
 		}
 
-		constexpr bool intersectsRect(const Rect& rect) const
+		inline bool IntersectsRect(const Rect& rect) const
 		{
 			// Broad collision check
-			if (!rectsIntersect(rect, FRect(FPoint::min(origin, origin + dir), dir.abs()))) return false;
+			if (!RectsIntersect(rect, FRect(FPoint::min(origin, origin + dir), dir.abs()))) return false;
 
 			if (dir.x == 0 && dir.y == 0) return false; // No ray
 			if (dir.x == 0 || dir.y == 0) return true; // Horizontal or vertical
 
-			FPoint invDir = 1.f / dir;
+			const FPoint invDir = 1.f / dir;
 
 			// Normalised proportion of ray
 			FPoint nearNorm = (rect.pos - origin) * invDir;
@@ -164,15 +178,15 @@ namespace SDL {
 			return nearNorm.x < farNorm.y && nearNorm.y > farNorm.x && nearNorm.max() <= 1;
 		}
 
-		constexpr bool intersectsRect(const FRect& rect) const
+		inline bool IntersectsRect(const FRect& rect) const
 		{
 			// Broad collision check
-			if (!rectsIntersect(rect, FRect(FPoint::min(origin, origin + dir), dir.abs()))) return false;
+			if (!RectsIntersect(rect, FRect(FPoint::min(origin, origin + dir), dir.abs()))) return false;
 
 			if (dir.x == 0 && dir.y == 0) return false; // No ray
 			if (dir.x == 0 || dir.y == 0) return true; // Horizontal or vertical
 
-			FPoint invDir = 1.f / dir;
+			const FPoint invDir = 1.f / dir;
 
 			// Normalised proportion of ray
 			FPoint nearNorm = (rect.pos - origin) * invDir;
@@ -183,9 +197,12 @@ namespace SDL {
 
 			return nearNorm.x < farNorm.y && nearNorm.y > farNorm.x && nearNorm.max() <= 1;
 		}
-
-		friend std::ostream& operator<<(std::ostream& os, const Ray& r);
 	};
+
+	inline std::ostream& operator<<(std::ostream& os, const Ray& r)
+	{
+		return os << (std::string)r;
+	}
 }
 
 #endif

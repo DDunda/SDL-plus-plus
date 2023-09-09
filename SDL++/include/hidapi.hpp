@@ -1,19 +1,22 @@
+#include <SDL_version.h>
+#if SDL_VERSION_ATLEAST(2, 0, 18)
+#ifndef SDL_hidapi_hpp_
+#define SDL_hidapi_hpp_
 #pragma once
 
-#ifndef SDLpp_hidapi_h_
-#define SDLpp_hidapi_h_
-
 #include <SDL_hidapi.h>
-#include <string>
 
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace SDL::HID
 {
-	namespace {
+	namespace
+	{
 		template <typename t, typename T>
-		struct ContinuousContainer_traits {
+		struct ContinuousContainer_traits
+		{
 			template <typename T>
 			static auto has_data(T x) -> decltype((t*)x.data(), std::true_type{});
 			static auto has_data(...) -> std::false_type;
@@ -39,7 +42,7 @@ namespace SDL::HID
 	 * 
 	 * \returns true on success and false on error.
 	 */
-	static inline bool Init()
+	inline bool Init()
 		{ return SDL_hid_init() == 0; }
 
 	/**
@@ -50,7 +53,7 @@ namespace SDL::HID
 	 *
 	 * \returns true on success and false on error.
 	 */
-	static inline bool Quit()
+	inline bool Quit()
 		{ return SDL_hid_exit() == 0; }
 	
 	/**
@@ -68,7 +71,7 @@ namespace SDL::HID
 	 * \returns a change counter that is incremented with each potential device
 	 *          change, or 0 if device change detection isn't available.
 	 */
-	static inline Uint32 DeviceChangeCount()
+	inline static Uint32 DeviceChangeCount()
 		{ return SDL_hid_device_change_count(); }
 
 	struct Device
@@ -173,7 +176,6 @@ namespace SDL::HID
 
 		// This creates a device from a SDL_hid_device pointer, but does not take ownership of the pointer
 		static Device FromUnownedPtr(SDL_hid_device* device) { return Device(std::shared_ptr<SDL_hid_device>(device, DontDestroyDevice)); }
-
 
 		Device(std::shared_ptr<SDL_hid_device> device = nullptr) : device(device) {}
 
@@ -653,7 +655,8 @@ namespace SDL::HID
 	 *
 	 * \param active true to start the scan, false to stop the scan
 	 */
-	static inline void BLE_Scan(bool active) { SDL_hid_ble_scan(active ? SDL_TRUE : SDL_FALSE); }
+	inline static void BLE_Scan(bool active) { SDL_hid_ble_scan(active ? SDL_TRUE : SDL_FALSE); }
 }
 
+#endif
 #endif

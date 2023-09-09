@@ -1,12 +1,15 @@
+#include <SDL_version.h>
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+#ifndef SDL_events_hpp_
+#define SDL_events_hpp_
 #pragma once
-
-#ifndef SDLpp_events_h_
-#define SDLpp_events_h_
 
 #include <SDL_events.h>
 
-namespace SDL {
-	struct Event {
+namespace SDL
+{
+	struct Event
+	{
 		typedef SDL_CommonEvent           Common;           // Common event data
 		typedef SDL_DisplayEvent          Display;          // Display event data
 		typedef SDL_WindowEvent           Window;           // Window event data
@@ -36,12 +39,13 @@ namespace SDL {
 
 		enum class Action
 		{
-			ADDEVENT = SDL_ADDEVENT,
+			ADDEVENT  = SDL_ADDEVENT,
 			PEEKEVENT = SDL_PEEKEVENT,
-			GETEVENT = SDL_GETEVENT
+			GETEVENT  = SDL_GETEVENT
 		};
 
-		enum class Type {
+		enum class Type
+		{
 			FIRSTEVENT = SDL_FIRSTEVENT, /* Unused (do not remove) */
 
 			/* Application events */
@@ -125,7 +129,8 @@ namespace SDL {
 			USEREVENT = SDL_USEREVENT, // Events ::USEREVENT through ::LASTEVENT are for your use, and should be allocated with RegisterEvents()
 			LASTEVENT = SDL_LASTEVENT  // This last event is only for bounding internal arrays
 		};
-		union {
+		union
+		{
 			Type type;
 			SDL_Event event;
 			Common common;            // Common event data
@@ -174,15 +179,16 @@ namespace SDL {
 		 *
 		 *  This function is thread-safe.
 		 */
-		static int PeepEvents(Event* events, int numevents, Action action, Type minType, Type maxType) {
+		inline static int PeepEvents(Event* events, int numevents, Action action, Type minType, Type maxType)
+		{
 			return SDL_PeepEvents((SDL_Event*)events, numevents, (SDL_eventaction)action, (Uint32)minType, (Uint32)maxType);
 		}
 
 		// Checks to see if certain event types are in the event queue.
-		static bool HasEvent(Type type) { return SDL_HasEvent((Uint32)type); }
+		inline static bool HasEvent(Type type) { return SDL_HasEvent((Uint32)type); }
 
 		// Checks to see if certain event types are in the event queue.
-		static bool HasEvents(Type minType, Type maxType) { return SDL_HasEvents((Uint32)minType, (Uint32)maxType); }
+		inline static bool HasEvents(Type minType, Type maxType) { return SDL_HasEvents((Uint32)minType, (Uint32)maxType); }
 
 		/**
 		 *  This function clears events from the event queue
@@ -190,7 +196,7 @@ namespace SDL {
 		 *  sure that all pending OS events are flushed, you can call PumpEvents()
 		 *  on the main thread immediately before the flush call.
 		 */
-		static void FlushEvent(Type type) { SDL_FlushEvent((Uint32)type); }
+		inline static void FlushEvent(Type type) { SDL_FlushEvent((Uint32)type); }
 
 		/**
 		 *  This function clears events from the event queue
@@ -198,7 +204,7 @@ namespace SDL {
 		 *  sure that all pending OS events are flushed, you can call PumpEvents()
 		 *  on the main thread immediately before the flush call.
 		 */
-		static void FlushEvents(Type minType, Type maxType) { SDL_FlushEvents((Uint32)minType, (Uint32)maxType); }
+		inline static void FlushEvents(Type minType, Type maxType) { SDL_FlushEvents((Uint32)minType, (Uint32)maxType); }
 
 		/**
 		 *  \brief Polls for currently pending events.
@@ -207,7 +213,7 @@ namespace SDL {
 		 *
 		 *  \param event The next event is removed from the queue and stored in that area.
 		 */
-		bool Poll() { return SDL_PollEvent(&event); }
+		inline bool Poll() { return SDL_PollEvent(&event) != 0; }
 
 		/**
 		 *  \brief Waits indefinitely for the next available event.
@@ -216,7 +222,7 @@ namespace SDL {
 		 *
 		 *  \param event The next event is removed from the queue and stored in that area.
 		 */
-		bool Wait() { return SDL_WaitEvent(&event); }
+		inline bool Wait() { return SDL_WaitEvent(&event) != 0; }
 
 		/**
 		 *  \brief Waits until the specified timeout (in milliseconds) for the next
@@ -227,7 +233,7 @@ namespace SDL {
 		 *  \param event The next event is removed from the queue and stored in that area.
 		 *  \param timeout The timeout (in milliseconds) to wait for next event.
 		 */
-		bool WaitTimeout(int timeout) { return SDL_WaitEventTimeout(&event, timeout); }
+		inline bool WaitTimeout(int timeout) { return SDL_WaitEventTimeout(&event, timeout) != 0; }
 
 		/**
 		 *  \brief Add an event to the event queue.
@@ -235,54 +241,14 @@ namespace SDL {
 		 *  \return 1 on success, 0 if the event was filtered, or -1 if the event queue
 		 *		  was full or there was some other error.
 		 */
-		int Push() { return SDL_PushEvent(&event); }
+		inline int Push() { return SDL_PushEvent(&event); }
 
-		typedef SDL_EventFilter Filter;
-
-		/**
-		 *  Sets up a filter to process all events before they change internal state and
-		 *  are posted to the internal event queue.
-		 *
-		 *  The filter is prototyped as:
-		 *  \code
-		 *	  int EventFilter(void *userdata, SDL_Event* event);
-		 *  \endcode
-		 *
-		 *  If the filter returns 1, then the event will be added to the internal queue.
-		 *  If it returns 0, then the event will be dropped from the queue, but the
-		 *  internal state will still be updated.  This allows selective filtering of
-		 *  dynamically arriving events.
-		 *
-		 *  \warning  Be very careful of what you do in the event filter function, as
-		 *			it may run in a different thread!
-		 *
-		 *  There is one caveat when dealing with the ::QuitEvent event type.  The
-		 *  event filter is only called when the window manager desires to close the
-		 *  application window.  If the event filter returns 1, then the window will
-		 *  be closed, otherwise the window will remain open if possible.
-		 *
-		 *  If the quit event is generated by an interrupt signal, it will bypass the
-		 *  internal queue and be delivered to the application at the next event poll.
-		 */
-		static void SetFilter(Filter filter, void* userdata) { SDL_SetEventFilter(filter, userdata); }
-
-		// Return the current event filter - can be used to "chain" filters. If there is no event filter set, this function returns false.
-		static bool GetFilter(Filter& filter, void*& userdata) { return SDL_GetEventFilter(&filter, &userdata); }
-
-		// Add a function which is called when an event is added to the queue.
-		static void AddWatch(Filter filter, void* userdata) { SDL_AddEventWatch(filter, userdata); }
-
-		// Remove an event watch function added with AddEventWatch()
-		static void DeleteWatch(Filter filter, void* userdata) { SDL_DelEventWatch(filter, userdata); }
-
-		// Run the filter function on the current event queue, removing any events for which the filter returns 0.
-		static void FilterEvents(Filter filter, void* userdata) { SDL_FilterEvents(filter, userdata); }
-
-		enum class State {
-			QUERY = SDL_QUERY,
-			IGNORE = SDL_IGNORE,
+		enum class State
+		{
+			QUERY   = SDL_QUERY,
+			IGNORE  = SDL_IGNORE,
 			DISABLE = SDL_DISABLE,
-			ENABLE = SDL_ENABLE
+			ENABLE  = SDL_ENABLE
 		};
 
 		/**
@@ -294,10 +260,10 @@ namespace SDL {
 		 *   - If \c state is set to ::SDL_QUERY, SDL_EventState() will return the
 		 *	 current processing state of the specified event.
 		 */
-		static void SetState(Type type, State state) { SDL_EventState((Uint32)type, (int)state); }
-		static State GetState(Type type) { return (State)SDL_EventState((Uint32)type, (int)State::QUERY); }
-		void SetState(State state) { SDL_EventState((Uint32)type, (int)state); }
-		State GetState() { return (State)SDL_EventState((Uint32)type, (int)State::QUERY); }
+		inline static void SetState(Type type, State state) { SDL_EventState((Uint32)type, (int)state); }
+		inline static State GetState(Type type) { return (State)SDL_EventState((Uint32)type, (int)State::QUERY); }
+		inline void SetState(State state) { SDL_EventState((Uint32)type, (int)state); }
+		inline State GetState() { return (State)SDL_EventState((Uint32)type, (int)State::QUERY); }
 
 		/**
 		 *  This function allocates a set of user-defined events, and returns
@@ -306,8 +272,126 @@ namespace SDL {
 		 *  If there aren't enough user-defined events left, this function
 		 *  returns (Uint32)-1
 		 */
-		Uint32 RegisterEvents(int numevents) { return SDL_RegisterEvents(numevents); }
+		inline Uint32 RegisterEvents(int numevents) { return SDL_RegisterEvents(numevents); }
 	};
+
+	/**
+	 * A function pointer used for callbacks that watch the event queue.
+	 *
+	 * \param userdata what was passed as `userdata` to SetEventFilter()
+	 *        or AddEventWatch, etc
+	 * \param event the event that triggered the callback
+	 * \returns 1 to permit event to be added to the queue, and 0 to disallow
+	 *          it. When used with AddEventWatch, the return value is ignored.
+	 */
+	typedef SDL_EventFilter EventFilter;
+
+	/**
+	 * Set up a filter to process all events before they change internal state and
+	 * are posted to the internal event queue.
+	 *
+	 * If the filter function returns 1 when called, then the event will be added
+	 * to the internal queue. If it returns 0, then the event will be dropped from
+	 * the queue, but the internal state will still be updated. This allows
+	 * selective filtering of dynamically arriving events.
+	 *
+	 * **WARNING**: Be very careful of what you do in the event filter function,
+	 * as it may run in a different thread!
+	 *
+	 * On platforms that support it, if the quit event is generated by an
+	 * interrupt signal (e.g. pressing Ctrl-C), it will be delivered to the
+	 * application at the next event poll.
+	 *
+	 * There is one caveat when dealing with the ::SDL_QuitEvent event type. The
+	 * event filter is only called when the window manager desires to close the
+	 * application window. If the event filter returns 1, then the window will be
+	 * closed, otherwise the window will remain open if possible.
+	 *
+	 * Note: Disabled events never make it to the event filter function; see
+	 * SDL_EventState().
+	 *
+	 * Note: If you just want to inspect events without filtering, you should use
+	 * AddEventWatch() instead.
+	 *
+	 * Note: Events pushed onto the queue with PushEvent() get passed through
+	 * the event filter, but events pushed onto the queue with PeepEvents() do
+	 * not.
+	 *
+	 * \param filter An EventFilter function to call when an event happens
+	 * \param userdata a pointer that is passed to `filter`
+	 */
+	inline void SetEventFilter(EventFilter filter, void* userdata) { return SDL_SetEventFilter(filter, userdata); }
+	template<typename T>
+	inline void SetEventFilter(EventFilter filter, T& userdata) { return SDL_SetEventFilter(filter, &userdata); }
+
+	/**
+	 * Query the current event filter.
+	 *
+	 * This function can be used to "chain" filters, by saving the existing filter
+	 * before replacing it with a function that will call that saved filter.
+	 *
+	 * \param filter the current callback function will be stored here
+	 * \param userdata the pointer that is passed to the current event filter will
+	 *                 be stored here
+	 * \returns true on success or false if there is no event filter set.
+	 */
+	inline bool GetEventFilter(EventFilter& filter, void*& userdata) { return SDL_GetEventFilter(&filter, &userdata) == SDL_TRUE; }
+	template<typename T>
+	inline bool GetEventFilter(EventFilter& filter, T*& userdata) { return SDL_GetEventFilter(&filter, &userdata) == SDL_TRUE; }
+
+	/**
+	 * Add a callback to be triggered when an event is added to the event queue.
+	 *
+	 * `filter` will be called when an event happens, and its return value is
+	 * ignored.
+	 *
+	 * **WARNING**: Be very careful of what you do in the event filter function,
+	 * as it may run in a different thread!
+	 *
+	 * If the quit event is generated by a signal (e.g. SIGINT), it will bypass
+	 * the internal queue and be delivered to the watch callback immediately, and
+	 * arrive at the next event poll.
+	 *
+	 * Note: the callback is called for events posted by the user through
+	 * PushEvent(), but not for disabled events, nor for events by a filter
+	 * callback set with SetEventFilter(), nor for events posted by the user
+	 * through PeepEvents().
+	 *
+	 * \param filter an EventFilter function to call when an event happens.
+	 * \param userdata a pointer that is passed to `filter`
+	 */
+	inline void AddEventWatch(EventFilter filter, void* userdata) { SDL_AddEventWatch(filter, userdata); }
+	template<typename T>
+	inline void AddEventWatch(EventFilter filter, T& userdata) { SDL_AddEventWatch(filter, &userdata); }
+
+	/**
+	 * Remove an event watch callback added with AddEventWatch().
+	 *
+	 * This function takes the same input as AddEventWatch() to identify and
+	 * delete the corresponding callback.
+	 *
+	 * \param filter the function originally passed to AddEventWatch()
+	 * \param userdata the pointer originally passed to AddEventWatch()
+	 */
+	inline void DelEventWatch(EventFilter filter, void* userdata) { SDL_DelEventWatch(filter, userdata); }
+	template<typename T>
+	inline void DelEventWatch(EventFilter filter, T& userdata) { SDL_DelEventWatch(filter, &userdata); }
+
+	/**
+	 * Run a specific filter function on the current event queue, removing any
+	 * events for which the filter returns 0.
+	 *
+	 * See SetEventFilter() for more information. Unlike SetEventFilter(),
+	 * this function does not change the filter permanently, it only uses the
+	 * supplied filter until this function returns.
+	 *
+	 * \param filter the EventFilter function to call when an event happens
+	 * \param userdata a pointer that is passed to `filter`
+	 */
+	inline void FilterEvents(EventFilter filter, void* userdata) { SDL_FilterEvents(filter, userdata); }
+	template<typename T>
+	inline void FilterEvents(EventFilter filter, T& userdata) { SDL_FilterEvents(filter, &userdata); }
 }
 
+#endif
 #endif

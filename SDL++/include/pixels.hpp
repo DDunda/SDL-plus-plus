@@ -1,24 +1,27 @@
+#include <SDL_version.h>
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+#ifndef SDL_pixels_hpp_
+#define SDL_pixels_hpp_
 #pragma once
 
-#ifndef SDLpp_pixels_h_
-#define SDLpp_pixels_h_
+#include <SDL_pixels.h>
 
 #include <memory>
-
-#include <SDL_pixels.h>
 #include <vector>
 
-namespace SDL {
+namespace SDL
+{
 	// Pixel type.
-	enum class SDL_PixelType {
-		UNKNOWN = SDL_PIXELTYPE_UNKNOWN,
-		INDEX1 = SDL_PIXELTYPE_INDEX1,
-		INDEX4 = SDL_PIXELTYPE_INDEX4,
-		INDEX8 = SDL_PIXELTYPE_INDEX8,
-		PACKED8 = SDL_PIXELTYPE_PACKED8,
+	enum class SDL_PixelType
+	{
+		UNKNOWN  = SDL_PIXELTYPE_UNKNOWN,
+		INDEX1   = SDL_PIXELTYPE_INDEX1,
+		INDEX4   = SDL_PIXELTYPE_INDEX4,
+		INDEX8   = SDL_PIXELTYPE_INDEX8,
+		PACKED8  = SDL_PIXELTYPE_PACKED8,
 		PACKED16 = SDL_PIXELTYPE_PACKED16,
 		PACKED32 = SDL_PIXELTYPE_PACKED32,
-		ARRAYU8 = SDL_PIXELTYPE_ARRAYU8,
+		ARRAYU8  = SDL_PIXELTYPE_ARRAYU8,
 		ARRAYU16 = SDL_PIXELTYPE_ARRAYU16,
 		ARRAYU32 = SDL_PIXELTYPE_ARRAYU32,
 		ARRAYF16 = SDL_PIXELTYPE_ARRAYF16,
@@ -26,14 +29,16 @@ namespace SDL {
 	};
 
 	// Bitmap pixel order, high bit -> low bit.
-	enum class BitmapOrder {
-		NONE = SDL_BITMAPORDER_NONE,
+	enum class BitmapOrder
+	{
+		NONE  = SDL_BITMAPORDER_NONE,
 		_4321 = SDL_BITMAPORDER_4321,
 		_1234 = SDL_BITMAPORDER_1234
 	};
 
 	// Packed component order, high bit -> low bit. 
-	enum class PackedOrder {
+	enum class PackedOrder
+	{
 		NONE = SDL_PACKEDORDER_NONE,
 		XRGB = SDL_PACKEDORDER_XRGB,
 		RGBX = SDL_PACKEDORDER_RGBX,
@@ -46,18 +51,20 @@ namespace SDL {
 	};
 
 	// Array component order, low byte -> high byte.
-	enum class ArrayOrder {
+	enum class ArrayOrder
+	{
 		NONE = SDL_ARRAYORDER_NONE,
-		RGB = SDL_ARRAYORDER_RGB,
+		RGB  = SDL_ARRAYORDER_RGB,
 		RGBA = SDL_ARRAYORDER_RGBA,
 		ARGB = SDL_ARRAYORDER_ARGB,
-		BGR = SDL_ARRAYORDER_BGR,
+		BGR  = SDL_ARRAYORDER_BGR,
 		BGRA = SDL_ARRAYORDER_BGRA,
 		ABGR = SDL_ARRAYORDER_ABGR
 	};
 
 	// Packed component layout.
-	enum class PackedLayout {
+	enum class PackedLayout
+	{
 		NONE     = SDL_PACKEDLAYOUT_NONE,
 		_332     = SDL_PACKEDLAYOUT_332,
 		_4444    = SDL_PACKEDLAYOUT_4444,
@@ -70,7 +77,8 @@ namespace SDL {
 	};
 
 
-	enum class PixelFormatEnum {
+	enum class PixelFormatEnum
+	{
 		UNKNOWN = SDL_PIXELFORMAT_UNKNOWN,
 
 		INDEX1LSB = SDL_PIXELFORMAT_INDEX1LSB,
@@ -215,22 +223,32 @@ namespace SDL {
 		int SetPalette(Palette& palette);
 
 		// Maps an RGB triple to an opaque pixel value for a given pixel format.
-		Uint32 MapRGB(Uint8 r, Uint8 g, Uint8 b) const;
+		inline Uint32 MapRGB(Uint8 r, Uint8 g, Uint8 b) const { return SDL_MapRGB(format.get(), r, g, b); }
+		inline Uint32 MapRGB(const Colour& c          ) const { return MapRGB(c.r, c.g, c.b); }
 
 		// Maps an RGBA quadruple to a pixel value for a given pixel format.
-		Uint32 MapRGBA(Uint8 r, Uint8 g, Uint8 b, Uint8 a) const;
-
-		// Maps an RGBA quadruple to a pixel value for a given pixel format.
-		Uint32 MapRGBA(Colour c) const;
+		inline Uint32 MapRGBA(Uint8 r, Uint8 g, Uint8 b, Uint8 a) const { return SDL_MapRGBA(format.get(), r, g, b, a); }
+		inline Uint32 MapRGBA(const Colour& c                   ) const { return MapRGBA(c.r, c.g, c.b, c.a); }
 
 		// Get the RGB components from a pixel of the specified format.
-		void GetRGB(Uint32 pixel, Uint8& r, Uint8& g, Uint8& b) const;
+		inline void GetRGB(Uint32 pixel, Uint8& r, Uint8& g, Uint8& b) const { SDL_GetRGB(pixel, format.get(), &r, &g, &b); }
+		inline void GetRGB(Uint32 pixel, Colour& c                   ) const { GetRGB(pixel, c.r, c.g, c.b); }
+		inline Colour GetRGB(Uint32 pixel) const
+		{
+			Colour c;
+			GetRGB(pixel, c);
+			return c;
+		}
 
 		// Get the RGBA components from a pixel of the specified format.
-		void GetRGBA(Uint32 pixel, Uint8& r, Uint8& g, Uint8& b, Uint8& a) const;
-
-		// Get the RGBA components from a pixel of the specified format.
-		void GetRGBA(Uint32 pixel, Colour& c) const;
+		inline void   GetRGBA(Uint32 pixel, Uint8& r, Uint8& g, Uint8& b, Uint8& a) const { SDL_GetRGBA(pixel, format.get(), &r, &g, &b, &a); }
+		inline void   GetRGBA(Uint32 pixel, Colour& c                             ) const { GetRGBA(pixel, c.r, c.g, c.b, c.a); }
+		inline Colour GetRGBA(Uint32 pixel) const
+		{
+			Colour c;
+			GetRGBA(pixel, c);
+			return c;
+		}
 	};
 
 	/**
@@ -244,4 +262,5 @@ namespace SDL {
 	static Uint16* CalculateGammaRamp(float gamma);
 }
 
+#endif
 #endif

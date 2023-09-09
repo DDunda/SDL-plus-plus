@@ -1,13 +1,15 @@
+#include <SDL_version.h>
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+#ifndef SDL_audio_hpp_
+#define SDL_audio_hpp_
 #pragma once
-
-#ifndef SDLpp_audio_h_
-#define SDLpp_audio_h_
-
-#include <memory>
 
 #include <SDL_audio.h>
 
-namespace SDL {
+#include <memory>
+
+namespace SDL
+{
 	/**
 	 *  \brief Audio format flags.
 	 *
@@ -28,16 +30,17 @@ namespace SDL {
 	 *
 	 *  There are macros in SDL 2.0 and later to query these bits.
 	 */
-	struct AudioFormat {
+	struct AudioFormat
+	{
 		SDL_AudioFormat format;
 
-		constexpr Uint8 BitSize() const;
-		constexpr bool IsFloat() const;
-		constexpr bool IsBigEndian() const;
-		constexpr bool IsSigned() const;
-		constexpr bool IsInt() const;
-		constexpr bool IsLittleEndian() const;
-		constexpr bool IsUnsigned() const;
+		inline constexpr Uint8 BitSize       () const { return SDL_AUDIO_BITSIZE       (format); }
+		inline constexpr bool  IsFloat       () const { return SDL_AUDIO_ISFLOAT       (format); }
+		inline constexpr bool  IsBigEndian   () const { return SDL_AUDIO_ISBIGENDIAN   (format); }
+		inline constexpr bool  IsSigned      () const { return SDL_AUDIO_ISSIGNED      (format); }
+		inline constexpr bool  IsInt         () const { return SDL_AUDIO_ISINT         (format); }
+		inline constexpr bool  IsLittleEndian() const { return SDL_AUDIO_ISLITTLEENDIAN(format); }
+		inline constexpr bool  IsUnsigned    () const { return SDL_AUDIO_ISUNSIGNED    (format); }
 	};
 
 	typedef SDL_AudioCallback AudioCallback;
@@ -332,6 +335,26 @@ namespace SDL {
 		 */
 		const char* GetDeviceName(bool iscapture);
 
+#if SDL_VERSION_ATLEAST(2, 0, 16)
+		/**
+		 * Get the preferred audio format of a specific audio device.
+		 *
+		 * This function is only valid after a successfully initializing the audio
+		 * subsystem. The values returned by this function reflect the latest call to
+		 * GetNumAudioDevices(); re-call that function to redetect available
+		 * hardware.
+		 *
+		 * `spec` will be filled with the sample rate, sample format, and channel
+		 * count.
+		 *
+		 * \param iscapture true to query the list of recording devices, false to
+		 *                  query the list of output devices.
+		 * \param spec The AudioSpec to be initialized by this function.
+		 * \returns true on success, false on error
+		 */
+		inline bool GetSpec(bool iscapture, AudioSpec& spec) { return SDL_GetAudioDeviceSpec(*ID, iscapture, &spec) == 0; }
+#endif
+
 		// This function pauses and unpauses the audio callback processing.
 		AudioDevice& Pause(int pause_on);
 		/**
@@ -343,6 +366,7 @@ namespace SDL {
 		 */
 		AudioDevice& Play();
 
+#if SDL_VERSION_ATLEAST(2, 0, 4)
 		/**
 		 *  Queue more audio on non-callback devices.
 		 *
@@ -380,6 +404,7 @@ namespace SDL {
 		 */
 		AudioDevice& QueueAudio(const void* data, Uint32 len);
 
+#if SDL_VERSION_ATLEAST(2, 0, 5)
 		/**
 		 *  Dequeue more audio on non-callback devices.
 		 *
@@ -422,6 +447,7 @@ namespace SDL {
 		 *  \return number of bytes dequeued, which could be less than requested.
 		 */
 		Uint32 DequeueAudio(void* data, Uint32 len);
+#endif
 
 		/**
 		 *  Get the number of bytes of still-queued audio.
@@ -486,7 +512,7 @@ namespace SDL {
 		 *  This function always succeeds and thus returns void.
 		 */
 		AudioDevice& ClearQueuedAudio();
-
+#endif
 
 		/**
 		 *  \name Audio lock functions
@@ -501,8 +527,88 @@ namespace SDL {
 		AudioDevice& Unlock();
 	};
 
-	struct WAV {
-		struct WAVData {
+#if SDL_VERSION_ATLEAST(2, 24, 0)
+	/**
+	 * Get the name and preferred format of the default audio device.
+	 *
+	 * Some (but not all!) platforms have an isolated mechanism to get information
+	 * about the "default" device. This can actually be a completely different
+	 * device that's not in the list you get from AudioDevice::GetSpec(). It can
+	 * even be a network address! (This is discussed in SDL_OpenAudioDevice().)
+	 *
+	 * As a result, this call is not guaranteed to be performant, as it can query
+	 * the sound server directly every time, unlike the other query functions. You
+	 * should call this function sparingly!
+	 *
+	 * `spec` will be filled with the sample rate, sample format, and channel
+	 * count, if a default device exists on the system. If `name` is provided,
+	 * will be filled with either a dynamically-allocated UTF-8 string or NULL.
+	 *
+	 * \param name A pointer to be filled with the name of the default device (can
+	 *             be NULL). Please call SDL_free() when you are done with this
+	 *             pointer!
+	 * \param spec The AudioSpec to be initialized by this function.
+	 * \param iscapture true to query the default recording device, false to
+	 *                  query the default output device.
+	 * \returns true on success, false on error
+	 */
+	inline bool GetDefaultAudioInfo(char** name, AudioSpec& spec, bool iscapture)
+		{ return SDL_GetDefaultAudioInfo(name, &spec, iscapture) == 0; }
+
+	/**
+	 * Get the name and preferred format of the default audio device.
+	 *
+	 * Some (but not all!) platforms have an isolated mechanism to get information
+	 * about the "default" device. This can actually be a completely different
+	 * device that's not in the list you get from AudioDevice::GetSpec(). It can
+	 * even be a network address! (This is discussed in SDL_OpenAudioDevice().)
+	 *
+	 * As a result, this call is not guaranteed to be performant, as it can query
+	 * the sound server directly every time, unlike the other query functions. You
+	 * should call this function sparingly!
+	 *
+	 * `spec` will be filled with the sample rate, sample format, and channel
+	 * count, if a default device exists on the system. `name` will be filled
+	 * with either a dynamically-allocated UTF-8 string or NULL.
+	 *
+	 * \param name A pointer to be filled with the name of the default device.
+	 *             Please call SDL_free() when you are done with this pointer!
+	 * \param spec The AudioSpec to be initialized by this function.
+	 * \param iscapture true to query the default recording device, false to
+	 *                  query the default output device.
+	 * \returns true on success, false on error
+	 */
+	inline bool GetDefaultAudioInfo(char*& name, AudioSpec& spec, bool iscapture)
+		{ return GetDefaultAudioInfo(&name, spec, iscapture); }
+
+	/**
+	 * Get the preferred format of the default audio device.
+	 *
+	 * Some (but not all!) platforms have an isolated mechanism to get information
+	 * about the "default" device. This can actually be a completely different
+	 * device that's not in the list you get from AudioDevice::GetSpec(). It can
+	 * even be a network address! (This is discussed in SDL_OpenAudioDevice().)
+	 *
+	 * As a result, this call is not guaranteed to be performant, as it can query
+	 * the sound server directly every time, unlike the other query functions. You
+	 * should call this function sparingly!
+	 *
+	 * `spec` will be filled with the sample rate, sample format, and channel
+	 * count, if a default device exists on the system.
+	 *
+	 * \param spec The AudioSpec to be initialized by this function.
+	 * \param iscapture true to query the default recording device, false to
+	 *                  query the default output device.
+	 * \returns true on success, false on error
+	 */
+	inline bool GetDefaultAudioInfo(AudioSpec& spec, bool iscapture)
+		{ return GetDefaultAudioInfo(NULL, spec, iscapture); }
+#endif
+
+	struct WAV
+	{
+		struct WAVData
+		{
 			AudioSpec spec;
 			Uint8* audio_buf;
 			Uint32 audio_len;
@@ -616,6 +722,7 @@ namespace SDL {
 		int ConvertAudio();
 	};
 
+#if SDL_VERSION_ATLEAST(2, 0, 7)
 	/* SDL_AudioStream is a new audio conversion interface.
 	   The benefits vs SDL_AudioCVT:
 		- it can handle resampling data in chunks without generating
@@ -703,7 +810,7 @@ namespace SDL {
 		// Clear any pending data in the stream without converting it
 		AudioStream& Clear();
 	};
-
+#endif
 
 	constexpr unsigned MIX_MAXVOLUME = SDL_MIX_MAXVOLUME;
 
@@ -758,4 +865,5 @@ namespace SDL {
 	void MixAudioFormat(Uint8* dst, const Uint8* src, AudioFormat format, Uint32 len, int volume = MIX_MAXVOLUME);
 }
 
+#endif
 #endif

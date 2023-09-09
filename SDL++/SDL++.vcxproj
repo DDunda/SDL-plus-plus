@@ -203,15 +203,11 @@
   <ItemGroup>
     <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\audio.cpp" />
-    <ClCompile Include="src\blendmode.cpp" />
-    <ClCompile Include="src\SDL_image.cpp" />
     <ClCompile Include="src\mouse.cpp" />
     <ClCompile Include="src\pixels.cpp" />
-    <ClCompile Include="src\ray.cpp" />
     <ClCompile Include="src\rect.cpp" />
     <ClCompile Include="src\render.cpp" />
     <ClCompile Include="src\SDL_ttf.cpp" />
-    <ClCompile Include="src\version.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

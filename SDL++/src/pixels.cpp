@@ -53,14 +53,6 @@ namespace SDL
 
 	int PixelFormat::SetPalette(Palette& palette) { return SDL_SetPixelFormatPalette(format.get(), palette.palette.get()); }
 
-	Uint32 PixelFormat::MapRGB(Uint8 r, Uint8 g, Uint8 b) const { return SDL_MapRGB(format.get(), r, g, b); }
-	Uint32 PixelFormat::MapRGBA(Uint8 r, Uint8 g, Uint8 b, Uint8 a) const { return SDL_MapRGBA(format.get(), r, g, b, a); }
-	Uint32 PixelFormat::MapRGBA(Colour c) const { return SDL_MapRGBA(format.get(), c.r, c.g, c.b, c.a); }
-
-	void PixelFormat::GetRGB(Uint32 pixel, Uint8& r, Uint8& g, Uint8& b) const { SDL_GetRGB(pixel, format.get(), &r, &g, &b); }
-	void PixelFormat::GetRGBA(Uint32 pixel, Uint8& r, Uint8& g, Uint8& b, Uint8& a) const { SDL_GetRGBA(pixel, format.get(), &r, &g, &b, &a); }
-	void PixelFormat::GetRGBA(Uint32 pixel, Colour& c) const { SDL_GetRGBA(pixel, format.get(), &c.r, &c.g, &c.b, &c.a); }
-
 #pragma endregion 
 
 	PixelFormatEnum MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask) {

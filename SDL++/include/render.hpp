@@ -1,17 +1,16 @@
+#ifndef SDL_render_hpp_
+#define SDL_render_hpp_
 #pragma once
 
-#ifndef SDLpp_render_h_
-#define SDLpp_render_h_
-
-#include <memory>
-
-#include <tuple>
 #include <SDL_render.h>
-#include <stack>
+
 #include "rect.hpp"
 #include "video.hpp"
 
-namespace SDL {
+#include <memory>
+
+namespace SDL
+{
 	struct Texture;
 
 	// A structure representing rendering state
@@ -1059,7 +1058,7 @@ namespace SDL {
 		// The texture channel modulation used in Renderer::Copy().
 		enum class Modulate {
 			NONE = SDL_TEXTUREMODULATE_NONE,     // No modulation
-			COLOR = SDL_TEXTUREMODULATE_COLOR,    // srcC = srcC * color
+			COLOR = SDL_TEXTUREMODULATE_COLOR,    // srcC = srcC * colour
 			ALPHA = SDL_TEXTUREMODULATE_ALPHA     // srcA = srcA * alpha
 		};
 

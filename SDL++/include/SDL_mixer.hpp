@@ -1,15 +1,15 @@
+#include <SDL_mixer.h>
+#if SDL_MIXER_VERSION_ATLEAST(2,0,0)
+#ifndef SDL_mixer_hpp_
+#define SDL_mixer_hpp_
 #pragma once
 
-#ifndef SDLpp_mixer_h_
-#define SDLpp_mixer_h_
+#include "audio.hpp"
+#include "error.hpp""
+#include "version.hpp"
 
 #include <memory>
 #include <string>
-
-#include <SDL_mixer.h>
-
-#include <audio.hpp>
-#include <version.hpp>
 
 namespace SDL::Mix
 {
@@ -1041,23 +1041,23 @@ namespace SDL::Mix
 		// This is custom destructor for smart pointers that destroys a Mix_Music through SDL
 		// Due to how SDL_mixer works it will block execution if this
 		// music object is currently fading out, so be careful!
-		static inline void DestroyMusic(Mix_Music* music)
+		inline static void DestroyMusic(Mix_Music* music)
 			{ Mix_FreeMusic(music); }
 
 		// This is custom destructor for smart pointers that does not destroy the Mix_Music. This is for pointers you do not own
-		static inline void DontDestroyMusic(Mix_Music* music)
+		inline static void DontDestroyMusic(Mix_Music* music)
 			{}
 
 		// This creates a smart pointer to an Mix_Music with a custom destructor
-		static inline std::shared_ptr<Mix_Music> MakeSharedPtr(Mix_Music* music)
+		inline static std::shared_ptr<Mix_Music> MakeSharedPtr(Mix_Music* music)
 			{ return std::shared_ptr<Mix_Music>(music, DestroyMusic); }
 
 		// This creates a Music from a Mix_Music pointer, taking ownership of the pointer
-		static inline Music FromPtr(Mix_Music* music)
+		inline static Music FromPtr(Mix_Music* music)
 			{ return Music(MakeSharedPtr(music)); }
 
 		// This creates a Music from a Mix_Music pointer, but does not take ownership of the pointer
-		static inline Music FromUnownedPtr(Mix_Music* music)
+		inline static Music FromUnownedPtr(Mix_Music* music)
 			{ return Music(std::shared_ptr<Mix_Music>(music, DontDestroyMusic)); }
 
 		std::shared_ptr<Mix_Music> music = nullptr;
@@ -2749,4 +2749,5 @@ namespace SDL::Mix
 	}
 }
 
+#endif
 #endif

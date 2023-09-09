@@ -1,7 +1,7 @@
 #include "mouse.hpp"
 
-namespace SDL {
-
+namespace SDL
+{
 #pragma region Cursor
 
 #pragma region Safety
@@ -49,13 +49,6 @@ namespace SDL {
 	}
 	Uint32 GetMouseState() {
 		return SDL_GetMouseState(NULL, NULL);
-	}
-
-	Uint32 GetGlobalMouseState(int& x, int& y) {
-		return SDL_GetGlobalMouseState(&x, &y);
-	}
-	Uint32 GetGlobalMouseState() {
-		return SDL_GetGlobalMouseState(NULL, NULL);
 	}
 
 	Uint32 GetRelativeMouseState(int& x, int& y) {

@@ -1,19 +1,7 @@
 #include "audio.hpp"
 
-namespace SDL {
-
-#pragma region AudioFormat
-
-	constexpr Uint8 AudioFormat::BitSize() const { return format & SDL_AUDIO_MASK_BITSIZE; }
-	constexpr bool AudioFormat::IsFloat() const { return format & SDL_AUDIO_MASK_DATATYPE; }
-	constexpr bool AudioFormat::IsBigEndian() const { return format & SDL_AUDIO_MASK_ENDIAN; }
-	constexpr bool AudioFormat::IsSigned() const { return format & SDL_AUDIO_MASK_SIGNED; }
-	constexpr bool AudioFormat::IsInt() const { return !IsFloat(); }
-	constexpr bool AudioFormat::IsLittleEndian() const { return !IsBigEndian(); }
-	constexpr bool AudioFormat::IsUnsigned() const { return !IsSigned(); }
-
-#pragma endregion  
-
+namespace SDL
+{
 #pragma region Audio
 
 #pragma region Constructors
@@ -78,12 +66,17 @@ namespace SDL {
 	AudioDevice& AudioDevice::Pause(int pause_on) { SDL_PauseAudioDevice(*ID, pause_on); return *this; }
 	AudioDevice& AudioDevice::Play() { SDL_PauseAudioDevice(*ID, 0); return *this; }
 
+#if SDL_VERSION_ATLEAST(2, 0, 4)
 	AudioDevice& AudioDevice::QueueAudio(const void* data, Uint32 len) { error |= SDL_QueueAudio(*ID, data, len); return *this; }
+
 	Uint32 AudioDevice::DequeueAudio(void* data, Uint32 len) { return SDL_DequeueAudio(*ID, data, len); }
 
+#if SDL_VERSION_ATLEAST(2, 0, 5)
 	Uint32 AudioDevice::GetQueuedAudioSize() { return SDL_GetQueuedAudioSize(*ID); }
+#endif
 
 	AudioDevice& AudioDevice::ClearQueuedAudio() { SDL_ClearQueuedAudio(*ID); return *this; }
+#endif
 
 	AudioDevice& AudioDevice::Lock() { SDL_LockAudioDevice(*ID); return *this; }
 	AudioDevice& AudioDevice::Unlock() { SDL_UnlockAudioDevice(*ID); return *this; }
@@ -138,6 +131,7 @@ namespace SDL {
 #pragma endregion
 
 #pragma region AudioStream
+#if SDL_VERSION_ATLEAST(2, 0, 7)
 
 #pragma region Safety
 
@@ -174,6 +168,7 @@ namespace SDL {
 	AudioStream& AudioStream::Flush() { error |= SDL_AudioStreamFlush(stream.get()); return *this; }
 	AudioStream& AudioStream::Clear() { SDL_AudioStreamClear(stream.get()); return *this; }
 
+#endif
 #pragma endregion
 
 	void MixAudio(Uint8* dst, const Uint8* src, Uint32 len, int volume)

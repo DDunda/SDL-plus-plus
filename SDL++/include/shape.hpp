@@ -1,7 +1,8 @@
+#include <SDL_version.h>
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+#ifndef SDL_shape_hpp_
+#define SDL_shape_hpp_
 #pragma once
-
-#ifndef SDLpp_shape_h_
-#define SDLpp_shape_h_
 
 #include <SDL_shape.h>
 
@@ -89,16 +90,17 @@ namespace SDL
         static bool IsShapedWindow(const Window& window) { return SDL_IsShapedWindow(window.window.get()) == SDL_TRUE; }
 
         /** \brief An enum denoting the specific type of contents present in an SDL_WindowShapeParams union. */
-        enum class ShapeMode {
+        enum class ShapeMode
+        {
             /** \brief The default mode, a binarized alpha cutoff of 1. */
             Default = ShapeModeDefault,
             /** \brief A binarized alpha cutoff with a given integer value. */
             BinarizeAlpha = ShapeModeBinarizeAlpha,
             /** \brief A binarized alpha cutoff with a given integer value, but with the opposite comparison. */
             ReverseBinarizeAlpha = ShapeModeReverseBinarizeAlpha,
-            /** \brief A color key is applied. */
+            /** \brief A colour key is applied. */
             ColourKey = ShapeModeColorKey,
-            /** \brief A color key is applied. */
+            /** \brief A colour key is applied. */
             ColorKey = ShapeModeColorKey
         };
 
@@ -106,21 +108,23 @@ namespace SDL
 
         
         /** \brief A struct that tags the SDL_WindowShapeParams union with an enum describing the type of its contents. */
-        struct Mode {
+        struct Mode 
+        {
             /** \brief The mode of these window-shape parameters. */
             ShapeMode mode;
             /** \brief A union containing parameters for shaped windows. */
-            union {
+            union
+            {
                 /** \brief A cutoff alpha value for binarization of the window shape's alpha channel. */
                 Uint8 binarizationCutoff;
-                Colour colorKey;
+                Colour colourKey;
             } parameters; /** \brief Window-shape parameters. */
 
             explicit operator SDL_WindowShapeMode() const
             {
                 SDL_WindowShapeMode m = {};
                 m.mode = (WindowShapeMode)mode;
-                m.parameters.colorKey = parameters.colorKey;
+                m.parameters.colorKey = parameters.colourKey;
                 return m;
             }
         };
@@ -155,4 +159,5 @@ namespace SDL
     }
 }
 
+#endif
 #endif

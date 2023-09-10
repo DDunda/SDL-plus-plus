@@ -265,6 +265,7 @@ namespace SDL::Mix
 	inline bool OpenAudio(int frequency, Uint16 format, int channels, int chunksize)
 		{ return Mix_OpenAudio(frequency, format, channels, chunksize) == 0; }
 
+#if SDL_MIXER_VERSION_ATLEAST(2,0,2)
 	/**
 	 * Open a specific audio device for playback.
 	 *
@@ -556,6 +557,7 @@ namespace SDL::Mix
 	 */
 	bool OpenAudioDevice(int frequency, Uint16 format, int channels, int chunksize, int allowed_changes)
 		{ return OpenAudioDevice(frequency, format, channels, chunksize, NULL, allowed_changes); }
+#endif
 
 	/**
 	 * Find out what the actual audio device parameters are.
@@ -650,6 +652,7 @@ namespace SDL::Mix
 		inline Chunk(std::shared_ptr<Mix_Chunk> chunk)
 			: chunk(chunk) {}
 
+#if SDL_MIXER_VERSION_ATLEAST(2,6,0)
 		/**
 		 * Load a supported audio format into a chunk.
 		 *
@@ -677,7 +680,7 @@ namespace SDL::Mix
 		 *                to leave it open.
 		 * \returns a new chunk, or NULL on error.
 		 */
-		inline static Chunk LoadWav(SDL_RWops* src, int freesrc)
+		inline static Chunk LoadWav(SDL_RWops* src, bool freesrc)
 			{ return Chunk::FromPtr(Mix_LoadWAV_RW(src, freesrc)); }
 
 		/**
@@ -709,6 +712,7 @@ namespace SDL::Mix
 			{ return Chunk::FromPtr(Mix_LoadWAV(file)); }
 		inline static Chunk LoadWAV(const std::string& file)
 			{ return Chunk::FromPtr(Mix_LoadWAV(file.c_str())); }
+#endif
 
 		/**
 		 * Load a WAV file from memory as quickly as possible.
@@ -802,6 +806,7 @@ namespace SDL::Mix
 		inline static const char* GetDecoder(int index)
 			{ return Mix_GetChunkDecoder(index); }
 
+#if SDL_MIXER_VERSION_ATLEAST(2,0,2)
 		/**
 		 * Check if a chunk decoder is available by name.
 		 *
@@ -821,6 +826,7 @@ namespace SDL::Mix
 			{ return Mix_HasChunkDecoder(name) == SDL_TRUE; }
 		inline static bool HasDecoder(const std::string& name)
 			{ return HasDecoder(name.c_str()); }
+#endif
 
 		/**
 		 * Play this audio chunk on a specific channel.
@@ -1092,7 +1098,7 @@ namespace SDL::Mix
 		 *                to leave it open.
 		 * \returns a valid Music object on success, or an invalid one on error.
 		 */
-		inline Music(SDL_RWops* src, int freesrc)
+		inline Music(SDL_RWops* src, bool freesrc)
 			: Music(MakeSharedPtr(Mix_LoadMUS_RW(src, freesrc))) {}
 
 		/**
@@ -1127,7 +1133,7 @@ namespace SDL::Mix
 		 *                to leave it open.
 		 * \returns a valid Music object on success, or an invalid one on error.
 		 */
-		inline Music(SDL_RWops* src, MusicType type, int freesrc)
+		inline Music(SDL_RWops* src, MusicType type, bool freesrc)
 			: Music(MakeSharedPtr(Mix_LoadMUSType_RW(src, (Mix_MusicType)type, freesrc))) {}
 
 		/**
@@ -1168,6 +1174,7 @@ namespace SDL::Mix
 		inline static const char* GetDecoder(int index)
 			{ return Mix_GetMusicDecoder(index); }
 
+#if SDL_MIXER_VERSION_ATLEAST(2,6,0)
 		/**
 		 * Check if a music decoder is available by name.
 		 *
@@ -1188,6 +1195,7 @@ namespace SDL::Mix
 			{ return Mix_HasMusicDecoder(name) == SDL_TRUE; }
 		inline static bool HasDecoder(const std::string& name)
 			{ return HasDecoder(name.c_str()); }
+#endif
 
 		/**
 		 * Find out the format of a mixer music.
@@ -1205,6 +1213,7 @@ namespace SDL::Mix
 		inline static MusicType GetPlayingType()
 			{ return (MusicType)Mix_GetMusicType(NULL); }
 
+#if SDL_MIXER_VERSION_ATLEAST(2,6,0)
 		/**
 		 * Get the title for a music object, or its filename.
 		 *
@@ -1321,7 +1330,8 @@ namespace SDL::Mix
 		 */
 		inline static const std::string_view GetPlayingCopyrightTag()
 			{ return Mix_GetMusicCopyrightTag(NULL); }
-		
+#endif
+
 		/**
 		 * Check the playing status of the music stream.
 		 *
@@ -1516,6 +1526,7 @@ namespace SDL::Mix
 		inline static int GetChannelVolume()
 			{ return SetChannelVolume(-1); }
 
+#if SDL_MIXER_VERSION_ATLEAST(2,6,0)
 		/**
 		 * Query the current volume value for this music object.
 		 *
@@ -1523,6 +1534,7 @@ namespace SDL::Mix
 		 */
 		inline int GetVolume()
 			{ return Mix_GetMusicVolume(music.get()); }
+#endif
 
 		/**
 		 * Halt playing of the music stream.
@@ -1616,19 +1628,8 @@ namespace SDL::Mix
 		 *
 		 * \return true if music is paused, false otherwise.
 		 */
-		inline static bool IsPaused(void)
+		inline static bool IsPaused()
 			{ return Mix_PausedMusic() == 1; }
-
-		/**
-		 * Jump to a given order in mod music.
-		 *
-		 * This only applies to MOD music formats.
-		 *
-		 * \param order order
-		 * \returns true if successful, or false if failed or isn't implemented.
-		 */
-		inline static bool ModJumpToOrder(int order)
-			{ return Mix_ModMusicJumpToOrder(order) == 0; }
 
 		/**
 		 * Set the current position in the music stream, in seconds.
@@ -1643,6 +1644,18 @@ namespace SDL::Mix
 		 */
 		inline static bool SetPosition(double position)
 			{ return Mix_SetMusicPosition(position) == 0; }
+
+#if SDL_MIXER_VERSION_ATLEAST(2,6,0)
+		/**
+		 * Jump to a given order in mod music.
+		 *
+		 * This only applies to MOD music formats.
+		 *
+		 * \param order order
+		 * \returns true if successful, or false if failed or isn't implemented.
+		 */
+		inline static bool ModJumpToOrder(int order)
+			{ return Mix_ModMusicJumpToOrder(order) == 0; }
 
 		/**
 		 * Get the time current position of music stream, in seconds.
@@ -1737,6 +1750,7 @@ namespace SDL::Mix
 		 */
 		inline static double GetPlayingLoopLengthTime()
 			{ return Mix_GetMusicLoopLengthTime(NULL); }
+#endif
 
 		/**
 		 * Run an external command as the music stream.
@@ -2186,7 +2200,7 @@ namespace SDL::Mix
 	 */
 	inline bool GroupChannels(int from, int to, int tag)
 		{ return Mix_GroupChannels(from, to, tag) == 0; }
-	inline bool UngroupChannels(int from, int to, int tag)
+	inline bool UngroupChannels(int from, int to)
 		{ return GroupChannels(from, to, -1); }
 
 	/**
@@ -2285,6 +2299,7 @@ namespace SDL::Mix
 	inline int GetChannelVolume(int channel) { return Mix_Volume(channel, -1); }
 	inline int GetAvgChannelVolume() { return Mix_Volume(-1, -1); }
 
+#if SDL_MIXER_VERSION_ATLEAST(2,6,0)
 	/**
 	 * Set the master volume for all channels.
 	 *
@@ -2311,6 +2326,7 @@ namespace SDL::Mix
 		{ return Mix_MasterVolume(volume); }
 	inline int GetMasterVolume()
 		{ return SetMasterVolume(-1); }
+#endif
 
 	/**
 	 * Halt playing of a particular channel.
@@ -2392,10 +2408,10 @@ namespace SDL::Mix
 	 *              halting, -1 to not halt.
 	 * \returns the number of channels that changed expirations.
 	 */
-	inline int SetChannelExpiration(int channel, int ticks) { return Mix_ExpireChannel(channel, ticks); }
-	inline int SetAllChannelExpirations(int ticks) { return Mix_ExpireChannel(-1, ticks); }
-	inline int ClearChannelExpiration(int channel) { return Mix_ExpireChannel(channel, -1); }
-	inline int ClearAllChannelExpirations() { return Mix_ExpireChannel(-1, -1); }
+	inline int SetChannelExpiration      (int channel, int ticks) { return Mix_ExpireChannel(channel, ticks); }
+	inline int SetAllChannelExpirations  (             int ticks) { return Mix_ExpireChannel(-1,      ticks); }
+	inline int ClearChannelExpiration    (int channel           ) { return Mix_ExpireChannel(channel, -1   ); }
+	inline int ClearAllChannelExpirations(                      ) { return Mix_ExpireChannel(-1,      -1   ); }
 
 	/**
 	 * Halt a channel after fading it out for a specified time.
@@ -2541,16 +2557,23 @@ namespace SDL::Mix
 	/**
 	 * Check the playing status of a specific channel.
 	 *
+	 * If the channel is currently playing, this function returns 1. Otherwise it
+	 * returns 0.
+	 *
+	 * If the specified channel is -1, all channels are checked, and this function
+	 * returns the number of channels currently playing.
+	 *
 	 * You may not specify MAX_CHANNEL_POST for a channel.
 	 *
 	 * Paused channels are treated as playing, even though they are not currently
 	 * making forward progress in mixing.
 	 *
 	 * \param channel channel
-	 * \returns true if channel is playing, false otherwise.
+	 * \returns non-zero if channel is playing, zero otherwise. If `channel` is
+	 *          -1, return the total number of channel playings.
 	 */
-	inline bool ChannelIsPlaying(unsigned channel)
-		{ return Mix_Playing(channel) != 0; }
+	inline int GetChannelPlaying(int channel)
+		{ return Mix_Playing(channel); }
 
 	/**
 	 * Check the playing status of all channels, and returns the number of
@@ -2563,7 +2586,7 @@ namespace SDL::Mix
 	 *
 	 * \returns the total number of channels playing.
 	 */
-	inline int ChannelsPlaying()
+	inline int GetChannelsPlaying()
 		{ return Mix_Playing(-1); }
 
 	/**
@@ -2714,6 +2737,7 @@ namespace SDL::Mix
 	inline void ClearError()
 		{ SDL::ClearError(); }
 
+#if SDL_MIXER_VERSION_ATLEAST(2,6,0)
 	namespace Timidity
 	{
 		/**
@@ -2747,6 +2771,7 @@ namespace SDL::Mix
 		inline const char* GetCfg()
 			{ return Mix_GetTimidityCfg(); }
 	}
+#endif
 }
 
 #endif

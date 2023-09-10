@@ -159,7 +159,6 @@
     <ClCompile Include="$(SDLpp)\src\pixels.cpp" />
     <ClCompile Include="$(SDLpp)\src\rect.cpp" />
     <ClCompile Include="$(SDLpp)\src\render.cpp" />
-    <ClCompile Include="$(SDLpp)\src\SDL_ttf.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -11,7 +11,7 @@
 #include <memory>
 #include <string>
 
-namespace SDL::Mix
+namespace SDL::MIX
 {
 	namespace
 	{
@@ -38,12 +38,12 @@ namespace SDL::Mix
 	 * Query the version of SDL_mixer that the program is linked against.
 	 *
 	 * This function gets the version of the dynamically linked SDL_mixer library.
-	 * This is separate from the Mix::COMPILED_VERSION constexpr, which tells you
+	 * This is separate from the MIX::COMPILED_VERSION constexpr, which tells you
 	 * what version of the SDL_mixer headers you compiled against.
 	 *
 	 * \returns a Version with the version information.
 	 */
-	inline Version GetVersion()
+	inline Version Linked_Version()
 		{ return *Mix_Linked_Version(); }
 
 	constexpr Version COMPILED_VERSION = Version(MAJOR_VERSION, MINOR_VERSION, PATCHLEVEL);
@@ -72,7 +72,7 @@ namespace SDL::Mix
 	 * them for use. This must be the first function you call in SDL_mixer, and if
 	 * it fails you should not continue with the library.
 	 *
-	 * Flags should be one or more flags from Mix::InitFlags OR'd together. It
+	 * Flags should be one or more flags from MIX::InitFlags OR'd together. It
 	 * returns the flags successfully initialized, or 0 on failure.
 	 *
 	 * Currently, these flags are:
@@ -109,15 +109,15 @@ namespace SDL::Mix
 	 * media player, perhaps you are fine with only having WAV and MP3 support and
 	 * can live without Opus playback, even if you request support for everything.
 	 *
-	 * Unlike other SDL satellite libraries, calls to Mix::Init do not stack; a
-	 * single call to Mix::Quit() will deinitialize everything and does not have to
-	 * be paired with a matching Mix::Init call. For that reason, it's considered
-	 * best practices to have a single Mix::Init and Mix::Quit call in your program.
+	 * Unlike other SDL satellite libraries, calls to MIX::Init do not stack; a
+	 * single call to MIX::Quit() will deinitialize everything and does not have to
+	 * be paired with a matching MIX::Init call. For that reason, it's considered
+	 * best practices to have a single MIX::Init and MIX::Quit call in your program.
 	 * While this isn't required, be aware of the risks of deviating from that
 	 * behavior.
 	 *
 	 * After initializing SDL_mixer, the next step is to open an audio device to
-	 * prepare to play sound (with Mix::OpenAudio() or Mix::OpenAudioDevice()), and
+	 * prepare to play sound (with MIX::OpenAudio() or MIX::OpenAudioDevice()), and
 	 * load audio data to play with that device.
 	 *
 	 * \param flags initialization flags, OR'd together.
@@ -135,15 +135,15 @@ namespace SDL::Mix
 	 * other resources and closing all audio devices. This will unload any shared
 	 * libraries it is using for various codecs.
 	 *
-	 * After this call, a call to Mix::Init(0) will return 0 (no codecs loaded).
+	 * After this call, a call to MIX::Init(0) will return 0 (no codecs loaded).
 	 *
-	 * You can safely call Mix::Init() to reload various codec support after this
+	 * You can safely call MIX::Init() to reload various codec support after this
 	 * call.
 	 *
-	 * Unlike other SDL satellite libraries, calls to Mix::Init do not stack; a
-	 * single call to Mix::Quit() will deinitialize everything and does not have to
-	 * be paired with a matching Mix::Init call. For that reason, it's considered
-	 * best practices to have a single Mix::Init and Mix::Quit call in your program.
+	 * Unlike other SDL satellite libraries, calls to MIX::Init do not stack; a
+	 * single call to MIX::Quit() will deinitialize everything and does not have to
+	 * be paired with a matching MIX::Init call. For that reason, it's considered
+	 * best practices to have a single MIX::Init and MIX::Quit call in your program.
 	 * While this isn't required, be aware of the risks of deviating from that
 	 * behavior.
 	 */
@@ -196,7 +196,7 @@ namespace SDL::Mix
 	 * Mix_OpenAudioDevice(). This function is equivalent to calling:
 	 *
 	 * ```c
-	 * Mix::OpenAudioDevice(frequency, format, nchannels, chunksize, NULL,
+	 * MIX::OpenAudioDevice(frequency, format, nchannels, chunksize, NULL,
 	 *                     SDL_AUDIO_ALLOW_FREQUENCY_CHANGE |
 	 *                     SDL_AUDIO_ALLOW_CHANNELS_CHANGE);
 	 * ```
@@ -245,15 +245,15 @@ namespace SDL::Mix
 	 * This function does not allow you to select a specific audio device on the
 	 * system, it always chooses the best default it can on your behalf (which, in
 	 * many cases, is exactly what you want anyhow). If you must choose a specific
-	 * device, you can do so with Mix::OpenAudioDevice() instead.
+	 * device, you can do so with MIX::OpenAudioDevice() instead.
 	 *
 	 * If this function reports success, you are ready to start making noise! Load
 	 * some audio data and start playing!
 	 *
-	 * The app can use Mix::QuerySpec() to determine the final device settings.
+	 * The app can use MIX::QuerySpec() to determine the final device settings.
 	 *
 	 * When done with an audio device, probably at the end of the program, the app
-	 * should dispose of the device with Mix::CloseAudio().
+	 * should dispose of the device with MIX::CloseAudio().
 	 *
 	 * \param frequency the frequency to playback audio at (in Hz).
 	 * \param format audio format, one of SDL's AUDIO_* values.
@@ -270,7 +270,7 @@ namespace SDL::Mix
 	 * Open a specific audio device for playback.
 	 *
 	 * (A slightly simpler version of this function is available in
-	 * Mix::OpenAudio(), which still might meet most applications' needs.)
+	 * MIX::OpenAudio(), which still might meet most applications' needs.)
 	 *
 	 * An audio device is what generates sound, so the app must open one to make
 	 * noise.
@@ -295,8 +295,8 @@ namespace SDL::Mix
 	 * need.
 	 *
 	 * The other reason to care about specific formats: if you plan to touch the
-	 * mix buffer directly (with Mix::SetPostMix, a registered effect, or
-	 * Mix::HookMusic), you might have code that expects it to be in a specific
+	 * mix buffer directly (with MIX::SetPostMix, a registered effect, or
+	 * MIX::HookMusic), you might have code that expects it to be in a specific
 	 * format, and you should specify that here.
 	 *
 	 * The audio device frequency is specified in Hz; in modern times, 48000 is
@@ -343,14 +343,14 @@ namespace SDL::Mix
 	 * requires. If your app needs precisely what is requested, specify zero for
 	 * `allowed_changes`.
 	 *
-	 * If changes were allowed, the app can use Mix::QuerySpec() to determine the
+	 * If changes were allowed, the app can use MIX::QuerySpec() to determine the
 	 * final device settings.
 	 *
 	 * If this function reports success, you are ready to start making noise! Load
 	 * some audio data and start playing!
 	 *
 	 * When done with an audio device, probably at the end of the program, the app
-	 * should dispose of the device with Mix::CloseAudio().
+	 * should dispose of the device with MIX::CloseAudio().
 	 *
 	 * \param frequency the frequency to playback audio at (in Hz).
 	 * \param format audio format, one of SDL's AUDIO_* values.
@@ -368,7 +368,7 @@ namespace SDL::Mix
 	 * Open a specific audio device for playback.
 	 *
 	 * (A slightly simpler version of this function is available in
-	 * Mix::OpenAudio(), which still might meet most applications' needs.)
+	 * MIX::OpenAudio(), which still might meet most applications' needs.)
 	 *
 	 * An audio device is what generates sound, so the app must open one to make
 	 * noise.
@@ -393,8 +393,8 @@ namespace SDL::Mix
 	 * need.
 	 *
 	 * The other reason to care about specific formats: if you plan to touch the
-	 * mix buffer directly (with Mix::SetPostMix, a registered effect, or
-	 * Mix::HookMusic), you might have code that expects it to be in a specific
+	 * mix buffer directly (with MIX::SetPostMix, a registered effect, or
+	 * MIX::HookMusic), you might have code that expects it to be in a specific
 	 * format, and you should specify that here.
 	 *
 	 * The audio device frequency is specified in Hz; in modern times, 48000 is
@@ -441,14 +441,14 @@ namespace SDL::Mix
 	 * requires. If your app needs precisely what is requested, specify zero for
 	 * `allowed_changes`.
 	 *
-	 * If changes were allowed, the app can use Mix::QuerySpec() to determine the
+	 * If changes were allowed, the app can use MIX::QuerySpec() to determine the
 	 * final device settings.
 	 *
 	 * If this function reports success, you are ready to start making noise! Load
 	 * some audio data and start playing!
 	 *
 	 * When done with an audio device, probably at the end of the program, the app
-	 * should dispose of the device with Mix::CloseAudio().
+	 * should dispose of the device with MIX::CloseAudio().
 	 *
 	 * \param frequency the frequency to playback audio at (in Hz).
 	 * \param format audio format, one of SDL's AUDIO_* values.
@@ -465,7 +465,7 @@ namespace SDL::Mix
 	 * Open a default audio device for playback.
 	 *
 	 * (A slightly simpler version of this function is available in
-	 * Mix::OpenAudio(), which still might meet most applications' needs.)
+	 * MIX::OpenAudio(), which still might meet most applications' needs.)
 	 *
 	 * An audio device is what generates sound, so the app must open one to make
 	 * noise.
@@ -490,8 +490,8 @@ namespace SDL::Mix
 	 * need.
 	 *
 	 * The other reason to care about specific formats: if you plan to touch the
-	 * mix buffer directly (with Mix::SetPostMix, a registered effect, or
-	 * Mix::HookMusic), you might have code that expects it to be in a specific
+	 * mix buffer directly (with MIX::SetPostMix, a registered effect, or
+	 * MIX::HookMusic), you might have code that expects it to be in a specific
 	 * format, and you should specify that here.
 	 *
 	 * The audio device frequency is specified in Hz; in modern times, 48000 is
@@ -538,14 +538,14 @@ namespace SDL::Mix
 	 * requires. If your app needs precisely what is requested, specify zero for
 	 * `allowed_changes`.
 	 *
-	 * If changes were allowed, the app can use Mix::QuerySpec() to determine the
+	 * If changes were allowed, the app can use MIX::QuerySpec() to determine the
 	 * final device settings.
 	 *
 	 * If this function reports success, you are ready to start making noise! Load
 	 * some audio data and start playing!
 	 *
 	 * When done with an audio device, probably at the end of the program, the app
-	 * should dispose of the device with Mix::CloseAudio().
+	 * should dispose of the device with MIX::CloseAudio().
 	 *
 	 * \param frequency the frequency to playback audio at (in Hz).
 	 * \param format audio format, one of SDL's AUDIO_* values.
@@ -562,8 +562,8 @@ namespace SDL::Mix
 	/**
 	 * Find out what the actual audio device parameters are.
 	 *
-	 * If Mix::OpenAudioDevice() was called with `allowed_changes` set to anything
-	 * but zero, or Mix::OpenAudio() was used, some audio device settings may be
+	 * If MIX::OpenAudioDevice() was called with `allowed_changes` set to anything
+	 * but zero, or MIX::OpenAudio() was used, some audio device settings may be
 	 * different from the application's request. This function will report what
 	 * the device is actually running at.
 	 *
@@ -605,7 +605,7 @@ namespace SDL::Mix
 	 *
 	 * If decreasing the number of channels, any upper channels currently playing
 	 * are stopped. This will deregister all effects on those channels and call
-	 * any callback specified by Mix::ChannelFinished() for each removed channel.
+	 * any callback specified by MIX::ChannelFinished() for each removed channel.
 	 *
 	 * If `numchans` is less than zero, this will return the current number of
 	 * channels without changing anything.
@@ -773,7 +773,7 @@ namespace SDL::Mix
 		 *
 		 * This list can change between builds AND runs of the program, if external
 		 * libraries that add functionality become available. You must successfully
-		 * call Mix::OpenAudio() or Mix::OpenAudioDevice() before calling this function,
+		 * call MIX::OpenAudio() or MIX::OpenAudioDevice() before calling this function,
 		 * as decoders are activated at device open time.
 		 *
 		 * Appearing in this list doesn't promise your specific audio file will
@@ -781,7 +781,7 @@ namespace SDL::Mix
 		 * install.
 		 *
 		 * These return values are static, read-only data; do not modify or free it.
-		 * The pointers remain valid until you call Mix::CloseAudio().
+		 * The pointers remain valid until you call MIX::CloseAudio().
 		 *
 		 * \returns number of chunk decoders available.
 		 */
@@ -792,12 +792,12 @@ namespace SDL::Mix
 		 * Get a chunk decoder's name.
 		 *
 		 * The requested decoder's index must be between zero and
-		 * Mix::GetNumChunkDecoders()-1. It's safe to call this with an invalid index;
+		 * MIX::GetNumChunkDecoders()-1. It's safe to call this with an invalid index;
 		 * this function will return NULL in that case.
 		 *
 		 * This list can change between builds AND runs of the program, if external
 		 * libraries that add functionality become available. You must successfully
-		 * call Mix::OpenAudio() or Mix::OpenAudioDevice() before calling this function,
+		 * call MIX::OpenAudio() or MIX::OpenAudioDevice() before calling this function,
 		 * as decoders are activated at device open time.
 		 *
 		 * \param index index of the chunk decoder.
@@ -812,7 +812,7 @@ namespace SDL::Mix
 		 *
 		 * This result can change between builds AND runs of the program, if external
 		 * libraries that add functionality become available. You must successfully
-		 * call Mix::OpenAudio() or Mix::OpenAudioDevice() before calling this function,
+		 * call MIX::OpenAudio() or MIX::OpenAudioDevice() before calling this function,
 		 * as decoders are activated at device open time.
 		 *
 		 * Decoder names are arbitrary but also obvious, so you have to know what
@@ -923,7 +923,7 @@ namespace SDL::Mix
 		/**
 		 * Play an audio chunk on a specific channel, fading in the audio.
 		 *
-		 * This will start the new sound playing, much like Mix::PlayChannel() will,
+		 * This will start the new sound playing, much like MIX::PlayChannel() will,
 		 * but will start the sound playing at silence and fade in to its normal
 		 * volume over the specified number of milliseconds.
 		 *
@@ -936,8 +936,8 @@ namespace SDL::Mix
 		 * If `loops` is greater than zero, loop the sound that many times. If `loops`
 		 * is -1, loop "infinitely" (~65000 times).
 		 *
-		 * A fading channel will change it's volume progressively, as if Mix::Volume()
-		 * was called on it (which is to say: you probably shouldn't call Mix::Volume()
+		 * A fading channel will change it's volume progressively, as if MIX::Volume()
+		 * was called on it (which is to say: you probably shouldn't call MIX::Volume()
 		 * on a fading channel).
 		 *
 		 * \param channel the channel on which to play the new chunk, or -1 to find
@@ -958,7 +958,7 @@ namespace SDL::Mix
 		 * Play an audio chunk on a specific channel, fading in the audio, for a
 		 * maximum time.
 		 *
-		 * This will start the new sound playing, much like Mix::PlayChannel() will,
+		 * This will start the new sound playing, much like MIX::PlayChannel() will,
 		 * but will start the sound playing at silence and fade in to its normal
 		 * volume over the specified number of milliseconds.
 		 *
@@ -979,8 +979,8 @@ namespace SDL::Mix
 		 * it just schedules the chunk to play and notes the maximum for the mixer to
 		 * manage later, and returns immediately.
 		 *
-		 * A fading channel will change it's volume progressively, as if Mix::Volume()
-		 * was called on it (which is to say: you probably shouldn't call Mix::Volume()
+		 * A fading channel will change it's volume progressively, as if MIX::Volume()
+		 * was called on it (which is to say: you probably shouldn't call MIX::Volume()
 		 * on a fading channel).
 		 *
 		 * \param channel the channel on which to play the new chunk, or -1 to find
@@ -1141,7 +1141,7 @@ namespace SDL::Mix
 		 *
 		 * This list can change between builds AND runs of the program, if external
 		 * libraries that add functionality become available. You must successfully
-		 * call Mix::OpenAudio() or Mix::OpenAudioDevice() before calling this function,
+		 * call MIX::OpenAudio() or MIX::OpenAudioDevice() before calling this function,
 		 * as decoders are activated at device open time.
 		 *
 		 * Appearing in this list doesn't promise your specific audio file will
@@ -1149,7 +1149,7 @@ namespace SDL::Mix
 		 * install.
 		 *
 		 * These return values are static, read-only data; do not modify or free it.
-		 * The pointers remain valid until you call Mix::CloseAudio().
+		 * The pointers remain valid until you call MIX::CloseAudio().
 		 *
 		 * \returns number of chunk decoders available.
 		 */
@@ -1160,12 +1160,12 @@ namespace SDL::Mix
 		 * Get a music decoder's name.
 		 *
 		 * The requested decoder's index must be between zero and
-		 * Mix::GetNumMusicDecoders()-1. It's safe to call this with an invalid index;
+		 * MIX::GetNumMusicDecoders()-1. It's safe to call this with an invalid index;
 		 * this function will return NULL in that case.
 		 *
 		 * This list can change between builds AND runs of the program, if external
 		 * libraries that add functionality become available. You must successfully
-		 * call Mix::OpenAudio() or Mix::OpenAudioDevice() before calling this function,
+		 * call MIX::OpenAudio() or MIX::OpenAudioDevice() before calling this function,
 		 * as decoders are activated at device open time.
 		 *
 		 * \param index index of the music decoder.
@@ -1180,7 +1180,7 @@ namespace SDL::Mix
 		 *
 		 * This result can change between builds AND runs of the program, if external
 		 * libraries that add functionality become available. You must successfully
-		 * call Mix::OpenAudio() or Mix::OpenAudioDevice() before calling this function,
+		 * call MIX::OpenAudio() or MIX::OpenAudioDevice() before calling this function,
 		 * as decoders are activated at device open time.
 		 *
 		 * Decoder names are arbitrary but also obvious, so you have to know what
@@ -1346,8 +1346,8 @@ namespace SDL::Mix
 		/**
 		 * Add your own music player or additional mixer function.
 		 *
-		 * This works something like Mix::SetPostMix(), but it has some crucial
-		 * differences. Note that an app can use this _and_ Mix::SetPostMix() at the
+		 * This works something like MIX::SetPostMix(), but it has some crucial
+		 * differences. Note that an app can use this _and_ MIX::SetPostMix() at the
 		 * same time. This allows an app to replace the built-in music playback,
 		 * either with it's own music decoder or with some sort of
 		 * procedurally-generated audio output.
@@ -1470,7 +1470,7 @@ namespace SDL::Mix
 		/**
 		 * Play this music object, fading in the audio, from a starting position.
 		 *
-		 * This will start the new music playing, much like Mix::PlayMusic() will, but
+		 * This will start the new music playing, much like MIX::PlayMusic() will, but
 		 * will start the music playing at silence and fade in to its normal volume
 		 * over the specified number of milliseconds.
 		 *
@@ -1480,9 +1480,9 @@ namespace SDL::Mix
 		 * If `loops` is greater than zero, loop the music that many times. If `loops`
 		 * is -1, loop "infinitely" (~65000 times).
 		 *
-		 * Fading music will change it's volume progressively, as if Mix::VolumeMusic()
+		 * Fading music will change it's volume progressively, as if MIX::VolumeMusic()
 		 * was called on it (which is to say: you probably shouldn't call
-		 * Mix::VolumeMusic() on fading music).
+		 * MIX::VolumeMusic() on fading music).
 		 *
 		 * This function allows the caller to start the music playback past the
 		 * beginning of its audio data. You may specify a start position, in seconds,
@@ -1490,7 +1490,7 @@ namespace SDL::Mix
 		 * samples of the music.
 		 *
 		 * An app can specify a `position` of 0.0 to start at the beginning of the
-		 * music (or just call Mix::FadeInMusic() instead).
+		 * music (or just call MIX::FadeInMusic() instead).
 		 *
 		 * To convert from milliseconds, divide by 1000.0.
 		 *
@@ -1555,7 +1555,7 @@ namespace SDL::Mix
 		 * `ms` milliseconds. After that time, the music is halted.
 		 *
 		 * Any halted music will call any callback specified by
-		 * Mix::HookMusicFinished() once the halt occurs.
+		 * MIX::HookMusicFinished() once the halt occurs.
 		 *
 		 * Fading music will change it's volume progressively, as if
 		 * Music::SetChannelVolume() was called on it (which is to say: you probably
@@ -1816,7 +1816,7 @@ namespace SDL::Mix
 	 * Set a callback that runs when a channel has finished playing.
 	 *
 	 * The callback may be called from the mixer's audio callback or it could be
-	 * called as a result of Mix::HaltChannel(), etc.
+	 * called as a result of MIX::HaltChannel(), etc.
 	 *
 	 * The callback has a single parameter, `channel`, which says what mixer
 	 * channel has just stopped.
@@ -1858,8 +1858,8 @@ namespace SDL::Mix
 		/**
 		 * This is a callback that signifies that a channel has finished all its
 		 *  loops and has completed playback. This gets called if the buffer
-		 *  plays out normally, or if you call Mix::HaltChannel(), implicitly stop
-		 *  a channel via Mix::AllocateChannels(), or unregister a callback while
+		 *  plays out normally, or if you call MIX::HaltChannel(), implicitly stop
+		 *  a channel via MIX::AllocateChannels(), or unregister a callback while
 		 *  it's still playing.
 		 *
 		 * DO NOT EVER call SDL::LockAudio() from your callback function!
@@ -1878,28 +1878,28 @@ namespace SDL::Mix
 		 * and any given effect will be extra cycles, too, so it is crucial that your
 		 * code run fast. Also note that the data that your function is given is in
 		 * the format of the sound device, and not the format you gave to
-		 * Mix::OpenAudio(), although they may in reality be the same. This is an
-		 * unfortunate but necessary speed concern. Use Mix::QuerySpec() to determine
+		 * MIX::OpenAudio(), although they may in reality be the same. This is an
+		 * unfortunate but necessary speed concern. Use MIX::QuerySpec() to determine
 		 * if you can handle the data before you register your effect, and take
 		 * appropriate actions.
 		 *
 		 * You may also specify a callback (EffectDone) that is called when the
 		 * channel finishes playing. This gives you a more fine-grained control than
-		 * Mix::ChannelFinished(), in case you need to free effect-specific resources,
+		 * MIX::ChannelFinished(), in case you need to free effect-specific resources,
 		 * etc. If you don't need this, you can specify NULL.
 		 *
-		 * You may set the callbacks before or after calling Mix::PlayChannel().
+		 * You may set the callbacks before or after calling MIX::PlayChannel().
 		 *
-		 * Things like Mix::SetPanning() are just internal special effect functions, so
+		 * Things like MIX::SetPanning() are just internal special effect functions, so
 		 * if you are using that, you've already incurred the overhead of a copy to a
 		 * separate buffer, and that these effects will be in the queue with any
 		 * functions you've registered. The list of registered effects for a channel
 		 * is reset when a chunk finishes playing, so you need to explicitly set them
-		 * with each call to Mix::PlayChannel().
+		 * with each call to MIX::PlayChannel().
 		 *
 		 * You may also register a special effect function that is to be run after
 		 * final mixing occurs. The rules for these callbacks are identical to those
-		 * in Mix::RegisterEffect, but they are run after all the channels and the
+		 * in MIX::RegisterEffect, but they are run after all the channels and the
 		 * music have been mixed into a single stream, whereas channel-specific
 		 * effects run on a given channel before any other mixing occurs. These global
 		 * effect callbacks are called "posteffects". Posteffects only have their
@@ -1910,7 +1910,7 @@ namespace SDL::Mix
 		 * considered a posteffect.
 		 *
 		 * After all these effects have finished processing, the callback registered
-		 * through Mix::SetPostMix() runs, and then the stream goes to the audio
+		 * through MIX::SetPostMix() runs, and then the stream goes to the audio
 		 * device.
 		 *
 		 * DO NOT EVER call SDL::LockAudio() from your callback function! You are
@@ -1922,7 +1922,7 @@ namespace SDL::Mix
 		 * \param done effect done callback
 		 * \param arg argument
 		 * \returns false if error (no such channel), true if added. Error messages
-		 *          can be retrieved from Mix::GetError().
+		 *          can be retrieved from MIX::GetError().
 		 */
 		inline bool RegisterEffect(int channel, EffectFunc func, EffectDone done, void* arg)
 			{ return Mix_RegisterEffect(channel, func, done, arg) != 0; }
@@ -1965,7 +1965,7 @@ namespace SDL::Mix
 		 *
 		 * \param channel the channel to unregister all effects on, or CHANNEL_POST.
 		 * \returns false if error (no such channel), true if all effects removed.
-		 *          Error messages can be retrieved from Mix::GetError().
+		 *          Error messages can be retrieved from MIX::GetError().
 		 */
 		inline bool UnregisterAllEffects(int channel)
 			{ return Mix_UnregisterAllEffects(channel) != 0; }
@@ -1983,28 +1983,28 @@ namespace SDL::Mix
 		 * want real panning, call it like this:
 		 *
 		 * ```c
-		 * Mix::SetPanning(channel, left, 255 - left);
+		 * MIX::SetPanning(channel, left, 255 - left);
 		 * ```
 		 *
 		 * Setting `channel` to CHANNEL_POST registers this as a posteffect, and the
 		 * panning will be done to the final mixed stream before passing it on to the
 		 * audio device.
 		 *
-		 * This uses the Mix::RegisterEffect() API internally, and returns without
+		 * This uses the MIX::RegisterEffect() API internally, and returns without
 		 * registering the effect function if the audio device is not configured for
 		 * stereo output. Setting both `left` and `right` to 255 causes this effect to
 		 * be unregistered, since that is the data's normal state.
 		 *
 		 * Note that an audio device in mono mode is a no-op, but this call will
 		 * return successful in that case. Error messages can be retrieved from
-		 * Mix::GetError().
+		 * MIX::GetError().
 		 *
 		 * \param channel The mixer channel to pan or CHANNEL_POST.
 		 * \param left Volume of stereo left channel, 0 is silence, 255 is full
 		 *             volume.
 		 * \param right Volume of stereo right channel, 0 is silence, 255 is full
 		 *              volume.
-		 * \returns false if error (no such channel or Mix::RegisterEffect() fails),
+		 * \returns false if error (no such channel or MIX::RegisterEffect() fails),
 		 *          true if panning effect enabled.
 		 */
 		inline bool SetPanning(int channel, Uint8 left, Uint8 right)
@@ -2037,13 +2037,13 @@ namespace SDL::Mix
 		 * distance attenuation will be done to the final mixed stream before passing
 		 * it on to the audio device.
 		 *
-		 * This uses the Mix::RegisterEffect() API internally.
+		 * This uses the MIX::RegisterEffect() API internally.
 		 *
 		 * \param channel The mixer channel to attenuate, or CHANNEL_POST.
 		 * \param distance distance; 0 is the listener, 255 is maximum distance away.
-		 * \returns false if error (no such channel or Mix::RegisterEffect() fails),
+		 * \returns false if error (no such channel or MIX::RegisterEffect() fails),
 		 *          true if position effect is enabled. Error messages can be retrieved
-		 *          from Mix::GetError().
+		 *          from MIX::GetError().
 		 */
 		inline bool SetDistance(int channel, Uint8 distance)
 			{ return Mix_SetDistance(channel, distance) != 0; }
@@ -2083,14 +2083,14 @@ namespace SDL::Mix
 		 * positioning will be done to the final mixed stream before passing it on to
 		 * the audio device.
 		 *
-		 * This is a convenience wrapper over Mix::SetDistance() and Mix::SetPanning().
+		 * This is a convenience wrapper over MIX::SetDistance() and MIX::SetPanning().
 		 *
 		 * \param channel The mixer channel to position, or CHANNEL_POST.
 		 * \param angle angle, in degrees. North is 0, and goes clockwise.
 		 * \param distance distance; 0 is the listener, 255 is maximum distance away.
-		 * \returns false if error (no such channel or Mix::RegisterEffect() fails),
+		 * \returns false if error (no such channel or MIX::RegisterEffect() fails),
 		 *          true if position effect is enabled. Error messages can be
-		 *          retrieved from Mix::GetError().
+		 *          retrieved from MIX::GetError().
 		 */
 		inline bool SetPosition(int channel, Sint16 angle, Uint8 distance)
 			{ return Mix_SetPosition(channel, angle, distance) != 0; }
@@ -2106,9 +2106,9 @@ namespace SDL::Mix
 		 * Calling this function with `flip` set to true reverses the chunks's
 		 * usual channels. If `flip` is false, the effect is unregistered.
 		 *
-		 * This uses the Mix::RegisterEffect() API internally, and thus is probably
+		 * This uses the MIX::RegisterEffect() API internally, and thus is probably
 		 * more CPU intensive than having the user just plug in their speakers
-		 * correctly. Mix::SetReverseStereo() returns without registering the effect
+		 * correctly. MIX::SetReverseStereo() returns without registering the effect
 		 * function if the audio device is not configured for stereo output.
 		 *
 		 * If you specify CHANNEL_POST for `channel`, then this effect is used on
@@ -2121,10 +2121,10 @@ namespace SDL::Mix
 		 *
 		 * \param channel The mixer channel to reverse, or CHANNEL_POST.
 		 * \param flip true to reverse stereo, false to disable this effect.
-		 * \returns false if error (no such channel or Mix::RegisterEffect() fails),
+		 * \returns false if error (no such channel or MIX::RegisterEffect() fails),
 		 *          true if reversing effect is enabled. Note that an audio device
 		 *          in mono mode is a no-op, but this call will return successful in
-		 *          that case. Error messages can be retrieved from Mix::GetError().
+		 *          that case. Error messages can be retrieved from MIX::GetError().
 		 */
 		inline bool SetReverseStereo(int channel, bool flip)
 			{ return Mix_SetReverseStereo(channel, flip) != 0; }
@@ -2136,8 +2136,8 @@ namespace SDL::Mix
 	 * Reserve the first channels for the application.
 	 *
 	 * While SDL_mixer will use up to the number of channels allocated by
-	 * Mix::AllocateChannels(), this sets channels aside that will not be available
-	 * when calling Mix::PlayChannel with a channel of -1 (play on the first unused
+	 * MIX::AllocateChannels(), this sets channels aside that will not be available
+	 * when calling MIX::PlayChannel with a channel of -1 (play on the first unused
 	 * channel). In this case, SDL_mixer will treat reserved channels as "used"
 	 * whether anything is playing on them at the moment or not.
 	 *
@@ -2316,7 +2316,7 @@ namespace SDL::Mix
 	 * this function returns the previous (in this case, still-current) value.
 	 *
 	 * Note that the master volume does not affect any playing music; it is only
-	 * applied when mixing chunks. Use Mix::MusicVolume() for that.\
+	 * applied when mixing chunks. Use MIX::MusicVolume() for that.\
 	 *
 	 * \param volume the new volume, between 0 and MAX_VOLUME, or -1 to query.
 	 * \returns the previous volume. If the specified volume is -1, this returns
@@ -2338,7 +2338,7 @@ namespace SDL::Mix
 	 * music.
 	 *
 	 * Any halted channels will have any currently-registered effects
-	 * deregistered, and will call any callback specified by Mix::ChannelFinished()
+	 * deregistered, and will call any callback specified by MIX::ChannelFinished()
 	 * before this function returns.
 	 *
 	 * You may not specify MAX_CHANNEL_POST for a channel.
@@ -2356,7 +2356,7 @@ namespace SDL::Mix
 	 * started.
 	 *
 	 * Any halted channels will have any currently-registered effects
-	 * deregistered, and will call any callback specified by Mix::ChannelFinished()
+	 * deregistered, and will call any callback specified by MIX::ChannelFinished()
 	 * before this function returns.
 	 * 
 	 * \returns true on success, or false on error.
@@ -2376,7 +2376,7 @@ namespace SDL::Mix
 	 * The default tag for a channel is -1.
 	 *
 	 * Any halted channels will have any currently-registered effects
-	 * deregistered, and will call any callback specified by Mix::ChannelFinished()
+	 * deregistered, and will call any callback specified by MIX::ChannelFinished()
 	 * before this function returns.
 	 *
 	 * \param tag an arbitrary value, assigned to channels, to search for.
@@ -2391,12 +2391,12 @@ namespace SDL::Mix
 	 * remove the expiration if 'ticks' is -1.
 	 *
 	 * This overrides the value passed to the fourth parameter of
-	 * Mix::PlayChannelTimed().
+	 * MIX::PlayChannelTimed().
 	 *
 	 * Specifying a channel of -1 will set an expiration for _all_ channels.
 	 *
 	 * Any halted channels will have any currently-registered effects
-	 * deregistered, and will call any callback specified by Mix::ChannelFinished()
+	 * deregistered, and will call any callback specified by MIX::ChannelFinished()
 	 * once the halt occurs.
 	 *
 	 * Note that this function does not block for the number of ticks requested;
@@ -2420,11 +2420,11 @@ namespace SDL::Mix
 	 * `ms` milliseconds. After that time, the channel is halted.
 	 *
 	 * Any halted channels will have any currently-registered effects
-	 * deregistered, and will call any callback specified by Mix::ChannelFinished()
+	 * deregistered, and will call any callback specified by MIX::ChannelFinished()
 	 * once the halt occurs.
 	 *
-	 * A fading channel will change it's volume progressively, as if Mix::Volume()
-	 * was called on it (which is to say: you probably shouldn't call Mix::Volume()
+	 * A fading channel will change it's volume progressively, as if MIX::Volume()
+	 * was called on it (which is to say: you probably shouldn't call MIX::Volume()
 	 * on a fading channel).
 	 *
 	 * Note that this function does not block for the number of milliseconds
@@ -2452,11 +2452,11 @@ namespace SDL::Mix
 	 * The default tag for a channel is -1.
 	 *
 	 * Any halted channels will have any currently-registered effects
-	 * deregistered, and will call any callback specified by Mix::ChannelFinished()
+	 * deregistered, and will call any callback specified by MIX::ChannelFinished()
 	 * once the halt occurs.
 	 *
-	 * A fading channel will change it's volume progressively, as if Mix::Volume()
-	 * was called on it (which is to say: you probably shouldn't call Mix::Volume()
+	 * A fading channel will change it's volume progressively, as if MIX::Volume()
+	 * was called on it (which is to say: you probably shouldn't call MIX::Volume()
 	 * on a fading channel).
 	 *
 	 * Note that this function does not block for the number of milliseconds
@@ -2500,7 +2500,7 @@ namespace SDL::Mix
 	 * will maintain the chunk's current mixing position. When resumed, this
 	 * channel will continue to mix the chunk where it left off.
 	 *
-	 * A paused channel can be resumed by calling Mix::Resume().
+	 * A paused channel can be resumed by calling MIX::Resume().
 	 *
 	 * A paused channel with an expiration will not expire while paused (the
 	 * expiration countdown will be adjusted once resumed).
@@ -2645,8 +2645,8 @@ namespace SDL::Mix
 	 * - If the boolean _SDL hint_ `"SDL_FORCE_SOUNDFONTS"` is set, AND the
 	 *   `"SDL_SOUNDFONTS"` _environment variable_ is also set, this function will
 	 *   return that environment variable regardless of whether
-	 *   Mix::SetSoundFounts() was ever called.
-	 * - Otherwise, if Mix::SetSoundFonts() was successfully called with a non-NULL
+	 *   MIX::SetSoundFounts() was ever called.
+	 * - Otherwise, if MIX::SetSoundFonts() was successfully called with a non-NULL
 	 *   path, this function will return the string passed to that function.
 	 * - Otherwise, if the `"SDL_SOUNDFONTS"` variable is set, this function will
 	 *   return that environment variable.
@@ -2690,26 +2690,26 @@ namespace SDL::Mix
 	 * Close the mixer, halting all playing audio.
 	 *
 	 * Any halted channels will have any currently-registered effects
-	 * deregistered, and will call any callback specified by Mix::ChannelFinished()
+	 * deregistered, and will call any callback specified by MIX::ChannelFinished()
 	 * before this function returns.
 	 *
 	 * Any halted music will call any callback specified by
-	 * Mix::HookMusicFinished() before this function returns.
+	 * MIX::HookMusicFinished() before this function returns.
 	 *
 	 * Do not start any new audio playing during callbacks in this function.
 	 *
 	 * This will close the audio device. Attempting to play new audio after this
 	 * function returns will fail, until another successful call to
-	 * Mix::OpenAudio() or Mix::OpenAudioDevice().
+	 * MIX::OpenAudio() or MIX::OpenAudioDevice().
 	 *
 	 * Note that (unlike Mix_OpenAudio optionally calling SDL_Init(SDL_INIT_AUDIO)
 	 * on the app's behalf), this will _not_ deinitialize the SDL audio subsystem
-	 * in any case. At some point after calling this function and Mix::Quit(), some
+	 * in any case. At some point after calling this function and MIX::Quit(), some
 	 * part of the application should be responsible for calling SDL::Quit() to
 	 * deinitialize all of SDL, including its audio subsystem.
 	 *
 	 * This function should be the last thing you call in SDL_mixer before
-	 * Mix::Quit(). However, the following notes apply if you don't follow this
+	 * MIX::Quit(). However, the following notes apply if you don't follow this
 	 * advice:
 	 *
 	 * Note that this will not free any loaded chunks or music; you should dispose

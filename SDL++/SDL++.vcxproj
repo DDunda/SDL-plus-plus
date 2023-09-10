@@ -207,7 +207,6 @@
     <ClCompile Include="src\pixels.cpp" />
     <ClCompile Include="src\rect.cpp" />
     <ClCompile Include="src\render.cpp" />
-    <ClCompile Include="src\SDL_ttf.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

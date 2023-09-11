@@ -6,8 +6,9 @@
 
 #include <SDL_pixels.h>
 
+#include "container.hpp"
+
 #include <memory>
-#include <vector>
 
 namespace SDL
 {
@@ -183,12 +184,26 @@ namespace SDL
 		/**
 		 *  \brief    Set a range of colours in a palette.
 		 *
-		 *  \param    colours     A vector of colours to copy into the palette.
+		 *  \param    colours     An array of colours to copy into the palette.
 		 *  \param    firstcolour The index of the first palette entry to modify.
 		 *
-		 *  \return   0 on success, or -1 if not all of the colours could be set.
+		 *  \return   true on success, or false if not all of the colours could be set.
 		 */
-		int SetColours(const std::vector<Colour>& colours, int firstcolour);
+		template <const int length>
+		inline bool SetColours(const Colour(&colours)[length], int firstcolour)
+			{ return SDL_SetPaletteColors(palette.get(), (const SDL_Color*)colours, firstcolour, length) == 0; }
+
+		/**
+		 *  \brief    Set a range of colours in a palette.
+		 *
+		 *  \param    colours     A container of colours to copy into the palette.
+		 *  \param    firstcolour The index of the first palette entry to modify.
+		 *
+		 *  \return   true on success, or false if not all of the colours could be set.
+		 */
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<Colour, T>::is_continuous_container>>
+		inline bool SetColours(const T& colours, int firstcolour)
+			{ return SDL_SetPaletteColors(palette.get(), (const SDL_Color*)colours.data(), firstcolour, (int)colours.size()) == 0; }
 	};
 
 	// \note Everything in the pixel format structure is read-only.

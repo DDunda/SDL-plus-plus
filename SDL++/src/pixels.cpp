@@ -22,7 +22,6 @@ namespace SDL
 		: palette(MakeSharedPtr(SDL_AllocPalette(ncolours))) {}
 
 	int Palette::SetColours(const Colour* colours, int firstcolour, int ncolours) { return SDL_SetPaletteColors(palette.get(), colours, firstcolour, ncolours); }
-	int Palette::SetColours(const std::vector<Colour>& colours, int firstcolour) { return SDL_SetPaletteColors(palette.get(), colours.data(), firstcolour, (int)colours.size()); }
 
 #pragma endregion 
 

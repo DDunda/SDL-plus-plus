@@ -11,7 +11,8 @@ With a bit of C++ your life with SDL can indeed be much simpler!
 
 With SDL++ you can write the same stuff, with less code:
 ```cpp
-r.SetDrawColor(WHITE).FillRect({25,25,50,50});
+r.SetDrawColor(WHITE);
+r.FillRect({ 25,25,50,50 });
 ```
 Half the size!
 

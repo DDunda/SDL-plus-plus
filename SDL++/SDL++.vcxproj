@@ -178,6 +178,7 @@
     <ClInclude Include="include\audio.hpp" />
     <ClInclude Include="include\blendmode.hpp" />
     <ClInclude Include="include\clipboard.hpp" />
+    <ClInclude Include="include\container.hpp" />
     <ClInclude Include="include\error.hpp" />
     <ClInclude Include="include\events.hpp" />
     <ClInclude Include="include\hidapi.hpp" />
@@ -206,7 +207,6 @@
     <ClCompile Include="src\mouse.cpp" />
     <ClCompile Include="src\pixels.cpp" />
     <ClCompile Include="src\rect.cpp" />
-    <ClCompile Include="src\render.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

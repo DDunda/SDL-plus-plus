@@ -83,12 +83,12 @@
     <ClInclude Include="include\SDL_mixer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\container.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\rect.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\audio.cpp">

@@ -6,29 +6,13 @@
 
 #include <SDL_hidapi.h>
 
+#include "container.hpp"
+
 #include <memory>
 #include <string>
-#include <vector>
 
 namespace SDL::HID
 {
-	namespace
-	{
-		template <typename t, typename T>
-		struct ContinuousContainer_traits
-		{
-			template <typename T>
-			static auto has_data(T x) -> decltype((t*)x.data(), std::true_type{});
-			static auto has_data(...) -> std::false_type;
-
-			template <typename T>
-			static auto has_size(T x) -> decltype((size_t)x.size(), std::true_type{});
-			static auto has_size(...) -> std::false_type;
-
-			static constexpr bool is_continous_container = decltype(has_data(std::declval<T>()))::value && decltype(has_size(std::declval<T>()))::value;
-		};
-	}
-
 	/**
 	 * Initialize the HIDAPI library.
 	 *
@@ -289,43 +273,13 @@ namespace SDL::HID
 		 *             byte.
 		 * \returns the actual number of bytes written and -1 on error.
 		 */
-		template<size_t length, typename = typename std::enable_if_t<length>=1>>
+		template<const size_t length, typename = typename std::enable_if_t<length>=1>>
 		 inline int Write(const unsigned char(&data)[length])
 			{ return Write(data, length); }
 
-		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<unsigned char, T>::is_continous_container>>
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<unsigned char, T>::is_continuous_container>>
 		inline int Write(const T& data)
 			{ return Write(data.data(), data.size()); }
-
-		/**
-		 * Write an Output report to a HID device.
-		 *
-		 * The first byte of `data` must contain the Report ID. For devices which only
-		 * support a single report, this must be set to 0x0. The remaining bytes
-		 * contain the report data. Since the Report ID is mandatory, calls to
-		 * HID::Write() will always contain one more byte than the report contains.
-		 * For example, if a hid report is 16 bytes long, 17 bytes must be passed to
-		 * HID::Write(), the Report ID (or 0x0, for devices with a single report),
-		 * followed by the report data (16 bytes). In this example, the length passed
-		 * in would be 17.
-		 *
-		 * HID::Write() will send the data on the first OUT endpoint, if one exists.
-		 * If it does not, it will send the data through the Control Endpoint
-		 * (Endpoint 0).
-		 *
-		 * \param device A device handle returned from HID::Open().
-		 * \param it An iterator to the data to send, including the report number as
-		 *           the first byte.
-		 * \param end An iterator that marks the end of the data to send.
-		 * \returns the actual number of bytes written and -1 on error.
-		 */
-		template <typename T>
-		inline int Write(T it, T end)
-		{
-			std::vector<unsigned char> values;
-			for (; it != end; it++) { values.push_back(*it); }
-			return Write(values.data(), values.size());
-		}
 
 		/**
 		 * Read an Input report from a HID device with timeout.
@@ -347,7 +301,6 @@ namespace SDL::HID
 		inline int ReadTimeout(unsigned char* data, size_t length, int milliseconds)
 			{ return SDL_hid_read_timeout(device.get(), data, length, milliseconds); }
 
-
 		/**
 		 * Read an Input report from a HID device with timeout.
 		 *
@@ -362,11 +315,11 @@ namespace SDL::HID
 		 *          available to be read within the timeout period, this function
 		 *          returns 0.
 		 */
-		template<size_t length, typename = typename std::enable_if_t<length >= 1>>
+		template<const size_t length, typename = typename std::enable_if_t<length >= 1>>
 		inline int ReadTimeout(unsigned char(&data)[length], int milliseconds)
 			{ return ReadTimeout(data, length, milliseconds); }
 
-		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<unsigned char, T>::is_continous_container>>
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<unsigned char, T>::is_continuous_container>>
 		inline int ReadTimeout(T& data, int milliseconds)
 			{ return ReadTimeout(data.data(), data.size(), milliseconds); }
 
@@ -402,11 +355,11 @@ namespace SDL::HID
 		 *          available to be read and the handle is in non-blocking mode, this
 		 *          function returns 0.
 		 */
-		template<size_t length, typename = typename std::enable_if_t<length >= 1>>
+		template<const size_t length, typename = typename std::enable_if_t<length >= 1>>
 		inline int Read(unsigned char(&data)[length])
 			{ return Read(data, length); }
 
-		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<unsigned char, T>::is_continous_container>>
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<unsigned char, T>::is_continuous_container>>
 		inline int Read(T& data)
 			{ return Read(data.data(), data.size()); }
 
@@ -468,40 +421,13 @@ namespace SDL::HID
 		 *             byte.
 		 * \returns the actual number of bytes written and -1 on error.
 		 */
-		template<size_t length, typename = typename std::enable_if_t<length>=1>>
+		template<const size_t length, typename = typename std::enable_if_t<length>=1>>
 		inline int SendFeatureReport(const unsigned char(&data)[length])
 			{ return SendFeatureReport(data, length); }
 
-		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<unsigned char, T>::is_continous_container>>
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<unsigned char, T>::is_continuous_container>>
 		inline int SendFeatureReport(const T& data)
 			{ return SendFeatureReport(data.data(), data.size()); }
-
-		/**
-		 * Send a Feature report to the device.
-		 *
-		 * Feature reports are sent over the Control endpoint as a Set_Report
-		 * transfer. The first byte of `data` must contain the Report ID. For devices
-		 * which only support a single report, this must be set to 0x0. The remaining
-		 * bytes contain the report data. Since the Report ID is mandatory, calls to
-		 * HID::SendFeatureReport() will always contain one more byte than the report
-		 * contains. For example, if a hid report is 16 bytes long, 17 bytes must be
-		 * passed to HID::SendFeatureReport(): the Report ID (or 0x0, for devices
-		 * which do not use numbered reports), followed by the report data (16 bytes).
-		 * In this example, the length passed in would be 17.
-		 *
-		 * \param device A device handle returned from HID::Open().
-		 * \param it An iterator to the data to send, including the report number as
-		 *           the first byte.
-		 * \param end An iterator that marks the end of the data to send.
-		 * \returns the actual number of bytes written and -1 on error.
-		 */
-		template <typename T>
-		inline int SendFeatureReport(T it, T end)
-		{
-			std::vector<unsigned char> values;
-			for (; it != end; it++) { values.push_back(*it); }
-			return SendFeatureReport(values.data(), values.size());
-		}
 
 		/**
 		 * Get a feature report from a HID device.
@@ -540,10 +466,10 @@ namespace SDL::HID
 		 * \returns the number of bytes read plus one for the report ID (which is
 		 *          still in the first byte), or -1 on error.
 		 */
-		template<size_t length, typename = typename std::enable_if_t<length >= 1>>
+		template<const size_t length, typename = typename std::enable_if_t<length >= 1>>
 		inline int GetFeatureReport(unsigned char(&data)[length])
 			{ return GetFeatureReport(data, length); }
-		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<unsigned char, T>::is_continous_container>>
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<unsigned char, T>::is_continuous_container>>
 		inline int GetFeatureReport(T& data)
 			{ return GetFeatureReport(data.data(), data.size()); }
 
@@ -565,10 +491,10 @@ namespace SDL::HID
 		 * \param string A wide string buffer to put the data into.
 		 * \returns true on success and false on error.
 		 */
-		template<size_t length>
+		template<const size_t length>
 		inline bool GetManufacturerString(wchar_t (&string)[length])
 			{ return GetManufacturerString(string, length); }
-		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<wchar_t, T>::is_continous_container>>
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<wchar_t, T>::is_continuous_container>>
 		inline bool GetManufacturerString(T& string)
 			{ return GetManufacturerString(string.data(), string.size()); }
 
@@ -589,10 +515,10 @@ namespace SDL::HID
 		 * \param string A wide string buffer to put the data into.
 		 * \returns true on success and false on error.
 		 */
-		template<size_t length>
+		template<const size_t length>
 		inline bool GetProductString(wchar_t (&string)[length])
 			{ return GetProductString(string, length); }
-		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<wchar_t, T>::is_continous_container>>
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<wchar_t, T>::is_continuous_container>>
 		inline bool GetProductString(T& string)
 			{ return GetProductString(string.data(), string.size()); }
 
@@ -614,10 +540,10 @@ namespace SDL::HID
 		 * \param string A wide string buffer to put the data into.
 		 * \returns true on success and false on error.
 		 */
-		template<size_t length>
+		template<const size_t length>
 		inline bool GetSerialNumberString(wchar_t (&string)[length])
 			{ return GetSerialNumberString(string, length); }
-		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<wchar_t, T>::is_continous_container>>
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<wchar_t, T>::is_continuous_container>>
 		inline bool GetSerialNumberString(T& string)
 			{ return GetSerialNumberString(string.data(), string.size()); }
 
@@ -641,10 +567,10 @@ namespace SDL::HID
 		 * \param string A wide string buffer to put the data into.
 		 * \returns true on success and false on error.
 		 */
-		template<size_t length>
+		template<const size_t length>
 		inline bool GetIndexedString(int string_index, wchar_t (&string)[length])
 			{ return GetIndexedString(string_index, string, length); }
-		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<wchar_t, T>::is_continous_container>>
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<wchar_t, T>::is_continuous_container>>
 		inline bool GetIndexedString(int string_index, T& string)
 			{ return GetIndexedString(string_index, string.data(), string.size()); }
 	

@@ -1,5 +1,4 @@
 #include "rect.hpp"
-#include <vector>
 
 namespace SDL
 {

@@ -54,11 +54,11 @@ namespace SDL::IMG
 #if SDL_VERSION_ATLEAST(2,0,0)
 	// Load an image directly into a render texture.
 	inline Texture LoadTexture        (Renderer& renderer, const char* file)
-		{ return Texture::FromPtr(IMG_LoadTexture        (renderer.renderer.get(), file)); }
+		{ return Texture::FromPtr(renderer, IMG_LoadTexture        (renderer.renderer.get(), file)); }
 	inline Texture LoadTexture_RW     (Renderer& renderer, SDL_RWops* src, bool freesrc)
-		{ return Texture::FromPtr(IMG_LoadTexture_RW     (renderer.renderer.get(), src, freesrc      )); }
+		{ return Texture::FromPtr(renderer, IMG_LoadTexture_RW     (renderer.renderer.get(), src, freesrc      )); }
 	inline Texture LoadTextureTyped_RW(Renderer& renderer, SDL_RWops* src, bool freesrc, const char* type)
-		{ return Texture::FromPtr(IMG_LoadTextureTyped_RW(renderer.renderer.get(), src, freesrc, type)); }
+		{ return Texture::FromPtr(renderer, IMG_LoadTextureTyped_RW(renderer.renderer.get(), src, freesrc, type)); }
 #endif /* SDL 2.0 */
 #pragma endregion
 

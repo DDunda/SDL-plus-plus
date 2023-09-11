@@ -5,6 +5,7 @@
 #pragma once
 
 #include "audio.hpp"
+#include "container.hpp"
 #include "error.hpp""
 #include "version.hpp"
 
@@ -13,22 +14,6 @@
 
 namespace SDL::MIX
 {
-	namespace
-	{
-		template <typename t, typename T>
-		struct ContinuousContainer_traits {
-			template <typename T>
-			static auto has_data(T x) -> decltype((t*)x.data(), std::true_type{});
-			static auto has_data(...) -> std::false_type;
-
-			template <typename T>
-			static auto has_size(T x) -> decltype((size_t)x.size(), std::true_type{});
-			static auto has_size(...) -> std::false_type;
-
-			static constexpr bool is_continous_container = decltype(has_data(std::declval<T>()))::value && decltype(has_size(std::declval<T>()))::value;
-		};
-	}
-
 	// Printable format: "%d.%d.%d", MAJOR, MINOR, PATCHLEVEL
 	constexpr Uint8 MAJOR_VERSION = SDL_MIXER_MAJOR_VERSION;
 	constexpr Uint8 MINOR_VERSION = SDL_MIXER_MINOR_VERSION;
@@ -761,10 +746,10 @@ namespace SDL::MIX
 		 */
 		inline static Chunk QuickLoad_RAW(Uint8* mem, Uint32 len)
 			{ return Chunk::FromPtr(Mix_QuickLoad_RAW(mem, len)); }
-		template <typename t, typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<t, T>::is_continous_container>>
+		template <typename t, typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<t, T>::is_continuous_container>>
 		inline static Chunk QuickLoad_RAW(T& data)
 			{ return Chunk::FromPtr(Mix_QuickLoad_RAW((Uint8*)data.data(), data.size() * sizeof(t))); }
-		template <typename T, typename size_t size>
+		template <typename T, const size_t size>
 		inline static Chunk QuickLoad_RAW(T (&data)[size])
 			{ return Chunk::FromPtr(Mix_QuickLoad_RAW((Uint8*)data, size * sizeof(T))); }
 
@@ -2605,16 +2590,16 @@ namespace SDL::MIX
 	 */
 	inline bool SetSoundFonts(const char* paths)
 		{ return Mix_SetSoundFonts(paths) == 1; }
-	template <typename T, typename t, typename = typename std::enable_if_t<ContinuousContainer_traits<t, T>::is_continous_container>>
+	template <typename t, typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<t, T>::is_continuous_container>>
 	inline bool SetSoundFonts(const T& paths)
 	{
 		if (paths.size() == 0) return SetSoundFonts(NULL);
 
-		std::string combined_paths = paths.data()[0];
+		std::string combined_paths = std::string(paths.data()[0]);
 
 		for (size_t i = 1; i < paths.size(); ++i)
 		{
-			combined_paths += ";" + paths.data()[i];
+			combined_paths += ";" + std::string(paths.data()[i]);
 		}
 
 		return SetSoundFonts(combined_paths.c_str());

@@ -1,9 +1,12 @@
+#include <SDL_version.h>
+#if SDL_VERSION_ATLEAST(2, 0, 0)
 #ifndef SDL_render_hpp_
 #define SDL_render_hpp_
 #pragma once
 
 #include <SDL_render.h>
 
+#include "container.hpp"
 #include "rect.hpp"
 #include "video.hpp"
 
@@ -12,6 +15,48 @@
 namespace SDL
 {
 	struct Texture;
+
+#if SDL_VERSION_ATLEAST(2, 0, 18)
+	struct Vertex
+	{
+		union {
+			struct {
+				FPoint position;        /**< Vertex position, in Renderer coordinates  */
+				Colour colour;          /**< Vertex color */
+				FPoint tex_coord;       /**< Normalized texture coordinates, if needed */
+			};
+			SDL_Vertex vertex;
+		};
+
+		inline constexpr Vertex(FPoint position, Colour colour, FPoint tex_coord)
+			: position(position), colour(colour), tex_coord(tex_coord) {}
+
+		inline constexpr Vertex(SDL_Vertex vertex)
+			: position(vertex.position), colour(vertex.color), tex_coord(vertex.tex_coord) {}
+
+		inline constexpr Vertex(const Vertex& v)
+			: position(v.position), colour(v.colour), tex_coord(v.tex_coord) {}
+
+		inline constexpr Vertex(Vertex&& v) noexcept
+			: position(v.position), colour(v.colour), tex_coord(v.tex_coord) {}
+
+		inline constexpr Vertex& operator=(const Vertex& v)
+		{
+			position = v.position;
+			colour = v.colour;
+			tex_coord = v.tex_coord;
+			return *this;
+		}
+
+		inline constexpr Vertex& operator=(Vertex&& v) noexcept
+		{
+			position = v.position;
+			colour = v.colour;
+			tex_coord = v.tex_coord;
+			return *this;
+		}
+	};
+#endif
 
 	// A structure representing rendering state
 	struct Renderer
@@ -28,28 +73,39 @@ namespace SDL
 		// Information on the capabilities of a render driver or context.
 		typedef SDL_RendererInfo Info;
 
+#pragma region Safety
+
 		// This is custom destructor for smart pointers that destroys SDL_Renderers through SDL
-		static void DestroyRenderer(SDL_Renderer* renderer);
+		inline static void DestroyRenderer(SDL_Renderer* renderer)
+			{ SDL_DestroyRenderer(renderer); }
 
 		// This is custom destructor for smart pointers that does not destroy the Renderer. This is for pointers you do not own
-		static void DontDestroyRenderer(SDL_Renderer* renderer);
+		inline static void DontDestroyRenderer(SDL_Renderer* renderer)
+		{}
 
 		// This creates a smart pointer to an SDL_Renderer with a custom destructor
-		static std::shared_ptr<SDL_Renderer> MakeSharedPtr(SDL_Renderer* renderer);
+		inline static std::shared_ptr<SDL_Renderer> MakeSharedPtr(SDL_Renderer* renderer)
+			{ return std::shared_ptr<SDL_Renderer>(renderer, DestroyRenderer); }
 
 		// This creates a Renderer from a SDL_Renderer pointer, taking ownership of the pointer
-		static Renderer FromPtr(SDL_Renderer* renderer);
+		inline static Renderer FromPtr(SDL_Renderer* renderer)
+			{ return Renderer(MakeSharedPtr(renderer)); }
 
 		// This creates a Renderer from a SDL_Renderer pointer, but does not take ownership of the pointer
-		static Renderer FromUnownedPtr(SDL_Renderer* renderer);
+		inline static Renderer FromUnownedPtr(SDL_Renderer* renderer)
+			{ return Renderer(std::shared_ptr<SDL_Renderer>(renderer, DontDestroyRenderer)); }
 
 		std::shared_ptr<SDL_Renderer> renderer = nullptr;
-		int error = 0;
 
-		Renderer(std::shared_ptr<SDL_Renderer> _renderer);
+#pragma endregion 
+
+#pragma region Constructors
+
+		inline Renderer(std::shared_ptr<SDL_Renderer> _renderer)
+			: renderer(_renderer) {}
 
 		/**
-		 *  \brief    Create a 2D rendering context for a window.
+		*  \brief    Create a 2D rendering context for a window.
 		 *
 		 *  \param    window: The window where rendering is displayed.
 		 *  \param    flags:  ::SDL_RendererFlags.
@@ -58,7 +114,8 @@ namespace SDL
 		 *
 		 *  \return   A valid rendering context or NULL if there was an error.
 		 */
-		Renderer(Window& window, Uint32 flags, int index = -1);
+		inline Renderer(Window& window, Uint32 flags, int index = -1)
+			: Renderer(MakeSharedPtr(SDL_CreateRenderer(window.window.get(), index, flags))) {}
 
 		/**
 		 *  \brief    Create a 2D software rendering context for a surface.
@@ -67,17 +124,44 @@ namespace SDL
 		 *
 		 *  \return   A valid rendering context or NULL if there was an error.
 		 */
-		Renderer(Surface& surface);
+		inline Renderer(Surface& surface)
+			: Renderer(MakeSharedPtr(SDL_CreateSoftwareRenderer(surface.surface.get()))) {}
 
 		// Get the renderer associated with a window.
-		Renderer(Window& window);
+		inline Renderer(Window& window)
+			: Renderer(MakeSharedPtr(SDL_GetRenderer(window.window.get()))) {}
 
-		Renderer();
-		Renderer(const Renderer& r);
-		Renderer(Renderer&& r) noexcept;
-		Renderer& operator=(const Renderer& r);
-		Renderer& operator=(Renderer&& r) noexcept;
+#if SDL_VERSION_ATLEAST(2, 0, 22)
+		/**
+		 * Get the window associated with a renderer.
+		 *
+		 * \param renderer the renderer to query
+		 * \returns the window on success or invalid window on failure; call
+		 *          SDL::GetError() for more information.
+		 */
+		inline Window GetWindow() { return Window::FromUnownedPtr(SDL_RenderGetWindow(renderer.get())); }
+#endif
 
+		inline Renderer()
+			: Renderer(nullptr) {}
+		inline Renderer(const Renderer& r)
+			: Renderer(r.renderer) {}
+		inline Renderer(Renderer&& r) noexcept
+			{ std::swap(renderer, r.renderer); }
+		inline Renderer& operator=(const Renderer& r)
+		{
+			renderer = r.renderer;
+			return *this;
+		}
+		inline Renderer& operator=(Renderer&& r) noexcept
+		{
+			std::swap(renderer, r.renderer);
+			return *this;
+		}
+
+#pragma endregion 
+
+#pragma region Renderer State
 		/**
 		 *  \brief    Set the drawing scale for rendering on the current target.
 		 *
@@ -91,7 +175,9 @@ namespace SDL
 		 *            rendering backend, it will be handled using the appropriate
 		 *            quality hints.  For best results use integer scaling factors.
 		 */
-		Renderer& SetScale(const FPoint& scale);
+		inline bool SetScale(const FPoint& scale)
+			{ return SDL_RenderSetScale(renderer.get(), scale.x, scale.y) == 0; }
+
 		/**
 		 *  \brief    Set the drawing scale for rendering on the current target.
 		 *
@@ -106,36 +192,170 @@ namespace SDL
 		 *            rendering backend, it will be handled using the appropriate
 		 *            quality hints.  For best results use integer scaling factors.
 		 */
-		Renderer& SetScale(float scaleX, float scaleY);
+		inline bool SetScale(float scaleX, float scaleY)
+			{ return SDL_RenderSetScale(renderer.get(), scaleX, scaleY) == 0; }
 
 		/**
 		 *  \brief    Get the drawing scale for the current target.
 		 *
 		 *  \return   The scaling factor
 		 */
-		FPoint GetScale();
+		inline FPoint GetScale()
+		{
+			FPoint returnVal;
+			SDL_RenderGetScale(renderer.get(), &returnVal.x, &returnVal.y);
+			return returnVal;
+		}
+
 		/**
 		 *  \brief    Get the drawing scale for the current target.
 		 *
 		 *  \param    scale: A reference to be filled in with the scaling factor
 		 */
-		Renderer& GetScale(FPoint& scale);
+		inline Renderer& GetScale(FPoint& scale)
+			{ SDL_RenderGetScale(renderer.get(), &scale.x, &scale.y); return *this; }
+
 		/**
 		 *  \brief    Get the drawing scale for the current target.
 		 *
 		 *  \param    scaleX: A reference to be filled in with the horizontal scaling factor
 		 *  \param    scaleY: A reference to be filled in with the vertical scaling factor\
 		 */
-		Renderer& GetScale(float& scaleX, float& scaleY);
+		inline Renderer& GetScale(float& scaleX, float& scaleY)
+			{ SDL_RenderGetScale(renderer.get(), &scaleX, &scaleY); return *this; }
+
+#if SDL_VERSION_ATLEAST(2, 0, 18)
+		/**
+		 * Get logical coordinates of point in renderer when given real coordinates of
+		 * point in window.
+		 *
+		 * Logical coordinates will differ from real coordinates when render is scaled
+		 * and logical renderer size set
+		 *
+		 * \param windowX the real X coordinate in the window
+		 * \param windowY the real Y coordinate in the window
+		 * \param logicalX the pointer filled with the logical x coordinate
+		 * \param logicalY the pointer filled with the logical y coordinate
+		 */
+		inline Renderer& WindowToLogical(int windowX, int windowY, float* logicalX, float* logicalY)
+			{ SDL_RenderWindowToLogical(renderer.get(), windowX, windowY, logicalX, logicalY); return *this; }
+
+		/**
+		 * Get logical coordinates of point in renderer when given real coordinates of
+		 * point in window.
+		 *
+		 * Logical coordinates will differ from real coordinates when render is scaled
+		 * and logical renderer size set
+		 *
+		 * \param windowX the real X coordinate in the window
+		 * \param windowY the real Y coordinate in the window
+		 * \param logicalX the reference filled with the logical x coordinate
+		 * \param logicalY the reference filled with the logical y coordinate
+		 */
+		inline Renderer& WindowToLogical(int windowX, int windowY, float& logicalX, float& logicalY)
+			{ SDL_RenderWindowToLogical(renderer.get(), windowX, windowY, &logicalX, &logicalY); return *this; }
+
+		/**
+		 * Get logical coordinates of point in renderer when given real coordinates of
+		 * point in window.
+		 *
+		 * Logical coordinates will differ from real coordinates when render is scaled
+		 * and logical renderer size set
+		 *
+		 * \param window the real coordinates in the window
+		 * \param logical the reference filled with the logical coordinates
+		 */
+		inline Renderer& WindowToLogical(const Point& window, FPoint& logical)
+			{ SDL_RenderWindowToLogical(renderer.get(), window.x, window.y, &logical.x, &logical.y); return *this; }
+
+		/**
+		 * Get logical coordinates of point in renderer when given real coordinates of
+		 * point in window.
+		 *
+		 * Logical coordinates will differ from real coordinates when render is scaled
+		 * and logical renderer size set
+		 *
+		 * \param window the real coordinates in the window
+		 * \return an FPoint with the logical coordinates
+		 */
+		inline FPoint WindowToLogical(const Point& window)
+		{
+			FPoint logical;
+			SDL_RenderWindowToLogical(renderer.get(), window.x, window.y, &logical.x, &logical.y);
+			return logical;
+		}
+
+		/**
+		 * Get real coordinates of point in window when given logical coordinates of
+		 * point in renderer.
+		 *
+		 * Logical coordinates will differ from real coordinates when render is scaled
+		 * and logical renderer size set
+		 *
+		 * \param logicalX the logical x coordinate
+		 * \param logicalY the logical y coordinate
+		 * \param windowX the pointer filled with the real X coordinate in the window
+		 * \param windowY the pointer filled with the real Y coordinate in the window
+		 */
+		inline Renderer& LogicalToWindow(float logicalX, float logicalY, int* windowX, int* windowY)
+			{ SDL_RenderLogicalToWindow(renderer.get(), logicalX, logicalY, windowX, windowY); return *this; }
+
+		/**
+		 * Get real coordinates of point in window when given logical coordinates of
+		 * point in renderer.
+		 *
+		 * Logical coordinates will differ from real coordinates when render is scaled
+		 * and logical renderer size set
+		 *
+		 * \param logicalX the logical x coordinate
+		 * \param logicalY the logical y coordinate
+		 * \param windowX the reference filled with the real X coordinate in the window
+		 * \param windowY the reference filled with the real Y coordinate in the window
+		 */
+		inline Renderer& LogicalToWindow(float logicalX, float logicalY, int& windowX, int& windowY)
+			{ SDL_RenderLogicalToWindow(renderer.get(), logicalX, logicalY, &windowX, &windowY); return *this; }
+
+		/**
+		 * Get real coordinates of point in window when given logical coordinates of
+		 * point in renderer.
+		 *
+		 * Logical coordinates will differ from real coordinates when render is scaled
+		 * and logical renderer size set
+		 *
+		 * \param logical the logical coordinates
+		 * \param window the reference filled with the real coordinates in the window
+		 */
+		inline Renderer& LogicalToWindow(const FPoint& logical, Point& window)
+			{ SDL_RenderLogicalToWindow(renderer.get(), logical.x, logical.y, &window.x, &window.y); return *this; }
+
+		/**
+		 * Get real coordinates of point in window when given logical coordinates of
+		 * point in renderer.
+		 *
+		 * Logical coordinates will differ from real coordinates when render is scaled
+		 * and logical renderer size set
+		 *
+		 * \param logical the logical coordinates
+		 * \return a Point with the real coordinates in the window
+		 */
+		inline Point LogicalToWindow(const FPoint& logical)
+		{
+			Point window;
+			SDL_RenderLogicalToWindow(renderer.get(), logical.x, logical.y, &window.x, &window.y);
+			return window;
+		}
+#endif
 
 		/**
 		 *  \brief    Set the colour used for drawing operations (Rect, Line and Clear).
 		 *
 		 *  \param    colour: The colour value used to draw on the rendering target.
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& SetDrawColour(const Colour& colour);
+		inline bool SetDrawColour(const Colour& colour)
+			{ return SDL_SetRenderDrawColor(renderer.get(), colour.r, colour.g, colour.b, colour.a) == 0; }
+
 		/**
 		 *  \brief    Set the colour used for drawing operations (Rect, Line and Clear).
 		 *
@@ -145,17 +365,21 @@ namespace SDL
 		 *  \param    a: The alpha value used to draw on the rendering target, usually
 		 *               ::SDL_ALPHA_OPAQUE (255).
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& SetDrawColour(Uint8 r, Uint8 g, Uint8 b, Uint8 a = 255);
+		inline bool SetDrawColour(Uint8 r, Uint8 g, Uint8 b, Uint8 a = 255)
+			{ return SDL_SetRenderDrawColor(renderer.get(), r, g, b, a) == 0; }
+
 		/**
 		 *  \brief    Get the colour used for drawing operations (Rect, Line and Clear).
 		 *
 		 *  \param    colour: A reference to be filled with the colour used to draw on the rendering target.
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& GetDrawColour(Colour& colour);
+		inline bool GetDrawColour(Colour& colour)
+			{ return SDL_GetRenderDrawColor(renderer.get(), &colour.r, &colour.g, &colour.b, &colour.a) == 0; }
+
 		/**
 		 *  \brief    Get the colour used for drawing operations (Rect, Line and Clear).
 		 *
@@ -165,9 +389,10 @@ namespace SDL
 		 *  \param    a: A reference to be filled with the alpha value used to draw on the rendering target,
 		 *               usually ::SDL_ALPHA_OPAQUE (255).
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& GetDrawColour(Uint8& r, Uint8& g, Uint8& b, Uint8& a);
+		inline bool GetDrawColour(Uint8& r, Uint8& g, Uint8& b, Uint8& a)
+			{ return SDL_GetRenderDrawColor(renderer.get(), &r, &g, &b, &a) == 0; }
 
 		/**
 		 *  \brief    Set the blend mode used for drawing operations (Fill and Line).
@@ -177,17 +402,20 @@ namespace SDL
 		 *  \note     If the blend mode is not supported, the closest supported mode is
 		 *            chosen.
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& SetDrawBlendMode(const BlendMode& blendMode);
+		inline bool SetDrawBlendMode(const BlendMode& blendMode)
+			{ return SDL_SetRenderDrawBlendMode(renderer.get(), (SDL_BlendMode)blendMode) == 0; }
+
 		/**
 		 *  \brief    Get the blend mode used for drawing operations.
 		 *
 		 *  \param    blendMode A reference to be filled in with the current blend mode.
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& GetDrawBlendMode(BlendMode& blendMode);
+		inline bool GetDrawBlendMode(BlendMode& blendMode)
+			{ return SDL_GetRenderDrawBlendMode(renderer.get(), (SDL_BlendMode*)&blendMode) == 0; }
 
 		/**
 		 *  \brief    Clear the current rendering target with the drawing colour
@@ -195,23 +423,26 @@ namespace SDL
 		 *            This function clears the entire rendering target, ignoring the viewport and
 		 *            the clip rectangle.
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& Clear();
+		inline bool Clear()
+			{ return SDL_RenderClear(renderer.get()) == 0; }
+
+#if SDL_VERSION_ATLEAST(2, 0, 10)
 		/**
 		 *  \brief    Force the rendering context to flush any pending commands to the
 		 *            underlying rendering API.
 		 *
 		 *  \note     You do not need to (and in fact, shouldn't) call this function unless
 		 *            you are planning to call into OpenGL/Direct3D/Metal/whatever directly
-		 *            in addition to using an SDL_Renderer.
+		 *            in addition to using an Renderer.
 		 *
 		 *  \details  This is for a very-specific case: if you are using SDL's render API,
 		 *            you asked for a specific renderer backend (OpenGL, Direct3D, etc),
 		 *            you set SDL_HINT_RENDER_BATCHING to "1", and you plan to make
 		 *            OpenGL/D3D/whatever calls in addition to SDL render API calls. If all of
-		 *            this applies, you should call SDL_RenderFlush() between calls to SDL's
-		 *            render API and the low-level API you're using in cooperation.
+		 *            this applies, you should call Flush() between calls to SDL's render API
+		 *            and the low-level API you're using in cooperation.
 		 *
 		 *            In all other cases, you can ignore this function. This is only here to
 		 *            get maximum performance out of a specific situation. In all other cases,
@@ -221,567 +452,848 @@ namespace SDL
 		 *            2.0.9 and earlier, as earlier versions did not queue rendering commands
 		 *            at all, instead flushing them to the OS immediately.
 		 */
-		Renderer& Flush();
-
-		// Resets the error
-		constexpr Renderer& FlushError() { error = 0; return *this; }
+		inline bool Flush()
+			{ return SDL_RenderFlush(renderer.get()) == 0; }
+#endif
 
 		// Update the screen with rendering performed.
-		Renderer& Present();
+		inline Renderer& Present()
+			{ SDL_RenderPresent(renderer.get()); return *this; }
 
+#pragma endregion 
+
+#pragma region Primitive Drawing
+		
 		/**
-		 *  \brief    Draw a line on the current rendering target.
+		 *  \brief    Draw a point on the current rendering target.
 		 *
-		 *  \param    a: The coordinates of the start point.
-		 *  \param    b: The coordinates of the end point.
+		 *  \param    x: The x coordinate of the point.
+		 *  \param    y: The y coordinate of the point.
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& DrawLine(const Point& a, const Point& b);
-		/**
-		 *  \brief    Draw a line on the current rendering target.
-		 *
-		 *  \param    a: The coordinates of the start point.
-		 *  \param    b: The coordinates of the end point.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& DrawLineF(const FPoint& a, const FPoint& b);
-		/**
-		 *  \brief    Draw a series of connected lines on the current rendering target.
-		 *
-		 *  \param    points: The points along the lines
-		 *  \param    count:  The number of points, drawing count-1 lines
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& DrawLines(const Point* points, int count);
-		/**
-		 *  \brief    Draw a series of connected lines on the current rendering target.
-		 *
-		 *  \param    points: The points along the lines
-		 *  \param    count:  The number of points, drawing count-1 lines
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& DrawLinesF(const FPoint* points, int count);
-		/**
-		 *  \brief    Draw a series of connected lines on the current rendering target.
-		 *
-		 *  \param    points: The points along the lines
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& DrawLines(const std::vector<Point>& points);
-		/**
-		 *  \brief    Draw a series of connected lines on the current rendering target.
-		 *
-		 *  \param    points: The points along the lines
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& DrawLinesF(const std::vector<FPoint>& points);
+		inline bool DrawPoint(int x, int y)
+			{ return SDL_RenderDrawPoint(renderer.get(), x, y) == 0; }
 
 		/**
 		 *  \brief    Draw a point on the current rendering target.
 		 *
 		 *  \param    point: The coordinates of the point.
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& DrawPoint(const Point& point);
-		/**
-		 *  \brief    Draw a point on the current rendering target.
-		 *
-		 *  \param    point: The coordinates of the point.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& DrawPointF(const FPoint& point);
+		inline bool DrawPoint(const Point& point)
+			{ return SDL_RenderDrawPoint(renderer.get(), point.x, point.y) == 0; }
+
 		/**
 		 *  \brief    Draw multiple points on the current rendering target.
 		 *
-		 *  \param    renderer: The renderer which should draw multiple points.
 		 *  \param    points:   The points to draw
 		 *  \param    count:    The number of points to draw
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& DrawPoints(const Point* points, int count);
+		inline bool DrawPoints(const Point* points, int count)
+			{ return SDL_RenderDrawPoints(renderer.get(), (const SDL_Point*)points, count) == 0; }
+
+		/**
+		 *  \brief    Draw multiple points on the current rendering target.
+		 *
+		 *  \param    points: The points to draw
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<Point, T>::is_continuous_container>>
+		inline bool DrawPoints(const T& points)
+			{ return SDL_RenderDrawPoints(renderer.get(), (const SDL_Point*)points.data(), (int)points.size()) == 0; }
+
+		/**
+		 *  \brief    Draw multiple points on the current rendering target.
+		 *
+		 *  \param    points: The points to draw
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		template <const int size>
+		inline bool DrawPoints(const Point (&points)[size])
+
+			{ return SDL_RenderDrawPoints(renderer.get(), (const SDL_Point*)points, size) == 0; }
+
+		/**
+		 *  \brief    Draw a line on the current rendering target.
+		 *
+		 *  \param    x1: The x coordinate of the start point.
+		 *  \param    y1: The y coordinate of the start point.
+		 *  \param    x2: The x coordinate of the end point.
+		 *  \param    y2: The y coordinate of the end point.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool DrawLine(int x1, int y1, int x2, int y2)
+			{ return SDL_RenderDrawLine(renderer.get(), x1, y1, x2, y2) == 0; }
+
+		/**
+		 *  \brief    Draw a line on the current rendering target.
+		 *
+		 *  \param    a: The coordinates of the start point.
+		 *  \param    b: The coordinates of the end point.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool DrawLine(const Point& a, const Point& b)
+			{ return SDL_RenderDrawLine(renderer.get(), a.x, a.y, b.x, b.y) == 0; }
+
+		/**
+		 *  \brief    Draw a series of connected lines on the current rendering target.
+		 *
+		 *  \param    points: The points along the lines
+		 *  \param    count:  The number of points, drawing count-1 lines
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool DrawLines(const Point* points, int count)
+			{ return SDL_RenderDrawLines(renderer.get(), (const  SDL_Point*)points, count) == 0; }
+
+		/**
+		 *  \brief    Draw a series of connected lines on the current rendering target.
+		 *
+		 *  \param    points: The points along the lines
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<Point, T>::is_continuous_container>>
+		inline bool DrawLines(const T& points)
+			{ return SDL_RenderDrawLines(renderer.get(), (const  SDL_Point*)points.data(), (int)points.size()) == 0; }
+
+		/**
+		 *  \brief    Draw a series of connected lines on the current rendering target.
+		 *
+		 *  \param    points: The points along the lines
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		template <const int size>
+		inline bool DrawLines(const Point(&points)[size])
+			{ return SDL_RenderDrawLines(renderer.get(), (const  SDL_Point*)points, size) == 0; }
+
+#if SDL_VERSION_ATLEAST(2, 0, 10)
+		/**
+		 *  \brief    Draw a point on the current rendering target.
+		 *
+		 *  \param    x: The x coordinate of the point.
+		 *  \param    y: The y coordinate of the point.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool DrawPointF(float x, float y)
+			{ return SDL_RenderDrawPointF(renderer.get(), x, y) == 0; }
+
+		/**
+		 *  \brief    Draw a point on the current rendering target.
+		 *
+		 *  \param    point: The coordinates of the point.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool DrawPointF(const FPoint& point)
+			{ return SDL_RenderDrawPointF(renderer.get(), point.x, point.y) == 0; }
+
 		/**
 		 *  \brief    Draw multiple points on the current rendering target.
 		 *
 		 *  \param    points: The points to draw
 		 *  \param    count:  The number of points to draw
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& DrawPointsF(const FPoint* points, int count);
+		inline bool DrawPointsF(const FPoint* points, int count)
+			{ return SDL_RenderDrawPointsF(renderer.get(), (const SDL_FPoint*)points, count) == 0; }
+
 		/**
 		 *  \brief    Draw multiple points on the current rendering target.
 		 *
 		 *  \param    points: The points to draw
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& DrawPoints(const std::vector<Point>& points);
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<FPoint, T>::is_continuous_container>>
+		inline bool DrawPointsF(const T& points)
+			{ return SDL_RenderDrawPointsF(renderer.get(), (const SDL_FPoint*)points.data(), (int)points.size()) == 0; }
+
 		/**
 		 *  \brief    Draw multiple points on the current rendering target.
 		 *
 		 *  \param    points: The points to draw
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& DrawPointsF(const std::vector<FPoint>& points);
+		template <const int size>
+		inline bool DrawPointsF(const FPoint (&points)[size])
+			{ return SDL_RenderDrawPointsF(renderer.get(), (const SDL_FPoint*)points, size) == 0; }
+
+		/**
+		 *  \brief    Draw a line on the current rendering target.
+		 *
+		 *  \param    x1: The x coordinate of the start point.
+		 *  \param    y1: The y coordinate of the start point.
+		 *  \param    x2: The x coordinate of the end point.
+		 *  \param    y2: The y coordinate of the end point.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool DrawLineF(float x1, float y1, float x2, float y2)
+			{ return SDL_RenderDrawLineF(renderer.get(), x1, y1, x2, y2) == 0; }
+
+		/**
+		 *  \brief    Draw a line on the current rendering target.
+		 *
+		 *  \param    a: The coordinates of the start point.
+		 *  \param    b: The coordinates of the end point.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool DrawLineF(const FPoint& a, const FPoint& b)
+			{ return SDL_RenderDrawLineF(renderer.get(), a.x, a.y, b.x, b.y) == 0; }
+
+		/**
+		 *  \brief    Draw a series of connected lines on the current rendering target.
+		 *
+		 *  \param    points: The points along the lines
+		 *  \param    count:  The number of points, drawing count-1 lines
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool DrawLinesF(const FPoint* points, int count) { return SDL_RenderDrawLinesF(renderer.get(), (const SDL_FPoint*)points, count) == 0; }
+
+		/**
+		 *  \brief    Draw a series of connected lines on the current rendering target.
+		 *
+		 *  \param    points: The points along the lines
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<FPoint, T>::is_continuous_container>>
+		inline bool DrawLinesF(const T& points)
+			{ return SDL_RenderDrawLinesF(renderer.get(), (const SDL_FPoint*)points.data(), (int)points.size()) == 0; }
+
+		/**
+		 *  \brief    Draw a series of connected lines on the current rendering target.
+		 *
+		 *  \param    points: The points along the lines
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		template <const int size>
+		inline bool DrawLinesF(const FPoint(&points)[size])
+			{ return SDL_RenderDrawLinesF(renderer.get(), (const SDL_FPoint*)points, size) == 0; }
+
+		/**
+		*  \brief    Draw a rectangle on the current rendering target.
+		 *
+		 *  \param    rect: A reference to the destination rectangle.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool DrawRectF(const FRect& rect)
+			{ return SDL_RenderDrawRectF(renderer.get(), &rect.rect) == 0; }
+
+		/**
+		 *  \brief    Draw a rectangle on the current rendering target.
+		 *
+		 *  \param    rect: A pointer to the destination rectangle, or NULL to outline the entire rendering target.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool DrawRectF(const FRect* rect)
+			{ return SDL_RenderDrawRectF(renderer.get(), (const SDL_FRect*)rect) == 0; }
+
+		/**
+		 *  \brief    Draw some number of rectangles on the current rendering target.
+		 *
+		 *  \param    rects: A pointer to an array of destination rectangles.
+		 *  \param    count: The number of rectangles.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool DrawRectsF(const FRect* rects, int count)
+			{ return SDL_RenderDrawRectsF(renderer.get(), (const SDL_FRect*)rects, count) == 0; }
+
+		/**
+		 *  \brief    Draw some number of rectangles on the current rendering target.
+		 *
+		 *  \param    rects: A reference to a container of destination rectangles.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<FRect, T>::is_continuous_container>>
+		inline bool DrawRectsF(const T& rects)
+			{ return SDL_RenderDrawRectsF(renderer.get(), (const SDL_FRect*)rects.data(), (int)rects.size()) == 0; }
+
+		/**
+		 *  \brief    Draw some number of rectangles on the current rendering target.
+		 *
+		 *  \param    rects: A reference to a container of destination rectangles.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		template <const int size>
+		inline bool DrawRectsF(const Rect (&rects)[size])
+			{ return SDL_RenderDrawRectsF(renderer.get(), (const SDL_FRect*)rects, size) == 0; }
+
+		/**
+		 *  \brief    Fill the entire current rendering target with the drawing colour.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool FillF()
+			{ return SDL_RenderFillRectF(renderer.get(), NULL) == 0; }
+
+		/**
+		 *  \brief    Fill a rectangle on the current rendering target with the drawing colour.
+		 *
+		 *  \param    rect: A reference to the destination rectangle.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool FillRectF(const FRect & rect)
+			{ return SDL_RenderFillRectF(renderer.get(), &rect.rect) == 0; }
+
+		/**
+		 *  \brief    Fill a rectangle on the current rendering target with the drawing colour.
+		 *
+		 *  \param    rect: A pointer to the destination rectangle, or NULL for the entire
+		 *                  rendering target.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool FillRectF(const FRect* rect)
+			{ return SDL_RenderFillRectF(renderer.get(), (const SDL_FRect*)rect) == 0; }
+
+		/**
+		 *  \brief    Fill some number of rectangles on the current rendering target with the drawing colour.
+		 *
+		 *  \param    rects: A pointer to an array of destination rectangles.
+		 *  \param    count: The number of rectangles.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool FillRectsF(const FRect* rects, int count)
+			{ return SDL_RenderFillRectsF(renderer.get(), (const SDL_FRect*)rects, count) == 0; }
+
+		/**
+		 *  \brief    Fill some number of rectangles on the current rendering target with the drawing colour.
+		 *
+		 *  \param    rects: A reference to a container of destination rectangles.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<FRect, T>::is_continuous_container>>
+		inline bool FillRectsF(const T& rects)
+			{ return SDL_RenderFillRectsF(renderer.get(), (const SDL_FRect*)rects.data(), (int)rects.size()) == 0; }
+
+		/**
+		 *  \brief    Fill some number of rectangles on the current rendering target with the drawing colour.
+		 *
+		 *  \param    rects: A reference to a container of destination rectangles.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		template <const int size>
+		inline bool FillRectsF(const Rect(&rects)[size])
+			{ return SDL_RenderFillRectsF(renderer.get(), (const SDL_FRect*)rects, size) == 0; }
+#endif
 
 		/**
 		 *  \brief    Draws a rectangle outlining current rendering target.
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& DrawOutline();
+		inline bool DrawOutline()
+			{ return SDL_RenderDrawRect(renderer.get(), NULL) == 0; }
+
 		/**
 		 *  \brief    Draws a rectangle outlining current rendering target.
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& DrawOutlineF();
-		/**
-		 *  \brief    Draw a rectangle on the current rendering target.
-		 *
-		 *  \param    rect: A reference to the destination rectangle.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& DrawRect(const Rect& rect);
+		inline bool DrawOutlineF()
+			{ return SDL_RenderDrawRectF(renderer.get(), NULL) == 0; }
+
 		/**
 		 *  \brief    Draw a rectangle on the current rendering target.
 		 *
 		 *  \param    rect: A pointer to the destination rectangle, or NULL to outline the entire rendering target.
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& DrawRect(const Rect* rect);
+		inline bool DrawRect(const Rect* rect)
+			{ return SDL_RenderDrawRect(renderer.get(), (const  SDL_Rect*)rect) == 0; }
+
 		/**
 		 *  \brief    Draw a rectangle on the current rendering target.
 		 *
 		 *  \param    rect: A reference to the destination rectangle.
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& DrawRectF(const FRect& rect);
-		/**
-		 *  \brief    Draw a rectangle on the current rendering target.
-		 *
-		 *  \param    rect: A pointer to the destination rectangle, or NULL to outline the entire rendering target.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& DrawRectF(const FRect* rect);
-		Renderer& DrawRectEx(const Rect& rect, const Point& center, float angle = 0.0);
-		Renderer& DrawRectEx(const Rect& rect, float angle = 0.0);
-		Renderer& DrawRectExF(const FRect& rect, const FPoint& center, float angle = 0.0);
-		Renderer& DrawRectExF(const FRect& rect, float angle = 0.0);
+		inline bool DrawRect(const Rect& rect)
+			{ return SDL_RenderDrawRect(renderer.get(), &rect.rect) == 0; }
+
+		inline bool DrawRectEx(const Rect& rect, const Point& center, float angle = 0.0)
+		{
+			const float rotX = cosf(angle);
+			const float rotY = sinf(angle);
+
+			const FPoint corners[5]
+			{
+				rect.topLeft    ().rotateAround(center, rotX, rotY),
+				rect.topRight   ().rotateAround(center, rotX, rotY),
+				rect.bottomRight().rotateAround(center, rotX, rotY),
+				rect.bottomLeft ().rotateAround(center, rotX, rotY),
+				rect.topLeft    ().rotateAround(center, rotX, rotY)
+			};
+
+			return DrawLinesF(corners);
+		}
+
+		inline bool DrawRectEx(const Rect& rect, float angle = 0.0)
+		{
+			const FPoint center = rect.middle();
+			const FPoint corner1 = FPoint(-rect.w / 2.f, -rect.h / 2.f).rotate(angle);
+
+			const FPoint corners[5]
+			{
+				corner1                        + center,
+				FPoint( corner1.y, -corner1.x) + center,
+				FPoint(-corner1.x, -corner1.y) + center,
+				FPoint(-corner1.y,  corner1.x) + center,
+				corner1                        + center
+			};
+
+			return DrawLinesF(corners);
+		}
+
+		inline bool DrawRectExF(const FRect& rect, const FPoint& center, float angle = 0.0)
+		{
+			const float rotX = cosf(angle);
+			const float rotY = sinf(angle);
+
+			const FPoint corners[5]
+			{
+				rect.topLeft    ().rotateAround(center, rotX, rotY),
+				rect.topRight   ().rotateAround(center, rotX, rotY),
+				rect.bottomRight().rotateAround(center, rotX, rotY),
+				rect.bottomLeft ().rotateAround(center, rotX, rotY),
+				rect.topLeft    ().rotateAround(center, rotX, rotY)
+			};
+
+			return DrawLinesF(corners);
+		}
+
+		inline bool DrawRectExF(const FRect& rect, float angle = 0.0)
+		{
+			const FPoint center = rect.middle();
+			const FPoint corner1 = FPoint(-rect.w / 2.f, -rect.h / 2.f).rotate(angle);
+
+			const FPoint corners[5]
+			{
+				corner1                        + center,
+				FPoint( corner1.y, -corner1.x) + center,
+				FPoint(-corner1.x, -corner1.y) + center,
+				FPoint(-corner1.y,  corner1.x) + center,
+				corner1                        + center
+			};
+
+			return DrawLinesF(corners);
+		}
+
 		/**
 		 *  \brief    Draw some number of rectangles on the current rendering target.
 		 *
 		 *  \param    rects: A pointer to an array of destination rectangles.
 		 *  \param    count: The number of rectangles.
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& DrawRects(const Rect* rects, int count);
+		inline bool DrawRects(const Rect* rects, int count)
+			{ return SDL_RenderDrawRects(renderer.get(), (const  SDL_Rect*)rects, count) == 0; }
+
 		/**
 		 *  \brief    Draw some number of rectangles on the current rendering target.
 		 *
-		 *  \param    rects: A pointer to an array of destination rectangles.
-		 *  \param    count: The number of rectangles.
+		 *  \param    rects: A reference to a container of destination rectangles.
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& DrawRectsF(const FRect* rects, int count);
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<Rect, T>::is_continuous_container>>
+		inline bool DrawRects(const T& rects)
+			{ return SDL_RenderDrawRects(renderer.get(), (const  SDL_Rect*)rects.data(), (int)rects.size()) == 0; }
+		
 		/**
 		 *  \brief    Draw some number of rectangles on the current rendering target.
 		 *
-		 *  \param    rects: A reference to a vector of destination rectangles.
+		 *  \param    rects: A reference to a container of destination rectangles.
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& DrawRects(const std::vector<Rect>& rects);
-		/**
-		 *  \brief    Draw some number of rectangles on the current rendering target.
-		 *
-		 *  \param    rects: A reference to a vector of destination rectangles.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& DrawRectsF(const std::vector<FRect>& rects);
+		template <const int size>
+		inline bool DrawRects(const Rect (&rects)[size])
+			{ return SDL_RenderDrawRects(renderer.get(), (const  SDL_Rect*)rects, size) == 0; }
+
 
 		/**
 		*  \brief     Fill the entire current rendering target with the drawing colour.
 		*
-		*  \return    0 on success, or -1 on error
+		*  \return    true on success, or false on error
 		*/
-		Renderer& Fill();
-		/**
-		 *  \brief    Fill the entire current rendering target with the drawing colour.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& FillF();
+		inline bool Fill()
+			{ return SDL_RenderFillRect(renderer.get(), NULL) == 0; }
+
 		/**
 		 *  \brief    Fill a rectangle on the current rendering target with the drawing colour.
 		 *
 		 *  \param    rect: A pointer to the destination rectangle.
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& FillRect(const Rect& rect);
+		inline bool FillRect(const Rect& rect)
+			{ return SDL_RenderFillRect(renderer.get(), &rect.rect) == 0; }
+
 		/**
 		 *  \brief    Fill a rectangle on the current rendering target with the drawing colour.
 		 *
 		 *  \param    rect: A pointer to the destination rectangle, or NULL for the entire
 		 *                  rendering target.
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& FillRect(const Rect* rect);
-		/**
-		 *  \brief    Fill a rectangle on the current rendering target with the drawing colour.
-		 *
-		 *  \param    rect: A reference to the destination rectangle.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& FillRectF(const FRect& rect);
-		/**
-		 *  \brief    Fill a rectangle on the current rendering target with the drawing colour.
-		 *
-		 *  \param    rect: A pointer to the destination rectangle, or NULL for the entire
-		 *                  rendering target.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& FillRectF(const FRect* rect);
+		inline bool FillRect(const Rect* rect)
+			{ return SDL_RenderFillRect(renderer.get(), (const  SDL_Rect*)rect) == 0; }
+
 		/**
 		 *  \brief    Fill some number of rectangles on the current rendering target with the drawing colour.
 		 *
 		 *  \param    rects: A pointer to an array of destination rectangles.
 		 *  \param    count: The number of rectangles.
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& FillRects(const Rect* rects, int count);
+		inline bool FillRects(const Rect* rects, int count)
+			{ return SDL_RenderFillRects(renderer.get(), (const  SDL_Rect*)rects, count) == 0; }
+
 		/**
 		 *  \brief    Fill some number of rectangles on the current rendering target with the drawing colour.
 		 *
-		 *  \param    rects: A pointer to an array of destination rectangles.
-		 *  \param    count: The number of rectangles.
+		 *  \param    rects: A reference to a container of destination rectangles.
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& FillRectsF(const FRect* rects, int count);
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<Rect, T>::is_continuous_container>>
+		inline bool FillRects(const T& rects)
+			{ return SDL_RenderFillRects(renderer.get(), (const  SDL_Rect*)rects.data(), (int)rects.size()) == 0; }
+
 		/**
 		 *  \brief    Fill some number of rectangles on the current rendering target with the drawing colour.
 		 *
-		 *  \param    rects: A reference to a vector of destination rectangles.
+		 *  \param    rects: A reference to a container of destination rectangles.
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& FillRects(const std::vector<Rect>& rects);
-		/**
-		 *  \brief    Fill some number of rectangles on the current rendering target with the drawing colour.
-		 *
-		 *  \param    rects: A reference to a vector of destination rectangles.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& FillRectsF(const std::vector<FRect>& rects);
+		template <const int size>
+		inline bool FillRects(const Rect (&rects)[size])
+			{ return SDL_RenderFillRects(renderer.get(), (const  SDL_Rect*)rects, size) == 0; }
 
-		// Flip constants for CopyEx
-		enum class Flip {
-			NONE = SDL_FLIP_NONE,       // Do not flip
-			HORIZONTAL = SDL_FLIP_HORIZONTAL, // flip horizontally
-			VERTICAL = SDL_FLIP_VERTICAL    // flip vertically
-		};
+#pragma endregion
+
+#pragma region Render Geometry
+#if SDL_VERSION_ATLEAST(2, 0, 18)
 
 		/**
-		 *  \brief    Copy a portion of the texture to the current rendering target.
+		 * Render a list of triangles, and optionally indices into the
+		 * vertex array. Colour and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
 		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *
-		 *  \return   0 on success, or -1 on error
+		 * \param vertices Vertices.
+		 * \param num_vertices Number of vertices.
+		 * \param indices (optional) An array of integer indices into the 'vertices'
+		 *                array, if NULL all vertices will be rendered in sequential
+		 *                order.
+		 * \param num_indices Number of indices.
+		 * \return true on success, or false if the operation is not supported
 		 */
-		Renderer& Copy(Texture& txt, const Rect& src, const Rect& dst);
-		/**
-		 *  \brief    Copy the texture to the current rendering target.
-		 *
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& Copy(Texture& txt, const Rect& dst);
-		/**
-		 *  \brief    Copy a portion of the texture to the entire current rendering target.
-		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& Copy_Fill(Texture& txt, const Rect& src);
-		/**
-		 *  \brief    Copy the texture to the entire current rendering target.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& Copy_Fill(Texture& txt);
-		/**
-		 *  \brief    Copy a portion of the texture to the current rendering target.
-		 *
-		 *  \param    srcrect: A pointer to the source rectangle, or NULL for the entire texture.
-		 *  \param    dstrect: A pointer to the destination rectangle, or NULL for the entire rendering target.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& Copy(Texture& txt, const Rect* src, const Rect* dst);
+		inline bool RenderGeometry(const Vertex* vertices, int num_vertices, const int* indices, int num_indices)
+			{ return SDL_RenderGeometry(renderer.get(), NULL, (const SDL_Vertex*)vertices, num_vertices, indices, num_indices) == 0; }
 
 		/**
-		 *  \brief    Copy a portion of the texture to the current rendering target.
+		 * Render a list of triangles, and optionally indices into the
+		 * vertex array. Colour and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
 		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *
-		 *  \return   0 on success, or -1 on error
+		 * \param vertices Vertices.
+		 * \param indices (optional) An array of integer indices into the 'vertices'
+		 *                array, if NULL all vertices will be rendered in sequential
+		 *                order.
+		 * \param num_indices Number of indices.
+		 * \return true on success, or false if the operation is not supported
 		 */
-		Renderer& CopyF(Texture& txt, const Rect& src, const FRect& dst);
-		/**
-		 *  \brief    Copy the texture to the current rendering target.
-		 *
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& CopyF(Texture& txt, const FRect& dst);
-		/**
-		 *  \brief    Copy a portion of the texture to the entire current rendering target.
-		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& CopyF_Fill(Texture& txt, const Rect& src);
-		/**
-		 *  \brief    Copy the texture to the entire current rendering target.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& CopyF_Fill(Texture& txt);
-		/**
-		 *  \brief    Copy a portion of the texture to the current rendering target.
-		 *
-		 *  \param    srcrect: A pointer to the source rectangle, or NULL for the entire
-		 *                     texture.
-		 *  \param    dstrect: A pointer to the destination rectangle, or NULL for the
-		 *                     entire rendering target.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& CopyF(Texture& txt, const Rect* src, const FRect* dst);
+		template <const int num_vertices>
+		inline bool RenderGeometry(const Vertex(&vertices)[num_vertices], const int* indices, int num_indices)
+			{ return SDL_RenderGeometry(renderer.get(), NULL, (const SDL_Vertex*)vertices, num_vertices, indices, num_indices) == 0; }
 
 		/**
-		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by an angle around the given center.
+		 * Render a list of triangles, and optionally indices into the
+		 * vertex array. Colour and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
 		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated.
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Renderer::Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
+		 * \param vertices Vertices.
+		 * \param indices (optional) An array of integer indices into the 'vertices'
+		 *                array, if NULL all vertices will be rendered in sequential
+		 *                order.
+		 * \param num_indices Number of indices.
+		 * \return true on success, or false if the operation is not supported
 		 */
-		Renderer& CopyEx(Texture& txt, const Rect& src, const Rect& dst, const Point& center, double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
-		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& CopyEx(Texture& txt, const Rect& src, const Rect& dst, double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy the texture to the current rendering target, rotating it by an angle around the given center.
-		 *
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated (if NULL, rotation will be done around dstrect.w/2, dstrect.h/2).
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& CopyEx(Texture& txt, const Rect& dst, const Point& center, double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy the texture to the current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2
-		 *
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& CopyEx(Texture& txt, const Rect& dst, double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy a portion of the texture to the entire current rendering target, rotating it by an angle around the given center
-		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated.
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& CopyEx_Fill(Texture& txt, const Rect& src, const Point& center, double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy a portion of the texture to the entire current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
-		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& CopyEx_Fill(Texture& txt, const Rect& src, double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy the texture to the entire current rendering target, rotating it by an angle around the given center.
-		 *
-		 *  \param    center: A reference to a point indicating the point around which dstrect will be rotated.
-		 *  \param    angle:  An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:   A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& CopyEx_Fill(Texture& txt, const Point& center, double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy the texture to the entire current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
-		 *
-		 *  \param    angle: An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:  A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& CopyEx_Fill(Texture& txt, double angle = 0.0, Flip flipType = Flip::NONE);
-		/**
-		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by angle around the given center.
-		 *
-		 *  \param    srcrect: A pointer to the source rectangle, or NULL for the entire texture.
-		 *  \param    dstrect: A pointer to the destination rectangle, or NULL for the entire rendering target.
-		 *  \param    center:  A pointer to a point indicating the point around which dstrect will be rotated (if NULL, rotation will be done around dstrect.w/2, dstrect.h/2).
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction.
-		 *  \param    flip:    An Flip value stating which flipping actions should be performed on the texture.
-		 *
-		 *  \return   0 on success, or -1 on error
-		 */
-		Renderer& CopyEx(Texture& txt, const Rect* src, const Rect* dst, const Point* center, double angle = 0.0, Flip flipType = Flip::NONE);
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<Vertex, T>::is_continuous_container>>
+		inline bool RenderGeometry(const T& vertices, const int* indices, int num_indices)
+			{ return SDL_RenderGeometry(renderer.get(), NULL, (const SDL_Vertex*)vertices.data(), (int)vertices.size(), indices, num_indices) == 0; }
 
 		/**
-		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by an angle around the given center.
+		 * Render a list of triangles and indices into the
+		 * vertex array. Colour and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
 		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated.
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
+		 * \param vertices Vertices.
+		 * \param num_vertices Number of vertices.
+		 * \param indices An array of integer indices into the 'vertices' array.
+		 * \return true on success, or false if the operation is not supported
 		 */
-		Renderer& CopyExF(Texture& txt, const Rect& src, const FRect& dst, const FPoint& center, double angle = 0.0, Flip flipType = Flip::NONE);
+		template <const int num_indices>
+		inline bool RenderGeometry(const Vertex* vertices, int num_vertices, const int(&indices)[num_indices])
+			{ return SDL_RenderGeometry(renderer.get(), NULL, (const SDL_Vertex*)vertices, num_vertices, indices, num_indices) == 0; }
+
 		/**
-		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
+		 * Render a list of triangles and indices into the
+		 * vertex array. Colour and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
 		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
+		 * \param vertices Vertices.
+		 * \param indices An array of integer indices into the 'vertices' array.
+		 * \return true on success, or false if the operation is not supported
 		 */
-		Renderer& CopyExF(Texture& txt, const Rect& src, const FRect& dst, double angle = 0.0, Flip flipType = Flip::NONE);
+		template <const int num_vertices, const int num_indices>
+		inline bool RenderGeometry(const Vertex(&vertices)[num_vertices], const int(&indices)[num_indices])
+			{ return SDL_RenderGeometry(renderer.get(), NULL, (const SDL_Vertex*)vertices, num_vertices, indices, num_indices) == 0; }
+
 		/**
-		 *  \brief    Copy the texture to the current rendering target, rotating it by an angle around the given center.
+		 * Render a list of triangles and indices into the
+		 * vertex array. Colour and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
 		 *
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated.
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
+		 * \param vertices Vertices.
+		 * \param indices An array of integer indices into the 'vertices' array.
+		 * \return true on success, or false if the operation is not supported
 		 */
-		Renderer& CopyExF(Texture& txt, const FRect& dst, const FPoint& center, double angle = 0.0, Flip flipType = Flip::NONE);
+		template <typename T, const int num_indices, typename = typename std::enable_if_t<ContinuousContainer_traits<Vertex, T>::is_continuous_container>>
+		inline bool RenderGeometry(const T& vertices, const int(&indices)[num_indices])
+			{ return SDL_RenderGeometry(renderer.get(), NULL, (const SDL_Vertex*)vertices.data(), (int)vertices.size(), indices, num_indices) == 0; }
+
 		/**
-		 *  \brief    Copy the texture to the current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2
+		 * Render a list of triangles and indices into the
+		 * vertex array. Colour and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
 		 *
-		 *  \param    dstrect: A reference to the destination rectangle.
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
+		 * \param vertices Vertices.
+		 * \param num_vertices Number of vertices.
+		 * \param indices A container of integer indices into the 'vertices' array.
+		 * \return true on success, or false if the operation is not supported
 		 */
-		Renderer& CopyExF(Texture& txt, const FRect& dst, double angle = 0.0, Flip flipType = Flip::NONE);
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<int, T>::is_continuous_container>>
+		inline bool RenderGeometry(const Vertex* vertices, int num_vertices, const T& indices)
+			{ return SDL_RenderGeometry(renderer.get(), NULL, (const SDL_Vertex*)vertices, num_vertices, indices.data(), (int)indices.size()) == 0; }
+
 		/**
-		 *  \brief    Copy a portion of the texture to the entire current rendering target, rotating it by an angle around the given center
+		 * Render a list of triangles and indices into the
+		 * vertex array. Colour and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
 		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated.
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
+		 * \param vertices Vertices.
+		 * \param indices A container of integer indices into the 'vertices' array.
+		 * \return true on success, or false if the operation is not supported
 		 */
-		Renderer& CopyExF_Fill(Texture& txt, const Rect& src, const FPoint& center, double angle = 0.0, Flip flipType = Flip::NONE);
+		template <const int num_vertices, typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<int, T>::is_continuous_container>>
+		inline bool RenderGeometry(const Vertex(&vertices)[num_vertices], const T& indices)
+			{ return SDL_RenderGeometry(renderer.get(), NULL, (const SDL_Vertex*)vertices, num_vertices, indices.data(), (int)indices.size()) == 0; }
+
 		/**
-		 *  \brief    Copy a portion of the texture to the entire current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
+		 * Render a list of triangles and indices into the
+		 * vertex array. Colour and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
 		 *
-		 *  \param    srcrect: A reference to the source rectangle.
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
+		 * \param vertices Vertices.
+		 * \param indices A container of integer indices into the 'vertices' array.
+		 * \return true on success, or false if the operation is not supported
 		 */
-		Renderer& CopyExF_Fill(Texture& txt, const Rect& src, double angle = 0.0, Flip flipType = Flip::NONE);
+		template <
+			typename T1,
+			typename T2,
+			typename = typename std::enable_if_t<
+			ContinuousContainer_traits<Vertex, T1>::is_continuous_container &&
+			ContinuousContainer_traits<int, T2>::is_continuous_container
+			>>
+		inline bool RenderGeometry(const T1& vertices, const T2& indices)
+			{ return SDL_RenderGeometry(renderer.get(), NULL, (const SDL_Vertex*)vertices.data(), (int)vertices.size(), indices.data(), (int)indices.size()) == 0; }
+
+
+
 		/**
-		 *  \brief    Copy the texture to the entire current rendering target, rotating it by an angle around the given center.
+		 * Render a list of triangles, and optionally indices into the
+		 * vertex arrays. Color and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
 		 *
-		 *  \param    center: A reference to a point indicating the point around which dstrect will be rotated.
-		 *  \param    angle:  An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:   A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
+		 * \param xy Vertex positions
+		 * \param xy_stride Byte size to move from one element to the next element
+		 * \param colour Vertex colours (as Colour)
+		 * \param colour_stride Byte size to move from one element to the next element
+		 * \param uv Vertex normalized texture coordinates
+		 * \param uv_stride Byte size to move from one element to the next element
+		 * \param num_vertices Number of vertices.
+		 * \param indices (optional) An array of indices into the 'vertices' arrays,
+		 *                if NULL all vertices will be rendered in sequential order.
+		 * \param num_indices Number of indices.
+		 * \param size_indices Index size: 1 (byte), 2 (short), 4 (int)
+		 * \return true on success, or false if the operation is not supported
 		 */
-		Renderer& CopyExF_Fill(Texture& txt, const FPoint& center, double angle = 0.0, Flip flipType = Flip::NONE);
+		inline bool RenderGeometryRaw(
+			const float* xy, int xy_stride,
+			const Colour* colour, int colour_stride,
+			const float* uv, int uv_stride,
+			int num_vertices,
+			const void* indices, int num_indices,
+			int size_indices)
+		{
+			return SDL_RenderGeometryRaw(
+				renderer.get(), NULL,
+				xy, xy_stride,
+				colour, colour_stride,
+				uv, uv_stride,
+				num_vertices,
+				indices, num_indices,
+				size_indices
+			) == 0;
+		}
+
 		/**
-		 *  \brief    Copy the texture to the entire current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
+		 * Render a list of triangles and indices into the
+		 * vertex arrays. Color and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
 		 *
-		 *  \param    angle: An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
-		 *  \param    flip:  A Flip value stating which flipping actions should be performed on the texture
-		 *
-		 *  \return   0 on success, or -1 on error
+		 * \param xy Vertex positions
+		 * \param xy_stride Byte size to move from one element to the next element
+		 * \param colour Vertex colours (as Colour)
+		 * \param colour_stride Byte size to move from one element to the next element
+		 * \param uv Vertex normalized texture coordinates
+		 * \param uv_stride Byte size to move from one element to the next element
+		 * \param num_vertices Number of vertices.
+		 * \param indices An array of indices into the 'vertices' arrays.
+		 * \return true on success, or false if the operation is not supported
 		 */
-		Renderer& CopyExF_Fill(Texture& txt, double angle = 0.0, Flip flipType = Flip::NONE);
+		template <
+			typename t,
+			const int num_indices,
+			typename = typename std::enable_if_t<
+				sizeof(t) == 1 || sizeof(t) == 2 || sizeof(t) == 4
+			>>
+			inline bool RenderGeometryRaw(
+				const float* xy, int xy_stride,
+				const Colour* colour, int colour_stride,
+				const float* uv, int uv_stride,
+				int num_vertices,
+				const t(&indices)[num_indices])
+		{
+			return SDL_RenderGeometryRaw(
+				renderer.get(), NULL,
+				xy, xy_stride,
+				colour, colour_stride,
+				uv, uv_stride,
+				num_vertices,
+				indices, num_indices,
+				sizeof(t)
+			) == 0;
+		}
+
 		/**
-		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by angle around the given center.
+		 * Render a list of triangles and indices into the
+		 * vertex arrays. Color and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
 		 *
-		 *  \param    srcrect: A pointer to the source rectangle, or NULL for the entire texture.
-		 *  \param    dstrect: A pointer to the destination rectangle, or NULL for the entire rendering target.
-		 *  \param    center:  A pointer to a point indicating the point around which dstrect will be rotated (if NULL, rotation will be done around dstrect.w/2, dstrect.h/2).
-		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction.
-		 *  \param    flip:    An Flip value stating which flipping actions should be performed on the texture.
-		 *
-		 *  \return   0 on success, or -1 on error
+		 * \param xy Vertex positions
+		 * \param xy_stride Byte size to move from one element to the next element
+		 * \param colour Vertex colours (as Colour)
+		 * \param colour_stride Byte size to move from one element to the next element
+		 * \param uv Vertex normalized texture coordinates
+		 * \param uv_stride Byte size to move from one element to the next element
+		 * \param num_vertices Number of vertices.
+		 * \param indices An container of indices into the 'vertices' arrays.
+		 * \return true on success, or false if the operation is not supported
 		 */
-		Renderer& CopyExF(Texture& txt, const Rect* src, const FRect* dst, const FPoint* center, double angle = 0.0, Flip flipType = Flip::NONE);
+		template <
+			typename t,
+			typename T,
+			typename = typename std::enable_if_t<
+			ContinuousContainer_traits<t, T>::is_continuous_container &&
+			(sizeof(t) == 1 || sizeof(t) == 2 || sizeof(t) == 4)
+			>>
+			inline bool RenderGeometryRaw(
+				const float* xy, int xy_stride,
+				const Colour* colour, int colour_stride,
+				const float* uv, int uv_stride,
+				int num_vertices,
+				const T& indices)
+		{
+			return SDL_RenderGeometryRaw(
+				renderer.get(), NULL,
+				xy, xy_stride,
+				colour, colour_stride,
+				uv, uv_stride,
+				num_vertices,
+				indices.data(), (int)indices.size(),
+				sizeof(t)
+			) == 0;
+		}
+
+		/**
+		 * Render a list of triangles, and optionally indices into the
+		 * vertex arrays. Color and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
+		 *
+		 * \param xy Vertex positions
+		 * \param xy_stride Byte size to move from one element to the next element
+		 * \param colour Vertex colours (as Colour)
+		 * \param colour_stride Byte size to move from one element to the next element
+		 * \param uv Vertex normalized texture coordinates
+		 * \param uv_stride Byte size to move from one element to the next element
+		 * \param num_vertices Number of vertices.
+		 * \return true on success, or false if the operation is not supported
+		 */
+		inline bool RenderGeometryRaw(
+			const float* xy, int xy_stride,
+			const Colour* colour, int colour_stride,
+			const float* uv, int uv_stride,
+			int num_vertices)
+		{
+			return SDL_RenderGeometryRaw(
+				renderer.get(), NULL,
+				xy, xy_stride,
+				colour, colour_stride,
+				uv, uv_stride,
+				num_vertices,
+				NULL, 0, 0
+			) == 0;
+		}
+
+#endif
+#pragma endregion
+
+#pragma region Renderer Information
 
 		/**
 		 *  \brief    Get the number of 2D rendering drivers available for the current
@@ -791,7 +1303,9 @@ namespace SDL
 		 *            management on a particular display.  Normally there is only one, but
 		 *            some drivers may have several available with different capabilities.
 		 */
-		static int GetNumDrivers();
+		inline static int GetNumDrivers()
+			{ return SDL_GetNumRenderDrivers(); }
+
 		/**
 		 *  \brief    Get information about a specific 2D rendering driver for the current
 		 *            display.
@@ -799,67 +1313,78 @@ namespace SDL
 		 *  \param    info: A reference to an Info struct to be filled with
 		 *                  information on the rendering driver.
 		 *
-		 *  \return   0 on success, -1 if the index was out of range.
+		 *  \return   true on success, false if the index was out of range.
 		 */
-		Renderer& GetDriverInfo(int index, Info& info);
+		inline bool GetDriverInfo(int index, Info& info)
+			{ return SDL_GetRenderDriverInfo(index, &info) == 0; }
 
 		// Get information about a rendering context.
-		Renderer& GetInfo(Info& info);
+		inline bool GetInfo(Info& info)
+			{ return SDL_GetRendererInfo(renderer.get(), &info) == 0; }
 
 		// Get the output size in pixels of a rendering context.
-		Point GetOutputSize();
+		inline bool GetOutputSize(Point& size)
+			{ return SDL_GetRendererOutputSize(renderer.get(), &size.w, &size.h) == 0; }
+
 		// Get the output size in pixels of a rendering context.
-		Renderer& GetOutputSize(Point& size);
-		// Get the output size in pixels of a rendering context.
-		Renderer& GetOutputSize(int& w, int& h);
+		inline bool GetOutputSize(int& w, int& h)
+			{ return SDL_GetRendererOutputSize(renderer.get(), &w, &h) == 0; }
 
 		/**
 		 * \brief     Determines whether a window supports the use of render targets
 		 *
 		 * \return    true if supported, false if not.
 		 */
-		bool TargetSupported();
+		inline bool TargetSupported()
+			{ return SDL_RenderTargetSupported(renderer.get()) == SDL_TRUE; }
+
 		/**
 		 * \brief     Determines whether a window supports the use of render targets
 		 *
 		 * \param     support: A reference to be filled with true if supported, false if not.
 		 */
-		Renderer& TargetSupported(bool& support);
+		inline Renderer& TargetSupported(bool& support)
+			{ support = SDL_RenderTargetSupported(renderer.get()) == SDL_TRUE; return *this; }
 
 		/**
 		 * \brief     Set a texture as the current rendering target.
 		 *
 		 * \param     texture: The targeted texture, which must be created with the SDL_TEXTUREACCESS_TARGET flag.
 		 *
-		 * \return    0 on success, or -1 on error
+		 * \return    true on success, or false on error
 		 */
-		Renderer& SetTarget(Texture& texture);
+		inline bool SetTarget(Texture& texture);
+
 		/**
 		 * \brief     Set the default render target as the current rendering target.
 		 *
-		 * \return    0 on success, or -1 on error
+		 * \return    true on success, or false on error
 		 */
-		Renderer& ClearTarget();
+		inline bool ClearTarget();
+
 		/**
 		 * Get the current render target.
 		 *
 		 * The default render target is the window for which the renderer was created,
 		 * and is reported as NULL here.
 		 *
-		 * \param renderer the rendering context
 		 * \returns the current render target or NULL for the default render target.
 		 */
-		Texture GetTarget();
+		inline Texture GetTarget();
+
 		/**
 		 * Get the current render target.
 		 *
 		 * The default render target is the window for which the renderer was created,
 		 * and is reported as NULL here.
 		 *
-		 * \param renderer the rendering context
-		 * \returns the current render target or NULL for the default render target.
+		 * \returns whether the texture is valid
 		 */
-		Renderer& GetTarget(Texture& target);
+		inline bool GetTarget(Texture& target);
+
+#pragma endregion 
+
+#pragma region Scaling
 
 		/**
 		 *  \brief    Set device independent resolution for rendering
@@ -878,7 +1403,9 @@ namespace SDL
 		 *            rendering backend, it will be handled using the appropriate
 		 *            quality hints.
 		 */
-		Renderer& SetLogicalSize(const Point& size);
+		inline bool SetLogicalSize(const Point& size)
+			{ return SDL_RenderSetLogicalSize(renderer.get(), size.w, size.h) == 0; }
+
 		/**
 		 *  \brief    Set device independent resolution for rendering
 		 *
@@ -897,28 +1424,39 @@ namespace SDL
 		 *            rendering backend, it will be handled using the appropriate
 		 *            quality hints.
 		 */
-		Renderer& SetLogicalSize(int w, int h);
+		inline bool SetLogicalSize(int w, int h)
+			{ return SDL_RenderSetLogicalSize(renderer.get(), w, h) == 0; }
 
 		/**
 		 *  \brief    Get device independent resolution for rendering
 		 *
 		 *  \return   The size of the logical resolution
 		 */
-		Point GetLogicalSize();
+		inline Point GetLogicalSize()
+		{
+			Point returnVal;
+			SDL_RenderGetLogicalSize(renderer.get(), &returnVal.w, &returnVal.h);
+			return returnVal;
+		}
+
 		/**
 		 *  \brief    Get device independent resolution for rendering
 		 *
 		 *  \param    size: A reference filled with the size of the logical resolution
 		 */
-		Renderer& GetLogicalSize(Point& size);
+		inline Renderer& GetLogicalSize(Point& size)
+			{ SDL_RenderGetLogicalSize(renderer.get(), &size.w, &size.h); return *this; }
+
 		/**
 		 *  \brief    Get device independent resolution for rendering
 		 *
 		 *  \param    w: A reference to be filled with the width of the logical resolution
 		 *  \param    h: A reference to be filled with the height of the logical resolution
 		 */
-		Renderer& GetLogicalSize(int& w, int& h);
+		inline Renderer& GetLogicalSize(int& w, int& h)
+			{ SDL_RenderGetLogicalSize(renderer.get(), &w, &h); return *this; }
 
+#if SDL_VERSION_ATLEAST(2, 0, 5)
 		/**
 		 *  \brief    Set whether to force integer scales for resolution-independent rendering
 		 *
@@ -928,11 +1466,21 @@ namespace SDL
 		 *            a resolution is between two multiples of a logical size, the viewport size is
 		 *            rounded down to the lower multiple.
 		 */
-		Renderer& SetIntegerScale(bool enable);
+		inline bool SetIntegerScale(bool enable)
+			{ return SDL_RenderSetIntegerScale(renderer.get(), enable ? SDL_TRUE : SDL_FALSE); }
+
 		// Get whether integer scales are forced for resolution-independent rendering
-		bool GetIntegerScale();
+		inline bool GetIntegerScale()
+			{ return SDL_RenderGetIntegerScale(renderer.get()) == SDL_TRUE; }
+#endif
+
 		// Get whether integer scales are forced for resolution-independent rendering
-		Renderer& GetIntegerScale(bool& enabled);
+		inline Renderer& GetIntegerScale(bool& enabled)
+			{ enabled = SDL_RenderGetIntegerScale(renderer.get()) == SDL_TRUE; return *this; }
+
+#pragma endregion 
+
+#pragma region Destination Manipulation
 
 		/**
 		 *  \brief    Set the drawing area for rendering on the current target.
@@ -940,24 +1488,34 @@ namespace SDL
 		 *  \param    rect: The rectangle representing the drawing area.
 		 *                  The x,y of the viewport rect represents the origin for rendering.
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 *
 		 *  \note     If the window associated with the renderer is resized, the viewport is automatically reset.
 		 */
-		Renderer& SetViewport(const Rect& rect);
+		inline bool SetViewport(const Rect& rect)
+			{ SDL_RenderSetViewport(renderer.get(), &rect.rect) == 0; }
+
 		/**
 		 *  \brief    Sets the drawing area for rendering to the current target.
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 *
 		 *  \note     If the window associated with the renderer is resized, the viewport is automatically reset.
 		 */
-		Renderer& FillViewport();
+		inline bool ClearViewport()
+			{ return SDL_RenderSetViewport(renderer.get(), NULL) == 0; }
 
 		// Get the drawing area for the current target.
-		Rect GetViewport();
+		inline Rect GetViewport()
+		{
+			Rect viewport;
+			SDL_RenderGetViewport(renderer.get(), &viewport.rect);
+			return viewport;
+		}
+
 		// Get the drawing area for the current target.
-		Renderer& GetViewport(Rect& rect);
+		inline Renderer& GetViewport(Rect& rect)
+			{ SDL_RenderGetViewport(renderer.get(), &rect.rect); return *this; }
 
 		/**
 		 *  \brief    Set the clip rectangle for the current target.
@@ -965,15 +1523,18 @@ namespace SDL
 		 *  \param    rect: A reference to the rectangle to set as the clip rectangle,
 		 *                  relative to the viewport
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& SetClipRect(const Rect& rect);
+		inline bool SetClipRect(const Rect& rect)
+			{ return SDL_RenderSetClipRect(renderer.get(), &rect.rect) == 0; }
+
 		/**
 		 *  \brief    Disables clipping for the current target.
 		 *
-		 *  \return   0 on success, or -1 on error
+		 *  \return   true on success, or false on error
 		 */
-		Renderer& DisableClip();
+		inline bool DisableClip()
+			{ return SDL_RenderSetClipRect(renderer.get(), NULL) == 0; }
 
 		/**
 		 *  \brief    Get the clip rectangle for the current target.
@@ -981,19 +1542,35 @@ namespace SDL
 		 *  \return   A rect filled in with the current clip rectangle, or
 		 *            an empty rectangle if clipping is disabled.
 		 */
-		Rect GetClipRect();
+		inline Rect GetClipRect()
+		{
+			Rect rect;
+			SDL_RenderGetClipRect(renderer.get(), &rect.rect);
+			return rect;
+		}
+
 		/**
 		 *  \brief    Get the clip rectangle for the current target.
 		 *
 		 *  \param    rect: A reference filled in with the current clip rectangle, or
 		 *                  an empty rectangle if clipping is disabled.
 		 */
-		Renderer& GetClipRect(Rect& rect);
+		inline Renderer& GetClipRect(Rect& rect)
+			{ SDL_RenderGetClipRect(renderer.get(), &rect.rect); return *this; }
+
+#if SDL_VERSION_ATLEAST(2, 0, 4)
+		// Get whether clipping is enabled on the given renderer.
+		inline bool IsClipEnabled()
+			{ return SDL_RenderIsClipEnabled(renderer.get()) == SDL_TRUE; }
 
 		// Get whether clipping is enabled on the given renderer.
-		bool IsClipEnabled();
-		// Get whether clipping is enabled on the given renderer.
-		Renderer& IsClipEnabled(bool& enabled);
+		inline Renderer& IsClipEnabled(bool& enabled)
+			{ enabled = SDL_RenderIsClipEnabled(renderer.get()) == SDL_TRUE; }
+#endif
+
+#pragma endregion 
+
+#pragma region Pixel Reading
 
 		/**
 		 *  \brief    Read pixels from the current rendering target.
@@ -1004,11 +1581,13 @@ namespace SDL
 		 *  \param    format: The desired format of the pixel data, or 0 to use the format
 		 *                    of the rendering target
 		 *
-		 *  \return   0 on success, or -1 if pixel reading is not supported.
+		 *  \return   true on success, or false if pixel reading is not supported.
 		 *
 		 *  \warning  This is a very slow operation, and should not be used frequently.
 		 */
-		Renderer& ReadPixelsRect(const Rect& rect, void* pixels, int pitch, Uint32 format = 0);
+		inline bool ReadPixelsRect(const Rect& rect, void* pixels, int pitch, Uint32 format = 0)
+			{ return SDL_RenderReadPixels(renderer.get(), &rect.rect, format, pixels, pitch) == 0; }
+
 		/**
 		 *  \brief    Read pixels from the entire current rendering target.
 		 *
@@ -1017,28 +1596,48 @@ namespace SDL
 		 *  \param    format: The desired format of the pixel data, or 0 to use the format
 		 *                    of the rendering target
 		 *
-		 *  \return   0 on success, or -1 if pixel reading is not supported.
+		 *  \return   true on success, or false if pixel reading is not supported.
 		 *
 		 *  \warning  This is a very slow operation, and should not be used frequently.
 		 */
-		Renderer& ReadPixels(void* pixels, int pitch, Uint32 format = 0);
+		inline bool ReadPixels(void* pixels, int pitch, Uint32 format = 0)
+			{ return SDL_RenderReadPixels(renderer.get(), NULL, format, pixels, pitch) == 0; }
 
+#pragma endregion 
+
+#if SDL_VERSION_ATLEAST(2, 0, 8)
 		/**
 		 *  \brief    Get the CAMetalLayer associated with the given Metal renderer
 		 *
 		 *  \return   CAMetalLayer* (as void*) on success, or NULL if the renderer isn't a Metal renderer
 		 */
-		void* GetMetalLayer();
+		inline void* GetMetalLayer()
+			{ return SDL_RenderGetMetalLayer(renderer.get()); }
+
 		/**
 		 *  \brief    Get the Metal command encoder for the current frame
 		 *
 		 *  \return   id<MTLRenderCommandEncoder> on success, or NULL if the renderer isn't a Metal renderer
 		 */
-		void* GetMetalCommandEncoder();
+		inline void* GetMetalCommandEncoder()
+			{ return SDL_RenderGetMetalCommandEncoder(renderer.get()); }
+#endif
+
+#if SDL_VERSION_ATLEAST(2, 0, 18)
+		/**
+		 * Toggle VSync of the given renderer.
+		 *
+		 * \param vsync true for on, false for off.
+		 * \returns true on success, or false on failure
+		 */
+		inline bool SetVSync(bool vsync)
+			{ return SDL_RenderSetVSync(renderer.get(), vsync ? 1 : 0) == 0; }
+#endif
 	};
 
 	// An efficient driver-specific representation of pixel data
-	struct Texture {
+	struct Texture
+	{
 		// The scaling mode for a texture.
 		enum class ScaleMode
 		{
@@ -1057,38 +1656,62 @@ namespace SDL
 
 		// The texture channel modulation used in Renderer::Copy().
 		enum class Modulate {
-			NONE = SDL_TEXTUREMODULATE_NONE,     // No modulation
+			NONE  = SDL_TEXTUREMODULATE_NONE,     // No modulation
 			COLOR = SDL_TEXTUREMODULATE_COLOR,    // srcC = srcC * colour
 			ALPHA = SDL_TEXTUREMODULATE_ALPHA     // srcA = srcA * alpha
 		};
 
-		// Information on the capabilities of a render driver or context.
-		typedef SDL_RendererInfo Info;
+#pragma region Safety
 
 		// This is custom destructor for smart pointers that destroys SDL_Texture through SDL
-		static void DestroyTexture(SDL_Texture* texture);
+		inline static void DestroyTexture(SDL_Texture* texture)
+			{ SDL_DestroyTexture(texture); }
 
 		// This is custom destructor for smart pointers that does not destroy the Texture. This is for pointers you do not own
-		static void DontDestroyTexture(SDL_Texture* texture);
+		inline static void DontDestroyTexture(SDL_Texture* texture)
+			{}
 
 		// This creates a smart pointer to an SDL_Texture with a custom destructor
-		static std::shared_ptr<SDL_Texture> MakeSharedPtr(SDL_Texture* texture);
+		inline static std::shared_ptr<SDL_Texture> MakeSharedPtr(SDL_Texture* texture)
+			{ return std::shared_ptr<SDL_Texture>(texture, DestroyTexture); }
 
 		// This creates a Texture from a SDL_Texture pointer, taking ownership of the pointer
-		static Texture FromPtr(SDL_Texture* texture);
+		inline static Texture FromPtr(Renderer& renderer, SDL_Texture* texture)
+			{ return Texture(renderer.renderer,MakeSharedPtr(texture)); }
 
 		// This creates a Texture from a SDL_Texture pointer, but does not take ownership of the pointer
-		static Texture FromUnownedPtr(SDL_Texture* texture);
+		inline static Texture FromUnownedPtr(Renderer& renderer, SDL_Texture* texture)
+			{ return Texture(renderer.renderer, std::shared_ptr<SDL_Texture>(texture, DontDestroyTexture)); }
 
+		std::shared_ptr<SDL_Renderer> renderer = nullptr;
 		std::shared_ptr<SDL_Texture> texture = nullptr;
 
-		Texture(std::shared_ptr<SDL_Texture> texture);
+		inline Texture(std::shared_ptr<SDL_Renderer> renderer, std::shared_ptr<SDL_Texture> texture)
+			: renderer(renderer), texture(texture) {}
 
-		Texture();
-		Texture(const Texture& txt);
-		Texture(Texture&& txt) noexcept;
-		Texture& operator=(const Texture& that) noexcept;
-		Texture& operator=(Texture&& that) noexcept;
+#pragma endregion
+
+#pragma region Constructors
+
+		inline Texture()
+			: Texture(nullptr, nullptr) {}
+		inline Texture(const Texture& txt)
+			: Texture(txt.renderer, txt.texture) {}
+		inline Texture(Texture&& txt) noexcept
+		{
+			std::swap(renderer, txt.renderer);
+			std::swap(texture, txt.texture);
+		}
+		inline Texture& operator=(const Texture& that) noexcept
+		{
+			renderer = that.renderer; texture = that.texture; return *this;
+		}
+		inline Texture& operator=(Texture&& that) noexcept
+		{
+			std::swap(renderer, that.renderer);
+			std::swap(texture, that.texture);
+			return *this;
+		}
 
 		/**
 		 *  \brief    Create a texture for a rendering context.
@@ -1104,7 +1727,8 @@ namespace SDL
 		 *
 		 *  \note     The contents of the texture are not defined at creation.
 		 */
-		Texture(Renderer& renderer, const Point& size, Access access = Access::STATIC, Uint32 format = (Uint32)PixelFormatEnum::RGBA32);
+		inline Texture(Renderer& renderer, const Point& size, Access access = Access::STATIC, Uint32 format = (Uint32)PixelFormatEnum::RGBA32)
+			: Texture(FromPtr(renderer, SDL_CreateTexture(renderer.renderer.get(), format, (SDL_TextureAccess)access, size.x, size.y))) {}
 		/**
 		 *  \brief    Create a texture from an existing surface.
 		 *
@@ -1115,7 +1739,12 @@ namespace SDL
 		 *
 		 *  \note     The surface is not modified or freed by this function.
 		 */
-		Texture(Renderer& renderer, Surface& surface);
+		inline Texture(Renderer& renderer, Surface& surface)
+			: Texture(FromPtr(renderer, SDL_CreateTextureFromSurface(renderer.renderer.get(), surface.surface.get()))) {}
+
+#pragma endregion 
+
+#pragma region Pixel Editing
 
 		/**
 		 *  \brief    Lock a portion of the texture for write-only pixel access.
@@ -1125,9 +1754,11 @@ namespace SDL
 		 *                    appropriately offset by the locked area.
 		 *  \param    pitch:  This is filled in with the pitch of the locked pixels.
 		 *
-		 *  \return   0 on success, or -1 if the texture is not valid or was not created with ::SDL_TEXTUREACCESS_STREAMING.
+		 *  \return   true on success, or false if the texture is not valid or was not created with ::SDL_TEXTUREACCESS_STREAMING.
 		 */
-		int LockRect(const Rect& rect, void*& pixels, int& pitch);
+		inline bool LockRect(const Rect& rect, void*& pixels, int& pitch)
+			{ return SDL_LockTexture(texture.get(), (const SDL_Rect*)&rect.rect, &pixels, &pitch) == 0; }
+
 		/**
 		 *  \brief    Lock the entire texture for write-only pixel access.
 		 *
@@ -1135,10 +1766,12 @@ namespace SDL
 		 *                    appropriately offset by the locked area.
 		 *  \param    pitch:  This is filled in with the pitch of the locked pixels.
 		 *
-		 *  \return   0 on success, or -1 if the texture is not valid or was not created with ::SDL_TEXTUREACCESS_STREAMING.
+		 *  \return   true on success, or false if the texture is not valid or was not created with ::SDL_TEXTUREACCESS_STREAMING.
 		 */
-		int Lock(void*& pixels, int& pitch);
+		inline bool Lock(void*& pixels, int& pitch)
+			{ return SDL_LockTexture(texture.get(), NULL, &pixels, &pitch) == 0; }
 
+#if SDL_VERSION_ATLEAST(2, 0, 12)
 		/**
 		 *  \brief    Lock a portion of the texture for write-only pixel access.
 		 *            Expose it as a SDL surface.
@@ -1147,9 +1780,16 @@ namespace SDL
 		 *  \param    surface: This is filled in with a SDL surface representing the locked area
 		 *                     Surface is freed internally after calling UnlockTexture() or deleting the Surface
 		 *
-		 *  \return   0 on success, or -1 if the texture is not valid or was not created with ::SDL_TEXTUREACCESS_STREAMING.
+		 *  \return   true on success, or false if the texture is not valid or was not created with ::SDL_TEXTUREACCESS_STREAMING.
 		 */
-		int LockRectToSurface(const Rect& rect, Surface& surface);
+		inline bool LockRectToSurface(const Rect& rect, Surface& surface)
+		{
+			SDL_Surface* surf;
+			const bool success = SDL_LockTextureToSurface(texture.get(), &rect.rect, &surf) == 0;
+			surface = Surface::FromUnownedPtr(surf);
+			return success;
+		}
+
 		/**
 		 *  \brief    Lock the entire texture for write-only pixel access.
 		 *            Expose it as a SDL surface.
@@ -1157,15 +1797,23 @@ namespace SDL
 		 *  \param    surface: This is filled in with a SDL surface representing the locked area
 		 *                     Surface is freed internally after calling UnlockTexture() or deleting the Surface
 		 *
-		 *  \return   0 on success, or -1 if the texture is not valid or was not created with ::SDL_TEXTUREACCESS_STREAMING.
+		 *  \return   true on success, or false if the texture is not valid or was not created with ::SDL_TEXTUREACCESS_STREAMING.
 		 */
-		int LockToSurface(Surface& surface);
+		inline bool LockToSurface(Surface& surface)
+		{
+			SDL_Surface* surf;
+			const bool success = SDL_LockTextureToSurface(texture.get(), NULL, &surf) == 0;
+			surface = Surface::FromUnownedPtr(surf);
+			return success;
+		}
+#endif
 
 		/**
 		 *  \brief    Unlock a texture, uploading the changes to video memory, if needed.
 		 *            If LockToSurface() was called for locking, the SDL surface is freed.
 		 */
-		void Unlock();
+		inline void Unlock()
+			{ SDL_UnlockTexture(texture.get()); }
 
 		/**
 		 *  \brief    Update the given texture rectangle with new pixel data.
@@ -1177,11 +1825,13 @@ namespace SDL
 		 *  \note     The pixel data must be in the format of the texture. The pixel format can be
 		 *            queried with Query or QueryFormat.
 		 *
-		 *  \return   0 on success, or -1 if the texture is not valid.
+		 *  \return   true on success, or false if the texture is not valid.
 		 *
 		 *  \warning  This is a fairly slow function.
 		 */
-		int UpdateRect(const Rect& rect, void* pixels, int pitch);
+		inline bool UpdateRect(const Rect& rect, void* pixels, int pitch)
+			{ return SDL_UpdateTexture(texture.get(), (const SDL_Rect*)&rect.rect, pixels, pitch) == 0; }
+
 		/**
 		 *  \brief    Update the entire texture with new pixel data.
 		 *
@@ -1191,12 +1841,14 @@ namespace SDL
 		 *  \note     The pixel data must be in the format of the texture. The pixel format can be
 		 *            queried with Query or QueryFormat.
 		 *
-		 *  \return   0 on success, or -1 if the texture is not valid.
+		 *  \return   true on success, or false if the texture is not valid.
 		 *
 		 *  \warning  This is a fairly slow function.
 		 */
-		int Update(void* pixels, int pitch);
+		inline bool Update(void* pixels, int pitch)
+			{ return SDL_UpdateTexture(texture.get(), NULL, pixels, pitch) == 0; }
 
+#if SDL_VERSION_ATLEAST(2, 0, 1)
 		/**
 		 *  \brief    Update a rectangle within a planar YV12 or IYUV texture with new pixel data.
 		 *
@@ -1208,15 +1860,17 @@ namespace SDL
 		 *  \param    Vplane: The raw pixel data for the V plane.
 		 *  \param    Vpitch: The number of bytes between rows of pixel data for the V plane.
 		 *
-		 *  \return   0 on success, or -1 if the texture is not valid.
+		 *  \return   true on success, or false if the texture is not valid.
 		 *
 		 *  \note     You can use UpdateRect() as long as your pixel data is
 		 *            a contiguous block of Y and U/V planes in the proper order, but
 		 *            this function is available if your pixel data is not contiguous.
 		 */
-		int UpdateYUVRect(const Rect& rect, const Uint8* Yplane, int Ypitch, const Uint8* Uplane, int Upitch, const Uint8* Vplane, int Vpitch);
+		inline bool UpdateYUVRect(const Rect& rect, const Uint8* Yplane, int Ypitch, const Uint8* Uplane, int Upitch, const Uint8* Vplane, int Vpitch)
+			{ return SDL_UpdateYUVTexture(texture.get(), &rect.rect, Yplane, Ypitch, Uplane, Upitch, Vplane, Vpitch) == 0; }
+
 		/**
-		 *  \brief    Update a the entire planar YV12 or IYUV texture with new pixel data.
+		 *  \brief    Update an entire planar YV12 or IYUV texture with new pixel data.
 		 *
 		 *  \param    Yplane: The raw pixel data for the Y plane.
 		 *  \param    Ypitch: The number of bytes between rows of pixel data for the Y plane.
@@ -1225,13 +1879,58 @@ namespace SDL
 		 *  \param    Vplane: The raw pixel data for the V plane.
 		 *  \param    Vpitch: The number of bytes between rows of pixel data for the V plane.
 		 *
-		 *  \return   0 on success, or -1 if the texture is not valid.
+		 *  \return   true on success, or false if the texture is not valid.
 		 *
 		 *  \note     You can use Update() as long as your pixel data is
 		 *            a contiguous block of Y and U/V planes in the proper order, but
 		 *            this function is available if your pixel data is not contiguous.
 		 */
-		int UpdateYUV(const Uint8* Yplane, int Ypitch, const Uint8* Uplane, int Upitch, const Uint8* Vplane, int Vpitch);
+		inline bool UpdateYUV(const Uint8* Yplane, int Ypitch, const Uint8* Uplane, int Upitch, const Uint8* Vplane, int Vpitch)
+			{ return SDL_UpdateYUVTexture(texture.get(), NULL, Yplane, Ypitch, Uplane, Upitch, Vplane, Vpitch) == 0; }
+#endif
+
+#if SDL_VERSION_ATLEAST(2, 0, 16)
+		/**
+		 * Update a rectangle within a planar NV12 or NV21 texture with new pixels.
+		 *
+		 * You can use SDL_UpdateTexture() as long as your pixel data is a contiguous
+		 * block of NV12/21 planes in the proper order, but this function is available
+		 * if your pixel data is not contiguous.
+		 *
+		 * \param rect a pointer to the rectangle of pixels to update
+		 * \param Yplane the raw pixel data for the Y plane.
+		 * \param Ypitch the number of bytes between rows of pixel data for the Y
+		 *               plane.
+		 * \param UVplane the raw pixel data for the UV plane.
+		 * \param UVpitch the number of bytes between rows of pixel data for the UV
+		 *                plane.
+		 * \return true on success, or false if the texture is not valid.
+		 */
+		inline bool UpdateNVRect(const Rect& rect, const Uint8* Yplane, int Ypitch, const Uint8* UVplane, int UVpitch)
+			{ return SDL_UpdateNVTexture(texture.get(), &rect.rect, Yplane, Ypitch, UVplane, UVpitch) == 0; }
+
+		/**
+		 * Update an entire planar NV12 or NV21 texture with new pixels.
+		 *
+		 * You can use SDL_UpdateTexture() as long as your pixel data is a contiguous
+		 * block of NV12/21 planes in the proper order, but this function is available
+		 * if your pixel data is not contiguous.
+		 *
+		 * \param Yplane the raw pixel data for the Y plane.
+		 * \param Ypitch the number of bytes between rows of pixel data for the Y
+		 *               plane.
+		 * \param UVplane the raw pixel data for the UV plane.
+		 * \param UVpitch the number of bytes between rows of pixel data for the UV
+		 *                plane.
+		 * \return true on success, or false if the texture is not valid.
+		 */
+		inline bool UpdateNV(const Uint8* Yplane, int Ypitch, const Uint8* UVplane, int UVpitch)
+			{ return SDL_UpdateNVTexture(texture.get(), NULL, Yplane, Ypitch, UVplane, UVpitch) == 0; }
+#endif
+
+#pragma endregion 
+
+#pragma region Texture Settings
 
 		/**
 		 *  \brief    Query the format of a texture
@@ -1240,25 +1939,31 @@ namespace SDL
 		 *                    actual format may differ, but pixel transfers will use this
 		 *                    format.
 		 *
-		 *  \return   0 on success, or -1 if the texture is not valid.
+		 *  \return   true on success, or false if the texture is not valid.
 		 */
-		int QueryFormat(Uint32& format);
+		inline bool QueryFormat(Uint32& format)
+			{ return SDL_QueryTexture(texture.get(), &format, NULL, NULL, NULL) == 0; }
+
 		/**
 		 *  \brief    Query the access of a texture
 		 *
 		 *  \param    access: A reference to be filled in with the actual access to the texture.
 		 *
-		 *  \return   0 on success, or -1 if the texture is not valid.
+		 *  \return   true on success, or false if the texture is not valid.
 		 */
-		int QueryAccess(int& access);
+		inline bool QueryAccess(Access& access)
+			{ return SDL_QueryTexture(texture.get(), NULL, (int*)&access, NULL, NULL) == 0; }
+
 		/**
 		 *  \brief    Query the size of a texture
 		 *
 		 *  \param    size: A reference to be filled in with the width and height of the texture in pixels.
 		 *
-		 *  \return   0 on success, or -1 if the texture is not valid.
+		 *  \return   true on success, or false if the texture is not valid.
 		 */
-		int QuerySize(Point& size);
+		inline bool QuerySize(Point& size)
+			{ return SDL_QueryTexture(texture.get(), NULL, NULL, &size.w, &size.h) == 0; }
+
 		/**
 		 *  \brief    Query the attributes of a texture
 		 *
@@ -1268,9 +1973,11 @@ namespace SDL
 		 *  \param    access: A reference to be filled in with the actual access to the texture.
 		 *  \param    size:   A reference to be filled in with the width and height of the texture in pixels.
 		 *
-		 *  \return   0 on success, or -1 if the texture is not valid.
+		 *  \return   true on success, or false if the texture is not valid.
 		 */
-		int Query(Uint32& format, int& access, Point& size);
+		inline bool Query(Uint32& format, Access& access, Point& size)
+			{ return SDL_QueryTexture(texture.get(), &format, (int*)&access, &size.w, &size.h) == 0; }
+
 		/**
 		 *  \brief    Query the attributes of a texture
 		 *
@@ -1281,9 +1988,10 @@ namespace SDL
 		 *  \param    w:      A pointer to be filled in with the width of the texture in pixels.
 		 *  \param    h:      A pointer to be filled in with the height of the texture in pixels.
 		 *
-		 *  \return   0 on success, or -1 if the texture is not valid.
+		 *  \return   true on success, or false if the texture is not valid.
 		 */
-		int Query(Uint32* format, int* access, int* w, int* h);
+		inline bool Query(Uint32* format, Access* access, int* w, int* h)
+			{ return SDL_QueryTexture(texture.get(), format, (int*)access, w, h) == 0; }
 
 		/**
 		 *  \brief    Set an additional colour value used in render copy operations.
@@ -1292,10 +2000,12 @@ namespace SDL
 		 *  \param    g: The green colour value multiplied into copy operations.
 		 *  \param    b: The blue colour value multiplied into copy operations.
 		 *
-		 *  \return   0 on success, or -1 if the texture is not valid or colour modulation
+		 *  \return   true on success, or false if the texture is not valid or colour modulation
 		 *            is not supported.
 		 */
-		int SetColourMod(Uint8 r, Uint8 g, Uint8 b);
+		inline bool SetColourMod(Uint8 r, Uint8 g, Uint8 b)
+			{ return SDL_SetTextureColorMod(texture.get(), r, g, b) == 0; }
+
 		/**
 		 *  \brief    Get the additional colour value used in render copy operations.
 		 *
@@ -1303,27 +2013,51 @@ namespace SDL
 		 *  \param    g: A reference to be filled in with the current green colour value.
 		 *  \param    b: A reference to be filled in with the current blue colour value.
 		 *
-		 *  \return   0 on success, or -1 if the texture is not valid.
+		 *  \return   true on success, or false if the texture is not valid.
 		 */
-		int GetColourMod(Uint8& r, Uint8& g, Uint8& b);
+		inline bool GetColourMod(Uint8& r, Uint8& g, Uint8& b)
+			{ return SDL_GetTextureColorMod(texture.get(), &r, &g, &b) == 0; }
+
+		/**
+		 *  \brief    Get the additional colour value used in render copy operations.
+		 *
+		 *  \param    c: A reference to be filled in with the current colour value.
+		 *
+		 *  \return   true on success, or false if the texture is not valid.
+		 */
+		inline bool GetColourMod(Colour& c)
+			{ return SDL_GetTextureColorMod(texture.get(), &c.r, &c.g, &c.b) == 0; }
 
 		/**
 		 *  \brief    Set an additional alpha value used in render copy operations.
 		 *
 		 *  \param    alpha: The alpha value multiplied into copy operations.
 		 *
-		 *  \return   0 on success, or -1 if the texture is not valid or alpha modulation
+		 *  \return   true on success, or false if the texture is not valid or alpha modulation
 		 *            is not supported.
 		 */
-		int SetAlphaMod(Uint8 alpha);
+		inline bool SetAlphaMod(Uint8 alpha)
+			{ return SDL_SetTextureAlphaMod(texture.get(), alpha) == 0; }
+
 		/**
 		 *  \brief    Get the additional alpha value used in render copy operations.
 		 *
 		 *  \param    alpha: A reference to be filled in with the current alpha value.
 		 *
-		 *  \return   0 on success, or -1 if the texture is not valid.
+		 *  \return   true on success, or false if the texture is not valid.
 		 */
-		int GetAlphaMod(Uint8& alpha);
+		inline bool GetAlphaMod(Uint8& alpha)
+			{ return SDL_GetTextureAlphaMod(texture.get(), &alpha) == 0; }
+		
+		/**
+		 *  \brief    Get the additional alpha value used in render copy operations.
+		 *
+		 *  \param    c: A Colour reference to be given the current alpha value.
+		 *
+		 *  \return   true on success, or false if the texture is not valid.
+		 */
+		inline bool GetAlphaMod(Colour& c)
+			{ return SDL_GetTextureAlphaMod(texture.get(), &c.a) == 0; }
 
 		/**
 		 *  \brief    Set an additional colour and alpha value used in render copy operations.
@@ -1337,7 +2071,9 @@ namespace SDL
 		 *            -2 if alpha modulation is not supported, or -3 if neither
 		 *            are supported or if the texture is not valid.
 		 */
-		int SetMod(const Colour& c);
+		inline int SetMod(const Colour& c)
+			{ return( SetColourMod(c.r, c.g, c.b) ? 0 : -1) + (SetAlphaMod(c.a) ? 0 : -2); }
+
 		/**
 		 *  \brief    Get the additional colour value used in render copy operations.
 		 *
@@ -1346,9 +2082,12 @@ namespace SDL
 		 *  \param    b:     A reference to be filled in with the current blue colour value.
 		 *  \param    alpha: A reference to be filled in with the current alpha value.
 		 *
-		 *  \return   0 on success, or -1 if the texture is not valid.
+		 *  \return   0 on success, -1 if colour modulation is not supported,
+		 *            -2 if alpha modulation is not supported, or -3 if neither
+		 *            are supported or if the texture is not valid.
 		 */
-		int GetMod(Colour& c);
+		inline int GetMod(Colour& c)
+			{ return (GetColourMod(c.r, c.g, c.b) ? 0 : -1) + (GetAlphaMod(c.a) ? 0 : -2); }
 
 		/**
 		 *  \brief    Set the blend mode used for texture copy operations.
@@ -1358,19 +2097,23 @@ namespace SDL
 		 *  \note     If the blend mode is not supported, the closest supported mode is
 		 *            chosen.
 		 *
-		 *  \return   0 on success, or -1 if the texture is not valid or the blend mode is
+		 *  \return   true on success, or false if the texture is not valid or the blend mode is
 		 *            not supported.
 		 */
-		int SetBlendMode(BlendMode blendMode);
+		inline bool SetBlendMode(BlendMode blendMode)
+			{ return SDL_SetTextureBlendMode(texture.get(), (SDL_BlendMode)blendMode) == 0; }
+
 		/**
 		 *  \brief    Get the blend mode used for texture copy operations.
 		 *
 		 *  \param    blendMode: A reference to be filled in with the current blend mode.
 		 *
-		 *  \return   0 on success, or -1 if the texture is not valid.
+		 *  \return   true on success, or false if the texture is not valid.
 		 */
-		int GetBlendMode(BlendMode& blendMode);
+		inline bool GetBlendMode(BlendMode& blendMode)
+			{ return SDL_GetTextureBlendMode(texture.get(), (SDL_BlendMode*)&blendMode) == 0; }
 
+#if SDL_VERSION_ATLEAST(2, 0, 12)
 		/**
 		 *  \brief    Set the scale mode used for texture scale operations.
 		 *
@@ -1379,18 +2122,742 @@ namespace SDL
 		 *  \note     If the scale mode is not supported, the closest supported mode is
 		 *            chosen.
 		 *
-		 *  \return   0 on success, or -1 if the texture is not valid.
+		 *  \return   true on success, or false if the texture is not valid.
 		 */
-		int SetScaleMode(ScaleMode scaleMode);
+		inline bool SetScaleMode(ScaleMode scaleMode)
+			{ return SDL_SetTextureScaleMode(texture.get(), (SDL_ScaleMode)scaleMode) == 0; }
+
 		/**
 		 *  \brief    Get the scale mode used for texture scale operations.
 		 *
 		 *  \param    scaleMode: A pointer filled in with the current scale mode.
 		 *
-		 *  \return   0 on success, or -1 if the texture is not valid.
+		 *  \return   true on success, or false if the texture is not valid.
 		 */
-		int GetScaleMode(ScaleMode& scaleMode);
+		inline bool GetScaleMode(ScaleMode& scaleMode)
+			{ return SDL_GetTextureScaleMode(texture.get(), (SDL_ScaleMode*)&scaleMode) == 0; }
+#endif
+
+#if SDL_VERSION_ATLEAST(2, 0, 18)
+		/**
+		 * Associate a user-specified pointer with a texture.
+		 *
+		 * \param texture the texture to update.
+		 * \param userdata the pointer to associate with the texture.
+		 * \returns true on success, or false if the texture is not valid.
+		 */
+		inline bool SetUserData(void* userdata)
+			{ return SDL_SetTextureUserData(texture.get(), userdata) == 0; }
+
+		/**
+		 * Get the user-specified pointer associated with a texture
+		 *
+		 * \param texture the texture to query.
+		 * \return the pointer associated with the texture, or NULL if the texture is
+		 *         not valid.
+		 */
+		inline void* GetUserData()
+			{ return SDL_GetTextureUserData(texture.get()); }
+#endif
+
+#pragma endregion 
+
+#pragma region Texture Copying
+		
+		// Flip constants for CopyEx
+		enum class Flip
+		{
+			NONE       = SDL_FLIP_NONE,       // Do not flip
+			HORIZONTAL = SDL_FLIP_HORIZONTAL, // flip horizontally
+			VERTICAL   = SDL_FLIP_VERTICAL    // flip vertically
+		};
+
+		/**
+		 *  \brief    Copy a portion of the texture to the current rendering target.
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool Copy(const Rect& src, const Rect& dst);
+
+		/**
+		 *  \brief    Copy the texture to the current rendering target.
+		 *
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool Copy(const Rect& dst);
+
+		/**
+		 *  \brief    Copy a portion of the texture to the entire current rendering target.
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool Copy_Fill(const Rect& src);
+
+		/**
+		 *  \brief    Copy the texture to the entire current rendering target.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool Copy_Fill();
+
+		/**
+		 *  \brief    Copy a portion of the texture to the current rendering target.
+		 *
+		 *  \param    srcrect: A pointer to the source rectangle, or NULL for the entire texture.
+		 *  \param    dstrect: A pointer to the destination rectangle, or NULL for the entire rendering target.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool Copy(const Rect* src, const Rect* dst);
+
+		/**
+		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by an angle around the given center.
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated.
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Texture::Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyEx(const Rect& src, const Rect& dst, const Point& center, double angle = 0.0, Flip flipType = Flip::NONE);
+
+		/**
+		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyEx(const Rect& src, const Rect& dst, double angle = 0.0, Flip flipType = Flip::NONE);
+
+		/**
+		 *  \brief    Copy the texture to the current rendering target, rotating it by an angle around the given center.
+		 *
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated (if NULL, rotation will be done around dstrect.w/2, dstrect.h/2).
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyEx(const Rect& dst, const Point& center, double angle = 0.0, Flip flipType = Flip::NONE);
+
+		/**
+		 *  \brief    Copy the texture to the current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2
+		 *
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyEx(const Rect& dst, double angle = 0.0, Flip flipType = Flip::NONE);
+
+		/**
+		 *  \brief    Copy a portion of the texture to the entire current rendering target, rotating it by an angle around the given center
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated.
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyEx_Fill(const Rect& src, const Point& center, double angle = 0.0, Flip flipType = Flip::NONE);
+
+		/**
+		 *  \brief    Copy a portion of the texture to the entire current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyEx_Fill(const Rect& src, double angle = 0.0, Flip flipType = Flip::NONE);
+
+		/**
+		 *  \brief    Copy the texture to the entire current rendering target, rotating it by an angle around the given center.
+		 *
+		 *  \param    center: A reference to a point indicating the point around which dstrect will be rotated.
+		 *  \param    angle:  An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:   A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyEx_Fill(const Point& center, double angle = 0.0, Flip flipType = Flip::NONE);
+
+		/**
+		 *  \brief    Copy the texture to the entire current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
+		 *
+		 *  \param    angle: An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:  A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyEx_Fill(double angle = 0.0, Flip flipType = Flip::NONE);
+
+		/**
+		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by angle around the given center.
+		 *
+		 *  \param    srcrect: A pointer to the source rectangle, or NULL for the entire texture.
+		 *  \param    dstrect: A pointer to the destination rectangle, or NULL for the entire rendering target.
+		 *  \param    center:  A pointer to a point indicating the point around which dstrect will be rotated (if NULL, rotation will be done around dstrect.w/2, dstrect.h/2).
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction.
+		 *  \param    flip:    An Flip value stating which flipping actions should be performed on the texture.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyEx(const Rect* src, const Rect* dst, const Point* center, double angle = 0.0, Flip flipType = Flip::NONE);
+
+#if SDL_VERSION_ATLEAST(2, 0, 18)
+		/**
+		 * Render a list of triangles using a texture, and optionally indices into the
+		 * vertex array. Colour and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
+		 *
+		 * \param vertices Vertices.
+		 * \param num_vertices Number of vertices.
+		 * \param indices (optional) An array of integer indices into the 'vertices'
+		 *                array, if NULL all vertices will be rendered in sequential
+		 *                order.
+		 * \param num_indices Number of indices.
+		 * \return true on success, or false if the operation is not supported
+		 */
+		inline bool RenderGeometry(const Vertex* vertices, int num_vertices, const int* indices, int num_indices)
+			{ return SDL_RenderGeometry(renderer.get(), texture.get(), (const SDL_Vertex*)vertices, num_vertices, indices, num_indices) == 0; }
+
+		/**
+		 * Render a list of triangles using a texture, and optionally indices into the
+		 * vertex array. Colour and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
+		 *
+		 * \param vertices Vertices.
+		 * \param indices (optional) An array of integer indices into the 'vertices'
+		 *                array, if NULL all vertices will be rendered in sequential
+		 *                order.
+		 * \param num_indices Number of indices.
+		 * \return true on success, or false if the operation is not supported
+		 */
+		template <const int num_vertices>
+		inline bool RenderGeometry(const Vertex(&vertices)[num_vertices], const int* indices, int num_indices)
+			{ return SDL_RenderGeometry(renderer.get(), texture.get(), (const SDL_Vertex*)vertices, num_vertices, indices, num_indices) == 0; }
+
+		/**
+		 * Render a list of triangles using a texture, and optionally indices into the
+		 * vertex array. Colour and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
+		 *
+		 * \param vertices Vertices.
+		 * \param indices (optional) An array of integer indices into the 'vertices'
+		 *                array, if NULL all vertices will be rendered in sequential
+		 *                order.
+		 * \param num_indices Number of indices.
+		 * \return true on success, or false if the operation is not supported
+		 */
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<Vertex, T>::is_continuous_container>>
+		inline bool RenderGeometry(const T& vertices, const int* indices, int num_indices)
+			{ return SDL_RenderGeometry(renderer.get(), texture.get(), (const SDL_Vertex*)vertices.data(), (int)vertices.size(), indices, num_indices) == 0; }
+
+		/**
+		 * Render a list of triangles using a texture and indices into the
+		 * vertex array. Colour and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
+		 *
+		 * \param vertices Vertices.
+		 * \param num_vertices Number of vertices.
+		 * \param indices An array of integer indices into the 'vertices' array.
+		 * \return true on success, or false if the operation is not supported
+		 */
+		template <const int num_indices>
+		inline bool RenderGeometry(const Vertex* vertices, int num_vertices, const int(&indices)[num_indices])
+			{ return SDL_RenderGeometry(renderer.get(), texture.get(), (const SDL_Vertex*)vertices, num_vertices, indices, num_indices) == 0; }
+
+		/**
+		 * Render a list of triangles using a texture and indices into the
+		 * vertex array. Colour and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
+		 *
+		 * \param vertices Vertices.
+		 * \param indices An array of integer indices into the 'vertices' array.
+		 * \return true on success, or false if the operation is not supported
+		 */
+		template <const int num_vertices, const int num_indices>
+		inline bool RenderGeometry(const Vertex(&vertices)[num_vertices], const int(&indices)[num_indices])
+			{ return SDL_RenderGeometry(renderer.get(), texture.get(), (const SDL_Vertex*)vertices, num_vertices, indices, num_indices) == 0; }
+
+		/**
+		 * Render a list of triangles using a texture and indices into the
+		 * vertex array. Colour and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
+		 *
+		 * \param vertices Vertices.
+		 * \param indices An array of integer indices into the 'vertices' array.
+		 * \return true on success, or false if the operation is not supported
+		 */
+		template <typename T, const int num_indices, typename = typename std::enable_if_t<ContinuousContainer_traits<Vertex, T>::is_continuous_container>>
+		inline bool RenderGeometry(const T& vertices, const int(&indices)[num_indices])
+			{ return SDL_RenderGeometry(renderer.get(), texture.get(), (const SDL_Vertex*)vertices.data(), (int)vertices.size(), indices, num_indices) == 0; }
+
+		/**
+		 * Render a list of triangles using a texture and indices into the
+		 * vertex array. Colour and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
+		 *
+		 * \param vertices Vertices.
+		 * \param num_vertices Number of vertices.
+		 * \param indices A container of integer indices into the 'vertices' array.
+		 * \return true on success, or false if the operation is not supported
+		 */
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<int, T>::is_continuous_container>>
+		inline bool RenderGeometry(const Vertex* vertices, int num_vertices, const T& indices)
+			{ return SDL_RenderGeometry(renderer.get(), texture.get(), (const SDL_Vertex*)vertices, num_vertices, indices.data(), (int)indices.size()) == 0; }
+
+		/**
+		 * Render a list of triangles using a texture and indices into the
+		 * vertex array. Colour and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
+		 *
+		 * \param vertices Vertices.
+		 * \param indices A container of integer indices into the 'vertices' array.
+		 * \return true on success, or false if the operation is not supported
+		 */
+		template <const int num_vertices, typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<int, T>::is_continuous_container>>
+		inline bool RenderGeometry(const Vertex(&vertices)[num_vertices], const T& indices)
+			{ return SDL_RenderGeometry(renderer.get(), texture.get(), (const SDL_Vertex*)vertices, num_vertices, indices.data(), (int)indices.size()) == 0; }
+
+		/**
+		 * Render a list of triangles using a texture and indices into the
+		 * vertex array. Colour and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
+		 *
+		 * \param vertices Vertices.
+		 * \param indices A container of integer indices into the 'vertices' array.
+		 * \return true on success, or false if the operation is not supported
+		 */
+		template <
+			typename T1,
+			typename T2,
+			typename = typename std::enable_if_t<
+			ContinuousContainer_traits<Vertex, T1>::is_continuous_container &&
+			ContinuousContainer_traits<int, T2>::is_continuous_container
+			>>
+		inline bool RenderGeometry(const T1& vertices, const T2& indices)
+			{ return SDL_RenderGeometry(renderer.get(), texture.get(), (const SDL_Vertex*)vertices.data(), (int)vertices.size(), indices.data(), (int)indices.size()) == 0; }
+
+		/**
+		 * Render a list of triangles using a texture. Colour and alpha
+		 * modulation is done per vertex (SetColourMod and SetAlphaMod are
+		 * ignored).
+		 *
+		 * \param vertices Vertices.
+		 * \param num_vertices Number of vertices.
+		 * \return true on success, or false if the operation is not supported
+		 */
+		inline bool RenderGeometry(const Vertex* vertices, int num_vertices)
+			{ return SDL_RenderGeometry(renderer.get(), texture.get(), (const SDL_Vertex*)vertices, num_vertices, NULL, 0) == 0; }
+
+		/**
+		 * Render a list of triangles using a texture. Colour and alpha
+		 * modulation is done per vertex (SetColourMod and SetAlphaMod are
+		 * ignored).
+		 *
+		 * \param vertices Vertices.
+		 * \return true on success, or false if the operation is not supported
+		 */
+		template <const int num_vertices>
+		inline bool RenderGeometry(const Vertex(&vertices)[num_vertices])
+			{ return SDL_RenderGeometry(renderer.get(), texture.get(), (const SDL_Vertex*)vertices, num_vertices, NULL, 0) == 0; }
+
+		/**
+		 * Render a list of triangles using a texture. Colour and alpha
+		 * modulation is done per vertex (SetColourMod and SetAlphaMod are
+		 * ignored).
+		 *
+		 * \param vertices Vertices.
+		 * \return true on success, or false if the operation is not supported
+		 */
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<Vertex, T>::is_continuous_container>>
+		inline bool RenderGeometry(const T& vertices)
+			{ return SDL_RenderGeometry(renderer.get(), texture.get(), (const SDL_Vertex*)vertices.data(), (int)vertices.size(), NULL, 0) == 0; }
+
+		/**
+		 * Render a list of triangles using a texture, and optionally indices into the
+		 * vertex arrays. Color and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
+		 *
+		 * \param xy Vertex positions
+		 * \param xy_stride Byte size to move from one element to the next element
+		 * \param colour Vertex colours (as Colour)
+		 * \param colour_stride Byte size to move from one element to the next element
+		 * \param uv Vertex normalized texture coordinates
+		 * \param uv_stride Byte size to move from one element to the next element
+		 * \param num_vertices Number of vertices.
+		 * \param indices (optional) An array of indices into the 'vertices' arrays,
+		 *                if NULL all vertices will be rendered in sequential order.
+		 * \param num_indices Number of indices.
+		 * \param size_indices Index size: 1 (byte), 2 (short), 4 (int)
+		 * \return true on success, or false if the operation is not supported
+		 */
+		inline bool RenderGeometryRaw(
+			const float* xy, int xy_stride,
+			const Colour* colour, int colour_stride,
+			const float* uv, int uv_stride,
+			int num_vertices,
+			const void* indices, int num_indices,
+			int size_indices)
+		{
+			return SDL_RenderGeometryRaw(
+				renderer.get(),
+				texture.get(),
+				xy, xy_stride,
+				colour, colour_stride,
+				uv, uv_stride,
+				num_vertices,
+				indices, num_indices,
+				size_indices
+			) == 0;
+		}
+
+		/**
+		 * Render a list of triangles using a texture and indices into the
+		 * vertex arrays. Color and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
+		 *
+		 * \param xy Vertex positions
+		 * \param xy_stride Byte size to move from one element to the next element
+		 * \param colour Vertex colours (as Colour)
+		 * \param colour_stride Byte size to move from one element to the next element
+		 * \param uv Vertex normalized texture coordinates
+		 * \param uv_stride Byte size to move from one element to the next element
+		 * \param num_vertices Number of vertices.
+		 * \param indices An array of indices into the 'vertices' arrays.
+		 * \return true on success, or false if the operation is not supported
+		 */
+		template <
+			typename t,
+			const int num_indices,
+			typename = typename std::enable_if_t<
+				sizeof(t) == 1 ||
+				sizeof(t) == 2 ||
+				sizeof(t) == 4
+			>>
+		inline bool RenderGeometryRaw(
+			const float* xy, int xy_stride,
+			const Colour* colour, int colour_stride,
+			const float* uv, int uv_stride,
+			int num_vertices,
+			const t(&indices)[num_indices])
+		{
+			return SDL_RenderGeometryRaw(
+				renderer.get(),
+				texture.get(),
+				xy, xy_stride,
+				colour, colour_stride,
+				uv, uv_stride,
+				num_vertices,
+				indices, num_indices,
+				sizeof(t)
+			) == 0;
+		}
+
+		/**
+		 * Render a list of triangles using a texture and indices into the
+		 * vertex arrays. Color and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
+		 *
+		 * \param xy Vertex positions
+		 * \param xy_stride Byte size to move from one element to the next element
+		 * \param colour Vertex colours (as Colour)
+		 * \param colour_stride Byte size to move from one element to the next element
+		 * \param uv Vertex normalized texture coordinates
+		 * \param uv_stride Byte size to move from one element to the next element
+		 * \param num_vertices Number of vertices.
+		 * \param indices An container of indices into the 'vertices' arrays.
+		 * \return true on success, or false if the operation is not supported
+		 */
+		template <
+			typename t,
+			typename T,
+			typename = typename std::enable_if_t<
+				ContinuousContainer_traits<t, T>::is_continuous_container &&
+				(sizeof(t) == 1 || sizeof(t) == 2 || sizeof(t) == 4)
+			>>
+		inline bool RenderGeometryRaw(
+			const float* xy, int xy_stride,
+			const Colour* colour, int colour_stride,
+			const float* uv, int uv_stride,
+			int num_vertices,
+			const T& indices)
+		{
+			return SDL_RenderGeometryRaw(
+				renderer.get(),
+				texture.get(),
+				xy, xy_stride,
+				colour, colour_stride,
+				uv, uv_stride,
+				num_vertices,
+				indices.data(), (int)indices.size(),
+				sizeof(T)
+			) == 0;
+		}
+
+		/**
+		 * Render a list of triangles using a texture, and optionally indices into the
+		 * vertex arrays. Color and alpha modulation is done per vertex
+		 * (SetColourMod and SetAlphaMod are ignored).
+		 *
+		 * \param xy Vertex positions
+		 * \param xy_stride Byte size to move from one element to the next element
+		 * \param colour Vertex colours (as Colour)
+		 * \param colour_stride Byte size to move from one element to the next element
+		 * \param uv Vertex normalized texture coordinates
+		 * \param uv_stride Byte size to move from one element to the next element
+		 * \param num_vertices Number of vertices.
+		 * \return true on success, or false if the operation is not supported
+		 */
+		inline bool RenderGeometryRaw(
+			const float* xy, int xy_stride,
+			const Colour* colour, int colour_stride,
+			const float* uv, int uv_stride,
+			int num_vertices)
+		{
+			return SDL_RenderGeometryRaw(
+				renderer.get(),
+				texture.get(),
+				xy, xy_stride,
+				colour, colour_stride,
+				uv, uv_stride,
+				num_vertices,
+				NULL, 0, 0
+			) == 0;
+		}
+#endif
+
+#if SDL_VERSION_ATLEAST(2, 0, 10)
+		/**
+		 *  \brief    Copy a portion of the texture to the current rendering target.
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyF(const Rect& src, const FRect& dst);
+
+		/**
+		 *  \brief    Copy the texture to the current rendering target.
+		 *
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyF(const FRect& dst);
+
+		/**
+		 *  \brief    Copy a portion of the texture to the entire current rendering target.
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyF_Fill(const Rect& src);
+
+		/**
+		 *  \brief    Copy the texture to the entire current rendering target.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyF_Fill();
+
+		/**
+		 *  \brief    Copy a portion of the texture to the current rendering target.
+		 *
+		 *  \param    srcrect: A pointer to the source rectangle, or NULL for the entire
+		 *                     texture.
+		 *  \param    dstrect: A pointer to the destination rectangle, or NULL for the
+		 *                     entire rendering target.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyF(const Rect* src, const FRect* dst);
+
+		/**
+		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by an angle around the given center.
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated.
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyExF(const Rect& src, const FRect& dst, const FPoint& center, double angle = 0.0, Flip flipType = Flip::NONE);
+
+		/**
+		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyExF(const Rect& src, const FRect& dst, double angle = 0.0, Flip flipType = Flip::NONE);
+
+		/**
+		 *  \brief    Copy the texture to the current rendering target, rotating it by an angle around the given center.
+		 *
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated.
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyExF(const FRect& dst, const FPoint& center, double angle = 0.0, Flip flipType = Flip::NONE);
+
+		/**
+		 *  \brief    Copy the texture to the current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2
+		 *
+		 *  \param    dstrect: A reference to the destination rectangle.
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyExF(const FRect& dst, double angle = 0.0, Flip flipType = Flip::NONE);
+
+		/**
+		 *  \brief    Copy a portion of the texture to the entire current rendering target, rotating it by an angle around the given center
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *  \param    center:  A reference to a point indicating the point around which dstrect will be rotated.
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyExF_Fill(const Rect& src, const FPoint& center, double angle = 0.0, Flip flipType = Flip::NONE);
+
+		/**
+		 *  \brief    Copy a portion of the texture to the entire current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
+		 *
+		 *  \param    srcrect: A reference to the source rectangle.
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:    A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyExF_Fill(const Rect& src, double angle = 0.0, Flip flipType = Flip::NONE);
+
+		/**
+		 *  \brief    Copy the texture to the entire current rendering target, rotating it by an angle around the given center.
+		 *
+		 *  \param    center: A reference to a point indicating the point around which dstrect will be rotated.
+		 *  \param    angle:  An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:   A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyExF_Fill(const FPoint& center, double angle = 0.0, Flip flipType = Flip::NONE);
+
+		/**
+		 *  \brief    Copy the texture to the entire current rendering target, rotating it by an angle around dstrect.w/2, dstrect.h/2.
+		 *
+		 *  \param    angle: An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction
+		 *  \param    flip:  A Flip value stating which flipping actions should be performed on the texture
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyExF_Fill(double angle = 0.0, Flip flipType = Flip::NONE);
+
+		/**
+		 *  \brief    Copy a portion of the texture to the current rendering target, rotating it by angle around the given center.
+		 *
+		 *  \param    srcrect: A pointer to the source rectangle, or NULL for the entire texture.
+		 *  \param    dstrect: A pointer to the destination rectangle, or NULL for the entire rendering target.
+		 *  \param    center:  A pointer to a point indicating the point around which dstrect will be rotated (if NULL, rotation will be done around dstrect.w/2, dstrect.h/2).
+		 *  \param    angle:   An angle in degrees that indicates the rotation that will be applied to dstrect, rotating it in a clockwise direction.
+		 *  \param    flip:    An Flip value stating which flipping actions should be performed on the texture.
+		 *
+		 *  \return   true on success, or false on error
+		 */
+		inline bool CopyExF(const Rect* src, const FRect* dst, const FPoint* center, double angle = 0.0, Flip flipType = Flip::NONE);
+#endif
+
+#pragma endregion 
+
 	};
+
+	inline bool Texture::Copy      (const Rect* src, const  Rect* dst) { return SDL_RenderCopy (renderer.get(), texture.get(), (SDL_Rect*)src, ( SDL_Rect*)dst) == 0; }
+	inline bool Texture::Copy      (const Rect& src, const  Rect& dst) { return SDL_RenderCopy (renderer.get(), texture.get(), &src.rect, &dst.rect) == 0; }
+	inline bool Texture::Copy      (                 const  Rect& dst) { return SDL_RenderCopy (renderer.get(), texture.get(), NULL,      &dst.rect) == 0; }
+	inline bool Texture::Copy_Fill (const Rect& src                  ) { return SDL_RenderCopy (renderer.get(), texture.get(), &src.rect, NULL     ) == 0; }
+	inline bool Texture::Copy_Fill (                                 ) { return SDL_RenderCopy (renderer.get(), texture.get(), NULL,      NULL     ) == 0; }
+
+	inline bool Texture::CopyEx      (const Rect* src, const  Rect* dst, const  Point* center, double angle, Flip flipType) { return SDL_RenderCopyEx (renderer.get(), texture.get(), (SDL_Rect*)src, ( SDL_Rect*)dst, angle, ( SDL_Point*)center, (SDL_RendererFlip)flipType) == 0; }
+	inline bool Texture::CopyEx      (const Rect& src, const  Rect& dst, const  Point& center, double angle, Flip flipType) { return SDL_RenderCopyEx (renderer.get(), texture.get(), &src.rect, &dst.rect, angle, &center.point, (SDL_RendererFlip)flipType) == 0; }
+	inline bool Texture::CopyEx      (const Rect& src, const  Rect& dst,                       double angle, Flip flipType) { return SDL_RenderCopyEx (renderer.get(), texture.get(), &src.rect, &dst.rect, angle, NULL,          (SDL_RendererFlip)flipType) == 0; }
+	inline bool Texture::CopyEx      (                 const  Rect& dst, const  Point& center, double angle, Flip flipType) { return SDL_RenderCopyEx (renderer.get(), texture.get(), NULL,      &dst.rect, angle, &center.point, (SDL_RendererFlip)flipType) == 0; }
+	inline bool Texture::CopyEx      (                 const  Rect& dst,                       double angle, Flip flipType) { return SDL_RenderCopyEx (renderer.get(), texture.get(), NULL,      &dst.rect, angle, NULL,          (SDL_RendererFlip)flipType) == 0; }
+	inline bool Texture::CopyEx_Fill (const Rect& src,                   const  Point& center, double angle, Flip flipType) { return SDL_RenderCopyEx (renderer.get(), texture.get(), &src.rect, NULL,      angle, &center.point, (SDL_RendererFlip)flipType) == 0; }
+	inline bool Texture::CopyEx_Fill (const Rect& src,                                         double angle, Flip flipType) { return SDL_RenderCopyEx (renderer.get(), texture.get(), &src.rect, NULL,      angle, NULL,          (SDL_RendererFlip)flipType) == 0; }
+	inline bool Texture::CopyEx_Fill (                                   const  Point& center, double angle, Flip flipType) { return SDL_RenderCopyEx (renderer.get(), texture.get(), NULL,      NULL,      angle, &center.point, (SDL_RendererFlip)flipType) == 0; }
+	inline bool Texture::CopyEx_Fill (                                                         double angle, Flip flipType) { return SDL_RenderCopyEx (renderer.get(), texture.get(), NULL,      NULL,      angle, NULL,          (SDL_RendererFlip)flipType) == 0; }
+
+#if SDL_VERSION_ATLEAST(2, 0, 10)
+	inline bool Texture::CopyF     (const Rect* src, const FRect* dst) { return SDL_RenderCopyF(renderer.get(), texture.get(), (SDL_Rect*)src, (SDL_FRect*)dst) == 0; }
+	inline bool Texture::CopyF     (const Rect& src, const FRect& dst) { return SDL_RenderCopyF(renderer.get(), texture.get(), &src.rect, &dst.rect) == 0; }
+	inline bool Texture::CopyF     (                 const FRect& dst) { return SDL_RenderCopyF(renderer.get(), texture.get(), NULL,      &dst.rect) == 0; }
+	inline bool Texture::CopyF_Fill(const Rect& src                  ) { return SDL_RenderCopyF(renderer.get(), texture.get(), &src.rect, NULL     ) == 0; }
+	inline bool Texture::CopyF_Fill(                                 ) { return SDL_RenderCopyF(renderer.get(), texture.get(), NULL,      NULL     ) == 0; }
+
+	inline bool Texture::CopyExF     (const Rect* src, const FRect* dst, const FPoint* center, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.get(), texture.get(), (SDL_Rect*)src, (SDL_FRect*)dst, angle, (SDL_FPoint*)center, (SDL_RendererFlip)flipType) == 0; }
+	inline bool Texture::CopyExF     (const Rect& src, const FRect& dst, const FPoint& center, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.get(), texture.get(), &src.rect, &dst.rect, angle, &center.point, (SDL_RendererFlip)flipType) == 0; }
+	inline bool Texture::CopyExF     (const Rect& src, const FRect& dst,                       double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.get(), texture.get(), &src.rect, &dst.rect, angle, NULL,          (SDL_RendererFlip)flipType) == 0; }
+	inline bool Texture::CopyExF     (                 const FRect& dst, const FPoint& center, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.get(), texture.get(), NULL,      &dst.rect, angle, &center.point, (SDL_RendererFlip)flipType) == 0; }
+	inline bool Texture::CopyExF     (                 const FRect& dst,                       double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.get(), texture.get(), NULL,      &dst.rect, angle, NULL,          (SDL_RendererFlip)flipType) == 0; }
+	inline bool Texture::CopyExF_Fill(const Rect& src,                   const FPoint& center, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.get(), texture.get(), &src.rect, NULL,      angle, &center.point, (SDL_RendererFlip)flipType) == 0; }
+	inline bool Texture::CopyExF_Fill(const Rect& src,                                         double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.get(), texture.get(), &src.rect, NULL,      angle, NULL,          (SDL_RendererFlip)flipType) == 0; }
+	inline bool Texture::CopyExF_Fill(                                   const FPoint& center, double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.get(), texture.get(), NULL,      NULL,      angle, &center.point, (SDL_RendererFlip)flipType) == 0; }
+	inline bool Texture::CopyExF_Fill(                                                         double angle, Flip flipType) { return SDL_RenderCopyExF(renderer.get(), texture.get(), NULL,      NULL,      angle, NULL,          (SDL_RendererFlip)flipType) == 0; }
+#endif
+
+	inline bool Renderer::SetTarget  (Texture& texture) { return SDL_SetRenderTarget(renderer.get(), texture.texture.get()) == 0; }
+	inline bool Renderer::ClearTarget(                ) { return SDL_SetRenderTarget(renderer.get(), NULL                 ) == 0; }
+
+	inline Texture Renderer::GetTarget()
+	{
+		return Texture::FromUnownedPtr(*this, SDL_GetRenderTarget(renderer.get()));
+	}
+
+	inline bool Renderer::GetTarget(Texture& target)
+	{
+		SDL_Texture* const txt = SDL_GetRenderTarget(renderer.get());
+
+		if (txt == NULL) 
+		{
+			return false;
+		}
+			
+		target = Texture::FromUnownedPtr(*this, txt);
+		return true;
+	}
 
 	/**
 	 *  \brief    Create a window and default renderer
@@ -1400,83 +2867,98 @@ namespace SDL
 	 *  \param    renderer:     A reference filled with the renderer, or NULL on error
 	 *  \param    window_flags: The flags used to create the window
 	 *
-	 *  \return   0 on success, or -1 on error
+	 *  \return   true on success, or false on error
 	 */
-	int CreateWindowAndRenderer(const Point& size, Window& window, Renderer& renderer, Uint32 window_flags = SDL_WINDOW_SHOWN & SDL_WINDOW_RESIZABLE);
+	inline bool CreateWindowAndRenderer(const Point& size, Window& window, Renderer& renderer, Uint32 window_flags = SDL_WINDOW_SHOWN & SDL_WINDOW_RESIZABLE)
+	{
+		SDL_Window* w;
+		SDL_Renderer* r;
+		if (SDL_CreateWindowAndRenderer(size.w, size.h, window_flags, &w, &r) != 0)
+		{
+			renderer = Renderer::FromUnownedPtr(NULL);
+			window = Window::FromUnownedPtr(NULL);
+			return false;
+		}
+		renderer = Renderer::FromPtr(r);
+		window = Window::FromPtr(w);
+		return true;
+	}
 
-	constexpr Colour VERY_LIGHT_RED = { 255, 191, 191, 255 };
-	constexpr Colour VERY_LIGHT_ORANGE = { 255, 223, 191, 255 };
-	constexpr Colour VERY_LIGHT_YELLOW = { 255, 255, 191, 255 };
-	constexpr Colour VERY_LIGHT_LIME = { 223, 255, 191, 255 };
-	constexpr Colour VERY_LIGHT_GREEN = { 191, 255, 191, 255 };
+	constexpr Colour VERY_LIGHT_RED       = { 255, 191, 191, 255 };
+	constexpr Colour VERY_LIGHT_ORANGE    = { 255, 223, 191, 255 };
+	constexpr Colour VERY_LIGHT_YELLOW    = { 255, 255, 191, 255 };
+	constexpr Colour VERY_LIGHT_LIME      = { 223, 255, 191, 255 };
+	constexpr Colour VERY_LIGHT_GREEN     = { 191, 255, 191, 255 };
 	constexpr Colour VERY_LIGHT_TURQUOISE = { 191, 255, 223, 255 };
-	constexpr Colour VERY_LIGHT_CYAN = { 191, 255, 255, 255 };
-	constexpr Colour VERY_LIGHT_AZURE = { 191, 223, 255, 255 };
-	constexpr Colour VERY_LIGHT_BLUE = { 191, 191, 255, 255 };
-	constexpr Colour VERY_LIGHT_VIOLET = { 223, 191, 255, 255 };
-	constexpr Colour VERY_LIGHT_MAGENTA = { 255, 191, 255, 255 };
+	constexpr Colour VERY_LIGHT_CYAN      = { 191, 255, 255, 255 };
+	constexpr Colour VERY_LIGHT_AZURE     = { 191, 223, 255, 255 };
+	constexpr Colour VERY_LIGHT_BLUE      = { 191, 191, 255, 255 };
+	constexpr Colour VERY_LIGHT_VIOLET    = { 223, 191, 255, 255 };
+	constexpr Colour VERY_LIGHT_MAGENTA   = { 255, 191, 255, 255 };
 	constexpr Colour VERY_LIGHT_RASPBERRY = { 255, 191, 223, 255 };
 
-	constexpr Colour LIGHT_RED = { 255, 128, 128, 255 };
-	constexpr Colour LIGHT_ORANGE = { 255, 191, 128, 255 };
-	constexpr Colour LIGHT_YELLOW = { 255, 255, 128, 255 };
-	constexpr Colour LIGHT_LIME = { 191, 255, 128, 255 };
-	constexpr Colour LIGHT_GREEN = { 128, 255, 128, 255 };
-	constexpr Colour LIGHT_TURQUOISE = { 128, 255, 191, 255 };
-	constexpr Colour LIGHT_CYAN = { 128, 255, 255, 255 };
-	constexpr Colour LIGHT_AZURE = { 128, 191, 255, 255 };
-	constexpr Colour LIGHT_BLUE = { 128, 128, 255, 255 };
-	constexpr Colour LIGHT_VIOLET = { 191, 128, 255, 255 };
-	constexpr Colour LIGHT_MAGENTA = { 255, 128, 255, 255 };
-	constexpr Colour LIGHT_RASPBERRY = { 255, 128, 191, 255 };
+	constexpr Colour LIGHT_RED            = { 255, 128, 128, 255 };
+	constexpr Colour LIGHT_ORANGE         = { 255, 191, 128, 255 };
+	constexpr Colour LIGHT_YELLOW         = { 255, 255, 128, 255 };
+	constexpr Colour LIGHT_LIME           = { 191, 255, 128, 255 };
+	constexpr Colour LIGHT_GREEN          = { 128, 255, 128, 255 };
+	constexpr Colour LIGHT_TURQUOISE      = { 128, 255, 191, 255 };
+	constexpr Colour LIGHT_CYAN           = { 128, 255, 255, 255 };
+	constexpr Colour LIGHT_AZURE          = { 128, 191, 255, 255 };
+	constexpr Colour LIGHT_BLUE           = { 128, 128, 255, 255 };
+	constexpr Colour LIGHT_VIOLET         = { 191, 128, 255, 255 };
+	constexpr Colour LIGHT_MAGENTA        = { 255, 128, 255, 255 };
+	constexpr Colour LIGHT_RASPBERRY      = { 255, 128, 191, 255 };
 
-	constexpr Colour RED = { 255, 0, 0, 255 };
-	constexpr Colour ORANGE = { 255, 128, 0, 255 };
-	constexpr Colour YELLOW = { 255, 255, 0, 255 };
-	constexpr Colour LIME = { 128, 255, 0, 255 };
-	constexpr Colour GREEN = { 0, 255, 0, 255 };
-	constexpr Colour TURQUOISE = { 0, 255, 128, 255 };
-	constexpr Colour CYAN = { 0, 255, 255, 255 };
-	constexpr Colour AZURE = { 0, 128, 255, 255 };
-	constexpr Colour BLUE = { 0, 0, 255, 255 };
-	constexpr Colour VIOLET = { 128, 0, 255, 255 };
-	constexpr Colour MAGENTA = { 255, 0, 255, 255 };
-	constexpr Colour RASPBERRY = { 255, 0, 128, 255 };
+	constexpr Colour RED                  = { 255,   0,   0, 255 };
+	constexpr Colour ORANGE               = { 255, 128,   0, 255 };
+	constexpr Colour YELLOW               = { 255, 255,   0, 255 };
+	constexpr Colour LIME                 = { 128, 255,   0, 255 };
+	constexpr Colour GREEN                = {   0, 255,   0, 255 };
+	constexpr Colour TURQUOISE            = {   0, 255, 128, 255 };
+	constexpr Colour CYAN                 = {   0, 255, 255, 255 };
+	constexpr Colour AZURE                = {   0, 128, 255, 255 };
+	constexpr Colour BLUE                 = {   0,   0, 255, 255 };
+	constexpr Colour VIOLET               = { 128,   0, 255, 255 };
+	constexpr Colour MAGENTA              = { 255,   0, 255, 255 };
+	constexpr Colour RASPBERRY            = { 255,   0, 128, 255 };
 
-	constexpr Colour DARK_RED = { 128, 0, 0, 255 };
-	constexpr Colour DARK_ORANGE = { 128, 64, 0, 255 };
-	constexpr Colour DARK_YELLOW = { 128, 128, 0, 255 };
-	constexpr Colour DARK_LIME = { 64, 128, 0, 255 };
-	constexpr Colour DARK_GREEN = { 0, 128, 0, 255 };
-	constexpr Colour DARK_TURQUOISE = { 0, 128, 64, 255 };
-	constexpr Colour DARK_CYAN = { 0, 128, 128, 255 };
-	constexpr Colour DARK_AZURE = { 0, 64, 128, 255 };
-	constexpr Colour DARK_BLUE = { 0, 0, 128, 255 };
-	constexpr Colour DARK_VIOLET = { 64, 0, 128, 255 };
-	constexpr Colour DARK_MAGENTA = { 128, 0, 128, 255 };
-	constexpr Colour DARK_RASPBERRY = { 128, 0, 64, 255 };
+	constexpr Colour DARK_RED             = { 128,   0,   0, 255 };
+	constexpr Colour DARK_ORANGE          = { 128,  64,   0, 255 };
+	constexpr Colour DARK_YELLOW          = { 128, 128,   0, 255 };
+	constexpr Colour DARK_LIME            = {  64, 128,   0, 255 };
+	constexpr Colour DARK_GREEN           = {   0, 128,   0, 255 };
+	constexpr Colour DARK_TURQUOISE       = {   0, 128,  64, 255 };
+	constexpr Colour DARK_CYAN            = {   0, 128, 128, 255 };
+	constexpr Colour DARK_AZURE           = {   0,  64, 128, 255 };
+	constexpr Colour DARK_BLUE            = {   0,   0, 128, 255 };
+	constexpr Colour DARK_VIOLET          = {  64,   0, 128, 255 };
+	constexpr Colour DARK_MAGENTA         = { 128,   0, 128, 255 };
+	constexpr Colour DARK_RASPBERRY       = { 128,   0,  64, 255 };
 
-	constexpr Colour VERY_DARK_RED = { 64, 0, 0, 255 };
-	constexpr Colour VERY_DARK_ORANGE = { 64, 32, 0, 255 };
-	constexpr Colour VERY_DARK_YELLOW = { 64, 64, 0, 255 };
-	constexpr Colour VERY_DARK_LIME = { 32, 64, 0, 255 };
-	constexpr Colour VERY_DARK_GREEN = { 0, 64, 0, 255 };
-	constexpr Colour VERY_DARK_TURQUOISE = { 0, 64, 32, 255 };
-	constexpr Colour VERY_DARK_CYAN = { 0, 64, 64, 255 };
-	constexpr Colour VERY_DARK_AZURE = { 0, 32, 64, 255 };
-	constexpr Colour VERY_DARK_BLUE = { 0, 0, 64, 255 };
-	constexpr Colour VERY_DARK_VIOLET = { 32, 0, 64, 255 };
-	constexpr Colour VERY_DARK_MAGENTA = { 64, 0, 64, 255 };
-	constexpr Colour VERY_DARK_RASPBERRY = { 64, 0, 32, 255 };
+	constexpr Colour VERY_DARK_RED        = {  64,   0,   0, 255 };
+	constexpr Colour VERY_DARK_ORANGE     = {  64,  32,   0, 255 };
+	constexpr Colour VERY_DARK_YELLOW     = {  64,  64,   0, 255 };
+	constexpr Colour VERY_DARK_LIME       = {  32,  64,   0, 255 };
+	constexpr Colour VERY_DARK_GREEN      = {   0,  64,   0, 255 };
+	constexpr Colour VERY_DARK_TURQUOISE  = {   0,  64,  32, 255 };
+	constexpr Colour VERY_DARK_CYAN       = {   0,  64,  64, 255 };
+	constexpr Colour VERY_DARK_AZURE      = {   0,  32,  64, 255 };
+	constexpr Colour VERY_DARK_BLUE       = {   0,   0,  64, 255 };
+	constexpr Colour VERY_DARK_VIOLET     = {  32,   0,  64, 255 };
+	constexpr Colour VERY_DARK_MAGENTA    = {  64,   0,  64, 255 };
+	constexpr Colour VERY_DARK_RASPBERRY  = {  64,   0,  32, 255 };
 
-	constexpr Colour WHITE = { 255, 255, 255, 255 };
-	constexpr Colour LIGHT_GREY = { 191, 191, 191, 255 };
-	constexpr Colour GREY = { 128, 128, 128, 255 };
-	constexpr Colour DARK_GREY = { 64, 64, 64, 255 };
-	constexpr Colour VERY_DARK_GREY = { 32, 32, 32, 255 };
-	constexpr Colour BLACK = { 0, 0, 0, 255 };
+	constexpr Colour WHITE                = { 255, 255, 255, 255 };
+	constexpr Colour VERY_LIGHT_GREY      = { 223, 223, 223, 255 };
+	constexpr Colour LIGHT_GREY           = { 191, 191, 191, 255 };
+	constexpr Colour GREY                 = { 128, 128, 128, 255 };
+	constexpr Colour DARK_GREY            = {  85,  85,  85, 255 };
+	constexpr Colour VERY_DARK_GREY       = {  43,  43,  43, 255 };
+	constexpr Colour BLACK                = {   0,   0,   0, 255 };
 
-	namespace GL {
+	namespace GL
+	{
 		/**
 		 *  \brief    Bind the texture to the current OpenGL/ES/ES2 context for use with
 		 *            OpenGL instructions.
@@ -1486,7 +2968,8 @@ namespace SDL
 		 *
 		 *  \return   true on success, or false if the operation is not supported
 		 */
-		bool BindTexture(Texture& texture, FPoint& texsize);
+		inline bool BindTexture(Texture& texture, FPoint& texsize)
+			{ return SDL_GL_BindTexture(texture.texture.get(), &texsize.w, &texsize.h) == 0; }
 
 		/**
 		 *  \brief    Unbind a texture from the current OpenGL/ES/ES2 context.
@@ -1495,8 +2978,10 @@ namespace SDL
 		 *
 		 *  \return   true on success, or false if the operation is not supported
 		 */
-		bool UnbindTexture(Texture& texture);
+		inline bool UnbindTexture(Texture& texture)
+			{ return SDL_GL_UnbindTexture(texture.texture.get()) == 0; }
 	}
 }
 
+#endif
 #endif

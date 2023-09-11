@@ -39,8 +39,8 @@
 //#include "locale.hpp"
 //#include "misc.hpp"
 
-#include<input.hpp>
-#include<ray.hpp>
+#include "input.hpp"
+#include "ray.hpp"
 
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 namespace SDL

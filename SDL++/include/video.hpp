@@ -872,23 +872,36 @@ namespace SDL
 		/**
 		 *  \brief    Copy the window surface to the screen.
 		 *
-		 *  \note     error is set to 0 on success, or -1 on error.
+		 *  \note     error is set to trie on success, or false on error.
 		 */
-		inline bool UpdateSurface() { return SDL_UpdateWindowSurface(window.get()) == 0; }
+		inline bool UpdateSurface()
+			{ return SDL_UpdateWindowSurface(window.get()) == 0; }
 
 		/**
 		 *  \brief    Copy a number of rectangles on the window surface to the screen.
 		 *
 		 *  \return   true on success, or false on error.
 		 */
-		inline bool UpdateSurfaceRects(const std::vector<Rect>& rects) { return SDL_UpdateWindowSurfaceRects(window.get(), (const SDL_Rect*)rects.data(), (int)rects.size()) == 0; }
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<Rect, T>::is_continuous_container>>
+		inline bool UpdateSurfaceRects(const T& rects)
+			{ return SDL_UpdateWindowSurfaceRects(window.get(), (const SDL_Rect*)rects.data(), (int)rects.size()) == 0; }
 
 		/**
 		 *  \brief    Copy a number of rectangles on the window surface to the screen.
 		 *
 		 *  \return   true on success, or false on error.
 		 */
-		inline bool UpdateSurfaceRects(const Rect* rects, int numrects) { return SDL_UpdateWindowSurfaceRects(window.get(), (const SDL_Rect*)rects, numrects) == 0; }
+		template <const int length>
+		inline bool UpdateSurfaceRects(const Rect(&rects)[length])
+			{ return SDL_UpdateWindowSurfaceRects(window.get(), (const SDL_Rect*)rects, length) == 0; }
+
+		/**
+		 *  \brief    Copy a number of rectangles on the window surface to the screen.
+		 *
+		 *  \return   true on success, or false on error.
+		 */
+		inline bool UpdateSurfaceRects(const Rect* rects, int numrects)
+			{ return SDL_UpdateWindowSurfaceRects(window.get(), (const SDL_Rect*)rects, numrects) == 0; }
 
 #if SDL_VERSION_ATLEAST(2, 28, 0)
 		/**

@@ -33,9 +33,6 @@
     <ClCompile Include="$(SDLpp)\src\rect.cpp">
       <Filter>SDL++</Filter>
     </ClCompile>
-    <ClCompile Include="$(SDLpp)\src\render.cpp">
-      <Filter>SDL++</Filter>
-    </ClCompile>
     <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

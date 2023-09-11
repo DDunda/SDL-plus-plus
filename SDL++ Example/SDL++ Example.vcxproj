@@ -180,7 +180,6 @@
     <ClCompile Include="..\SDL++\src\mouse.cpp" />
     <ClCompile Include="..\SDL++\src\pixels.cpp" />
     <ClCompile Include="..\SDL++\src\rect.cpp" />
-    <ClCompile Include="..\SDL++\src\render.cpp" />
     <ClCompile Include="Example.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

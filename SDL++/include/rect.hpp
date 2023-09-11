@@ -6,11 +6,12 @@
 
 #include <SDL_rect.h>
 
+#include "container.hpp"
+
 #include <algorithm>
 #include <cmath>
 #include <ostream>
 #include <string>
-#include <vector>
 
 namespace SDL
 {
@@ -259,25 +260,19 @@ namespace SDL
 		inline bool enclosePoints(const FPoint* points, int count, const FRect& clip) { return SDL_EncloseFPoints((const SDL_FPoint*)points, count, &clip.rect, &rect) == SDL_TRUE; }
 		inline bool enclosePoints(const FPoint* points, int count) { return SDL_EncloseFPoints((const SDL_FPoint*)points, count, NULL, &rect) == SDL_TRUE; }
 
-		template <const size_t length>
+		template <const int length>
 		inline bool enclosePoints(const FPoint(&points)[length], const FRect& clip) { return enclosePoints(points, length, clip); }
-		template <const size_t length>
+
+		template <const int length>
 		inline bool enclosePoints(const FPoint(&points)[length]) { return enclosePoints(points, length); }
 
-		template <typename iterator>
-		inline bool enclosePoints(iterator begin, iterator end, const FRect& clip)
-		{
-			std::vector<SDL_FPoint> points;
-			points.insert(points.begin(), begin, end);
-			return enclosePoints(points.data(), points.size(), clip);
-		}
-		template <typename iterator>
-		inline bool enclosePoints(iterator begin, iterator end)
-		{
-			std::vector<SDL_FPoint> points;
-			points.insert(points.begin(), begin, end);
-			return enclosePoints(points.data(), points.size());
-		}
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<FPoint, T>::is_continuous_container>>
+		inline bool enclosePoints(const T& points, const FRect& clip)
+			{ return enclosePoints(points.data(), (int)points.size(), clip); }
+
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<FPoint, T>::is_continuous_container>>
+		inline bool enclosePoints(const T& points)
+			{ return enclosePoints(points.data(), (int)points.size()); }
 #endif
 
 		inline constexpr bool contains(const  Point& v) const { return v.x > pos.x && v.y > pos.y && v.x < pos.x + size.x && v.y < pos.y + size.y; }
@@ -372,25 +367,18 @@ namespace SDL
 		inline bool enclosePoints(const Point* points, int count, const Rect& clip) { return SDL_EnclosePoints((const SDL_Point*)points, count, &clip.rect, &rect) == SDL_TRUE; }
 		inline bool enclosePoints(const Point* points, int count) { return SDL_EnclosePoints((const SDL_Point*)points, count, NULL, &rect) == SDL_TRUE; }
 
-		template <const size_t length>
+		template <const int length>
 		inline bool enclosePoints(const Point(&points)[length], const Rect& clip) { return SDL_EnclosePoints((const SDL_Point*)points, length, &clip.rect, &rect) == SDL_TRUE; }
-		template <const size_t length>
+		template <const int length>
 		inline bool enclosePoints(const Point(&points)[length]) { return SDL_EnclosePoints((const SDL_Point*)points, length, NULL, &rect) == SDL_TRUE; }
+		
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<Point, T>::is_continuous_container>>
+		inline bool enclosePoints(const T& points, const Rect& clip)
+			{ return enclosePoints(points.data(), (int)points.size(), clip); }
 
-		template <typename iterator>
-		inline bool enclosePoints(iterator begin, iterator end, const Rect& clip)
-		{
-			std::vector<SDL_Point> points;
-			points.insert(points.begin(), begin, end);
-			return SDL_EnclosePoints(points.data(), points.size(), &clip.rect, &rect) == SDL_TRUE;
-		}
-		template <typename iterator>
-		inline bool enclosePoints(iterator begin, iterator end)
-		{
-			std::vector<SDL_Point> points;
-			points.insert(points.begin(), begin, end);
-			return SDL_EnclosePoints(points.data(), points.size(), NULL, &rect) == SDL_TRUE;
-		}
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<Point, T>::is_continuous_container>>
+		inline bool enclosePoints(const T& points)
+			{ return enclosePoints(points.data(), (int)points.size()); }
 
 		inline constexpr bool contains(const  Point& v) const { return v.x > pos.x && v.y > pos.y && v.x < pos.x + size.x && v.y < pos.y + size.y; }
 		inline constexpr bool contains(const FPoint& v) const { return v.x > pos.x && v.y > pos.y && v.x < pos.x + size.x && v.y < pos.y + size.y; }

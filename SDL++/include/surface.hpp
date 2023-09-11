@@ -6,6 +6,7 @@
 
 #include <SDL_surface.h>
 
+#include "container.hpp"
 #include "rect.hpp"
 #include "blendmode.hpp"
 #include "pixels.hpp"
@@ -14,22 +15,6 @@
 
 namespace SDL
 {
-	namespace
-	{
-		template <typename t, typename T>
-		struct ContinuousContainer_traits
-		{
-			template <typename T>
-			static auto has_data(T x) -> decltype((t*)x.data(), std::true_type{});
-			static auto has_data(...) -> std::false_type;
-
-			template <typename T>
-			static auto has_size(T x) -> decltype((size_t)x.size(), std::true_type{});
-			static auto has_size(...) -> std::false_type;
-
-			static constexpr bool is_continous_container = decltype(has_data(std::declval<T>()))::value && decltype(has_size(std::declval<T>()))::value;
-		};
-	}
 
 	// The type of function used for surface blitting functions.
 	typedef SDL_blit blit;
@@ -621,12 +606,12 @@ namespace SDL
 		 * \returns true on success or false on failure; call SDL::GetError() for
 		 *          more information.
 		 */
-		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<Rect, T>::is_continous_container>>
-		inline bool FillRects(const T& rects, Uint32 colour            ) { return FillRects(rects.data(), rects.size(), colour); }
-		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<Rect, T>::is_continous_container>>
-		inline bool FillRects(const T& rects, Uint8 r, Uint8 g, Uint8 b) { return FillRects(rects.data(), rects.size(), r, g, b); }
-		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<Rect, T>::is_continous_container>>
-		inline bool FillRects(const T& rects, const Colour& colour     ) { return FillRects(rects.data(), rects.size(), colour); }
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<Rect, T>::is_continuous_container>>
+		inline bool FillRects(const T& rects, Uint32 colour            ) { return FillRects(rects.data(), (int)rects.size(), colour); }
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<Rect, T>::is_continuous_container>>
+		inline bool FillRects(const T& rects, Uint8 r, Uint8 g, Uint8 b) { return FillRects(rects.data(), (int)rects.size(), r, g, b); }
+		template <typename T, typename = typename std::enable_if_t<ContinuousContainer_traits<Rect, T>::is_continuous_container>>
+		inline bool FillRects(const T& rects, const Colour& colour     ) { return FillRects(rects.data(), (int)rects.size(), colour); }
 
 		/**
 		 * Perform a fast fill of a set of rectangles with a specific colour.
@@ -645,11 +630,11 @@ namespace SDL
 		 * \returns true on success or false on failure; call SDL::GetError() for
 		 *          more information.
 		 */
-		template<size_t length, typename = typename std::enable_if_t<length >= 1>>
+		template<const int length, typename = typename std::enable_if_t<length >= 1>>
 		inline bool FillRects(const Rect(&rects)[length], Uint32 colour            ) { return FillRects(rects, length, colour); }
-		template<size_t length, typename = typename std::enable_if_t<length >= 1>>
+		template<const int length, typename = typename std::enable_if_t<length >= 1>>
 		inline bool FillRects(const Rect(&rects)[length], Uint8 r, Uint8 g, Uint8 b) { return FillRects(rects, length, r, g, b); }
-		template<size_t length, typename = typename std::enable_if_t<length >= 1>>
+		template<const int length, typename = typename std::enable_if_t<length >= 1>>
 		inline bool FillRects(const Rect(&rects)[length], const Colour& colour     ) { return FillRects(rects, length, colour); }
 
 		/**

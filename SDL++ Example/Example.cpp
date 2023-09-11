@@ -61,7 +61,8 @@ void Program(int argc, char* argv[])
 
 	// Listeners are easier than Observers since they use lamdas/function objects rather than inheritence.
 	// This is slower at runtime, but a lot faster to write.
-	Listener<const Event&> toggle_visibility(
+	Listener<const Event&> toggle_visibility
+	(
 		[&boxVisible](const Event& e)
 		{
 			if (e.button.button == (Uint8)Button::RIGHT)
@@ -89,6 +90,60 @@ void Program(int argc, char* argv[])
 		Input::GetTypedEventSubject(Event::Type::QUIT)
 	);
 
+#if SDL_VERSION_ATLEAST(2, 0, 18)
+	constexpr Vertex verts1[]
+	{
+		{
+			{0.f,50.f},
+			WHITE,
+			{0.f,0.f}
+		},
+		{
+			{75.f,50.f},
+			WHITE,
+			{0.f,0.f}
+		},
+		{
+			{0.f,125.f},
+			WHITE,
+			{0.f,0.f}
+		}
+	};
+
+	constexpr std::array<Uint8, 3> indices1
+	{
+		0,
+		1,
+		2
+	};
+
+	constexpr Vertex verts2[]
+	{
+		{
+			{0.f,50.f},
+			RED,
+			{0.f,0.f}
+		},
+		{
+			{60.f,50.f},
+			GREEN,
+			{0.f,0.f}
+		},
+		{
+			{0.f,110.f},
+			BLUE,
+			{0.f,0.f}
+		}
+	};
+
+	const std::vector<int> indices2
+	{
+		0,
+		1,
+		2
+	};
+#endif
+
 	for (int frame = 0; running; frame++)
 	{
 		Input::Update();
@@ -96,9 +151,34 @@ void Program(int argc, char* argv[])
 		if (Input::button(Button::LEFT))
 			rect.pos = mouse;
 
-		r.SetDrawColour(VERY_DARK_BLUE).Clear();
-		if(boxVisible) r.SetDrawColour(WHITE).FillRect(rect);
-		r.SetDrawColour(VERY_LIGHT_AZURE).FillRect({ 0, 0, windowSize.w, 50 });
+		r.SetDrawColour(VERY_DARK_BLUE);
+		r.Clear();
+
+#if SDL_VERSION_ATLEAST(2, 0, 18)
+		r.RenderGeometryRaw<Uint8>
+		(
+			(float* )&verts1->position,  sizeof(Vertex),
+			(Colour*)&verts1->colour,    sizeof(Vertex),
+			(float* )&verts1->tex_coord, sizeof(Vertex),
+			sizeof(verts1) / sizeof(Vertex),
+			indices1
+		);
+
+		r.RenderGeometry
+		(
+			verts2,
+			indices2
+		);
+#endif
+
+		if (boxVisible)
+		{
+			r.SetDrawColour(VERY_LIGHT_GREY);
+			r.FillRect(rect);
+		}
+
+		r.SetDrawColour(VERY_LIGHT_AZURE);
+		r.FillRect({ 0, 0, windowSize.w, 50 });
 
 		r.Present();
 

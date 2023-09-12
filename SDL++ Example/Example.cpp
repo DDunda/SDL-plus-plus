@@ -59,7 +59,7 @@ void Program(int argc, char* argv[])
 	bool boxVisible = false;
 	bool running = true;
 
-	// Listeners are easier than Observers since they use lamdas/function objects rather than inheritence.
+	// Listeners are easier than Observers since they use lamdas/function objects rather than inheritance.
 	// This is slower at runtime, but a lot faster to write.
 	Listener<const Event&> toggle_visibility
 	(

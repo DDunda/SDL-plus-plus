@@ -183,6 +183,7 @@
     <ClInclude Include="include\events.hpp" />
     <ClInclude Include="include\hidapi.hpp" />
     <ClInclude Include="include\hints.hpp" />
+    <ClInclude Include="include\rwops.hpp" />
     <ClInclude Include="include\SDL_image.hpp" />
     <ClInclude Include="include\pixels.hpp" />
     <ClInclude Include="include\ray.hpp" />

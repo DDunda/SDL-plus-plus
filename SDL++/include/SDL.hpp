@@ -28,7 +28,7 @@
 //#include "mutex.hpp"
 //#include "power.hpp"
 #include "render.hpp"
-//#include "rwops.hpp"
+#include "rwops.hpp"
 //#include "sensor.hpp"
 #include "shape.hpp"
 //#include "system.hpp"

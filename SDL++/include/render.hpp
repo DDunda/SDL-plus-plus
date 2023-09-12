@@ -1493,7 +1493,7 @@ namespace SDL
 		 *  \note     If the window associated with the renderer is resized, the viewport is automatically reset.
 		 */
 		inline bool SetViewport(const Rect& rect)
-			{ SDL_RenderSetViewport(renderer.get(), &rect.rect) == 0; }
+			{ return SDL_RenderSetViewport(renderer.get(), &rect.rect) == 0; }
 
 		/**
 		 *  \brief    Sets the drawing area for rendering to the current target.

@@ -8,6 +8,7 @@
 
 #include "container.hpp"
 #include "rect.hpp"
+#include "rwops.hpp"
 #include "blendmode.hpp"
 #include "pixels.hpp"
 
@@ -107,8 +108,9 @@ namespace SDL
 		 * \returns a pointer to a new SDL_Surface structure or NULL if there was an
 		 *          error; call SDL::GetError() for more information.
 		 */
-		inline Surface(SDL_RWops* src, bool freesrc)
-			: Surface(MakeSharedPtr(SDL_LoadBMP_RW(src, freesrc))) {}
+		inline Surface(RWops& src, bool freesrc)
+			: Surface(MakeSharedPtr(SDL_LoadBMP_RW((SDL_RWops*)src, freesrc)))
+			{ if (freesrc) (SDL_RWops*&)src = NULL; }
 
 		// Load a surface from a file.
 		inline Surface(const char* file       ) : Surface(MakeSharedPtr(SDL_LoadBMP(file))) {}
@@ -169,9 +171,11 @@ namespace SDL
 		 * \returns true on success or false on failure; call SDL::GetError() for more
 		 *          information.
 		 */
-		inline bool SaveBMP_RW(SDL_RWops* dst, bool freedst)
+		inline bool SaveBMP_RW(RWops& dst, bool freedst)
 		{
-			return SDL_SaveBMP_RW(surface.get(), dst, freedst) == 0;
+			SDL_RWops* const ptr = (SDL_RWops*)dst;
+			if (freedst) (SDL_RWops*&)dst = NULL;
+			return SDL_SaveBMP_RW(surface.get(), ptr, freedst) == 0;
 		}
 
 		// Save a surface to a file.

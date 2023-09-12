@@ -5,6 +5,7 @@
 #pragma once
 
 #include <SDL_audio.h>
+#include "rwops.hpp"
 
 #include <memory>
 
@@ -684,7 +685,7 @@ namespace SDL
 		 *  \param audio_len A pointer filled with the length of the audio data buffer in bytes
 		 *  \return NULL on error, or non-NULL on success.
 		 */
-		WAV(SDL_RWops* src, int freesrc);
+		WAV(RWops& src, int freesrc);
 		/**
 		 *  Loads a WAV from a file.
 		 *  Compatibility convenience function.

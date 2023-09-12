@@ -98,9 +98,11 @@ namespace SDL
 #pragma region Constructors
 
 	WAV::WAV(std::shared_ptr<WAVData> data) : wav_data(data) {}
-	WAV::WAV(SDL_RWops* src, int freesrc) {
+	WAV::WAV(RWops& src, int freesrc) {
+		SDL_RWops* const ptr = (SDL_RWops*)src;
+		if (freesrc) (SDL_RWops*&)src = NULL;
 		WAVData data;
-		if (SDL_LoadWAV_RW(src, freesrc, &data.spec, &data.audio_buf, &data.audio_len) == NULL) {
+		if (SDL_LoadWAV_RW(ptr, freesrc, &data.spec, &data.audio_buf, &data.audio_len) == NULL) {
 			wav_data = std::shared_ptr<WAVData>(nullptr);
 		}
 		else {

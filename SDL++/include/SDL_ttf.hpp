@@ -5,6 +5,7 @@
 #pragma once
 
 #include "rect.hpp"
+#include "rwops.hpp"
 #include "version.hpp"
 #include "video.hpp"
 
@@ -221,8 +222,9 @@ namespace SDL::TTF
 		 * \param ptsize point size to use for the newly-opened font.
 		 * \returns a valid Font, or NULL on error.
 		 */
-		inline Font(SDL_RWops* src, bool freesrc, int ptsize)
-			: Font(MakeSharedPtr(TTF_OpenFontRW(src, freesrc, ptsize))) {}
+		inline Font(RWops& src, bool freesrc, int ptsize)
+			: Font(MakeSharedPtr(TTF_OpenFontRW((SDL_RWops*)src, freesrc, ptsize)))
+			{ if (freesrc) (SDL_RWops*&)src = NULL; }
 
 		/**
 		 * Create a font from an SDL_RWops, using a specified face index.
@@ -246,8 +248,9 @@ namespace SDL::TTF
 		 * \param index index of the face in the font file.
 		 * \returns a valid Font, or NULL on error.
 		 */
-		inline Font(SDL_RWops* src, bool freesrc, int ptsize, long index)
-			: Font(MakeSharedPtr(TTF_OpenFontIndexRW(src, freesrc, ptsize, index))) {}
+		inline Font(RWops& src, bool freesrc, int ptsize, long index)
+			: Font(MakeSharedPtr(TTF_OpenFontIndexRW((SDL_RWops*)src, freesrc, ptsize, index)))
+			{ if (freesrc) (SDL_RWops*&)src = NULL; }
 
 #if SDL_TTF_VERSION_ATLEAST(2,0,18)
 		/**
@@ -316,8 +319,9 @@ namespace SDL::TTF
 		 * \param vdpi the target vertical DPI.
 		 * \returns a valid Font, or NULL on error.
 		 */
-		inline Font(SDL_RWops* src, bool freesrc, int ptsize, unsigned int hdpi, unsigned int vdpi)
-			: Font(MakeSharedPtr(TTF_OpenFontDPIRW(src, freesrc, ptsize, hdpi, vdpi))) {}
+		inline Font(RWops& src, bool freesrc, int ptsize, unsigned int hdpi, unsigned int vdpi)
+			: Font(MakeSharedPtr(TTF_OpenFontDPIRW((SDL_RWops*)src, freesrc, ptsize, hdpi, vdpi)))
+			{ if (freesrc) (SDL_RWops*&)src = NULL; }
 
 		/**
 		 * Opens a font from an SDL_RWops with target resolutions (in DPI).
@@ -345,8 +349,9 @@ namespace SDL::TTF
 		 * \param vdpi the target vertical DPI.
 		 * \returns a valid Font, or NULL on error.
 		 */
-		inline Font(SDL_RWops* src, bool freesrc, int ptsize, long index, unsigned int hdpi, unsigned int vdpi)
-			: Font(MakeSharedPtr(TTF_OpenFontIndexDPIRW(src, freesrc, ptsize, index, hdpi, vdpi))) {}
+		inline Font(RWops& src, bool freesrc, int ptsize, long index, unsigned int hdpi, unsigned int vdpi)
+			: Font(MakeSharedPtr(TTF_OpenFontIndexDPIRW((SDL_RWops*)src, freesrc, ptsize, index, hdpi, vdpi)))
+			{ if (freesrc) (SDL_RWops*&)src = NULL; }
 
 
 		/**

@@ -6,7 +6,8 @@
 
 #include "audio.hpp"
 #include "container.hpp"
-#include "error.hpp""
+#include "error.hpp"
+#include "rwops.hpp"
 #include "version.hpp"
 
 #include <memory>
@@ -665,8 +666,12 @@ namespace SDL::MIX
 		 *                to leave it open.
 		 * \returns a new chunk, or NULL on error.
 		 */
-		inline static Chunk LoadWav(SDL_RWops* src, bool freesrc)
-			{ return Chunk::FromPtr(Mix_LoadWAV_RW(src, freesrc)); }
+		inline static Chunk LoadWav(RWops& src, bool freesrc)
+		{
+			SDL_RWops* const ptr = (SDL_RWops*)src;
+			if (freesrc) (SDL_RWops*&)src = NULL;
+			return Chunk::FromPtr(Mix_LoadWAV_RW(ptr, freesrc));
+		}
 
 		/**
 		 * Load a supported audio format into a chunk.
@@ -687,7 +692,7 @@ namespace SDL::MIX
 		 * allocate, but SDL_mixer only offers a single "music" channel.
 		 *
 		 * If you would rather use the abstract SDL_RWops interface to load data from
-		 * somewhere other than the filesystem, you can use LoadWAV(SDL_RWops*, int)
+		 * somewhere other than the filesystem, you can use LoadWAV(RWops&, int)
 		 * instead.
 		 *
 		 * \param file the filesystem path to load data from.
@@ -1076,15 +1081,16 @@ namespace SDL::MIX
 		 *
 		 * This function attempts to guess the file format from incoming data. If the
 		 * caller knows the format, or wants to force it, it should use
-		 * Music(SDL_RWops*, MusicType, int) instead.
+		 * Music(RWops&, MusicType, int) instead.
 		 *
 		 * \param src an SDL_RWops that data will be read from.
 		 * \param freesrc non-zero to close/free the SDL_RWops before returning, zero
 		 *                to leave it open.
 		 * \returns a valid Music object on success, or an invalid one on error.
 		 */
-		inline Music(SDL_RWops* src, bool freesrc)
-			: Music(MakeSharedPtr(Mix_LoadMUS_RW(src, freesrc))) {}
+		inline Music(RWops& src, bool freesrc)
+			: Music(MakeSharedPtr(Mix_LoadMUS_RW((SDL_RWops*)src, freesrc)))
+			{ if (freesrc) (SDL_RWops*&)src = NULL; }
 
 		/**
 		 * Load an audio format into a music object, assuming a specific format.
@@ -1118,8 +1124,9 @@ namespace SDL::MIX
 		 *                to leave it open.
 		 * \returns a valid Music object on success, or an invalid one on error.
 		 */
-		inline Music(SDL_RWops* src, MusicType type, bool freesrc)
-			: Music(MakeSharedPtr(Mix_LoadMUSType_RW(src, (Mix_MusicType)type, freesrc))) {}
+		inline Music(RWops& src, MusicType type, bool freesrc)
+			: Music(MakeSharedPtr(Mix_LoadMUSType_RW((SDL_RWops*)src, (Mix_MusicType)type, freesrc)))
+			{ if (freesrc) (SDL_RWops*&)src = NULL; }
 
 		/**
 		 * Get a list of music decoders that this build of SDL_mixer provides.

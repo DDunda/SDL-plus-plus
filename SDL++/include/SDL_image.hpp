@@ -187,8 +187,14 @@ namespace SDL::IMG
 		// This creates a Animation from a IMG_Animation pointer, but does not take ownership of the pointer
 		inline static Animation FromUnownedPtr(IMG_Animation* animation) { return Animation(std::shared_ptr<IMG_Animation>(animation, DontDestroyAnimation)); }
 
-		inline Animation(std::shared_ptr<IMG_Animation> _animation = nullptr)
-			: animation(_animation) {}
+		inline Animation(std::shared_ptr<IMG_Animation> animation)
+			: animation(animation) {}
+
+		inline bool operator==(const Animation& that) { return animation == that.animation; }
+		inline bool operator!=(const Animation& that) { return animation != that.animation; }
+
+		inline bool operator==(const IMG_Animation* that) { return animation.get() == that; }
+		inline bool operator!=(const IMG_Animation* that) { return animation.get() != that; }
 	};
 
 	/**

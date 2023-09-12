@@ -226,7 +226,8 @@ namespace SDL
 		Audio& Unlock();
 	};
 
-	struct AudioDevice {
+	struct AudioDevice
+	{
 		/**
 		 *  SDL Audio Device IDs.
 		 *
@@ -303,6 +304,11 @@ namespace SDL
 		 */
 		AudioDevice(bool iscapture, const AudioSpec& desired);
 
+		inline bool operator==(const AudioDevice& that) { return *ID == *that.ID; }
+		inline bool operator!=(const AudioDevice& that) { return *ID != *that.ID; }
+
+		inline bool operator==(const SDL_AudioDeviceID that) { return *ID == that; }
+		inline bool operator!=(const SDL_AudioDeviceID that) { return *ID != that; }
 
 		// Get the current audio state.
 		AudioStatus GetStatus();
@@ -632,6 +638,9 @@ namespace SDL
 
 		std::shared_ptr<WAVData> wav_data = nullptr;
 
+		inline bool operator==(const WAV& that) { return wav_data == that.wav_data; }
+		inline bool operator!=(const WAV& that) { return wav_data != that.wav_data; }
+
 		WAV(std::shared_ptr<WAVData> data);
 		/**
 		 *  \brief Load the audio data of a WAVE file into memory
@@ -762,6 +771,12 @@ namespace SDL
 			const AudioFormat dst_format,
 			const Uint8 dst_channels,
 			const int dst_rate);
+
+		inline bool operator==(const AudioStream& that) { return stream == that.stream; }
+		inline bool operator!=(const AudioStream& that) { return stream != that.stream; }
+
+		inline bool operator==(const SDL_AudioStream* that) { return stream.get() == that; }
+		inline bool operator!=(const SDL_AudioStream* that) { return stream.get() != that; }
 
 		/**
 		 *  Add data to be converted/resampled to the stream

@@ -159,6 +159,12 @@ namespace SDL
 			return *this;
 		}
 
+		inline bool operator==(const Renderer& that) { return renderer == that.renderer; }
+		inline bool operator!=(const Renderer& that) { return renderer != that.renderer; }
+
+		inline bool operator==(const SDL_Renderer* that) { return renderer.get() == that; }
+		inline bool operator!=(const SDL_Renderer* that) { return renderer.get() != that; }
+
 #pragma endregion 
 
 #pragma region Renderer State
@@ -1712,6 +1718,12 @@ namespace SDL
 			std::swap(texture, that.texture);
 			return *this;
 		}
+
+		inline bool operator==(const Texture& that) { return renderer == that.renderer && texture == that.texture; }
+		inline bool operator!=(const Texture& that) { return renderer != that.renderer || texture != that.texture; }
+
+		inline bool operator==(const SDL_Texture* that) { return texture.get() == that; }
+		inline bool operator!=(const SDL_Texture* that) { return texture.get() != that; }
 
 		/**
 		 *  \brief    Create a texture for a rendering context.

@@ -170,6 +170,12 @@ namespace SDL
 		inline RWops& operator=(RWops&& that) noexcept
 			{ std::swap(rwops, that.rwops); return *this; }
 
+		inline bool operator==(const RWops& that) { return *rwops == *that.rwops; }
+		inline bool operator!=(const RWops& that) { return *rwops != *that.rwops; }
+
+		inline bool operator==(const SDL_RWops* that) { return *rwops == that; }
+		inline bool operator!=(const SDL_RWops* that) { return *rwops != that; }
+
 		inline explicit operator SDL_RWops*&() const { return *rwops; }
 
 		/**

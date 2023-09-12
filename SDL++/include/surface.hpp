@@ -122,6 +122,12 @@ namespace SDL
 		inline Surface& operator=(const Surface& that) { surface = that.surface; };
 		inline Surface& operator=(Surface&& that) noexcept { std::swap(surface, that.surface); return *this; }
 
+		inline bool operator==(const Surface& that) { return surface == that.surface; }
+		inline bool operator!=(const Surface& that) { return surface != that.surface; }
+
+		inline bool operator==(const SDL_Surface* that) { return surface.get() == that; }
+		inline bool operator!=(const SDL_Surface* that) { return surface.get() != that; }
+
 		/**
 		 * Set the palette used by a surface.
 		 *

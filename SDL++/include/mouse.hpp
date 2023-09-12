@@ -78,6 +78,12 @@ namespace SDL
 		// Create a system cursor.
 		Cursor(SystemCursor id);
 
+		inline bool operator==(const Cursor& that) { return cursor == that.cursor; }
+		inline bool operator!=(const Cursor& that) { return cursor != that.cursor; }
+
+		inline bool operator==(const SDL_Cursor* that) { return cursor.get() == that; }
+		inline bool operator!=(const SDL_Cursor* that) { return cursor.get() != that; }
+
 		// Return the active cursor.
 		static Cursor GetCursor();
 

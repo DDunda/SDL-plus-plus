@@ -170,6 +170,12 @@ namespace SDL
 		 */
 		Palette(int ncolours);
 
+		inline bool operator==(const Palette& that) { return palette == that.palette; }
+		inline bool operator!=(const Palette& that) { return palette != that.palette; }
+
+		inline bool operator==(const SDL_Palette* that) { return palette.get() == that; }
+		inline bool operator!=(const SDL_Palette* that) { return palette.get() != that; }
+
 		/**
 		 *  \brief    Set a range of colours in a palette.
 		 *
@@ -227,6 +233,12 @@ namespace SDL
 		std::shared_ptr<SDL_PixelFormat> format = nullptr;
 
 		PixelFormat(std::shared_ptr<SDL_PixelFormat> format);
+
+		inline bool operator==(const PixelFormat& that) { return format == that.format; }
+		inline bool operator!=(const PixelFormat& that) { return format != that.format; }
+
+		inline bool operator==(const SDL_PixelFormat* that) { return format.get() == that; }
+		inline bool operator!=(const SDL_PixelFormat* that) { return format.get() != that; }
 
 		// Create an SDL_PixelFormat structure from a pixel format enum.
 		PixelFormat(Uint32 pixel_format);

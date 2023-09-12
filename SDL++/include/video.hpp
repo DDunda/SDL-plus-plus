@@ -328,6 +328,12 @@ namespace SDL
 			return *this;
 		}
 
+		inline bool operator==(const Window& that) { return window == that.window; }
+		inline bool operator!=(const Window& that) { return window != that.window; }
+
+		inline bool operator==(const SDL_Window* that) { return window.get() == that; }
+		inline bool operator!=(const SDL_Window* that) { return window.get() != that; }
+
 		/**
 		 *  \brief    Create this window with the specified position, dimensions, and flags.
 		 *
@@ -1360,6 +1366,12 @@ namespace SDL
 
 			// Create an OpenGL context for use with an OpenGL window, and make it current.
 			inline GLContext(Window& window) : GLContext(MakeSharedPtr(SDL_GL_CreateContext(window.window.get()))) {}
+
+			inline bool operator==(const GLContext& that) { return context == that.context; }
+			inline bool operator!=(const GLContext& that) { return context != that.context; }
+
+			inline bool operator==(const SDL_GLContext that) { return (SDL_GLContext)context.get() == that; }
+			inline bool operator!=(const SDL_GLContext that) { return (SDL_GLContext)context.get() != that; }
 
 			/**
 			 * Set up an OpenGL context for rendering into an OpenGL window.

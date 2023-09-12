@@ -140,6 +140,12 @@ namespace SDL::HID
 			InfoEnumerator()
 				: device_info(MakeSharedPtr(SDL_hid_enumerate(0, 0))) {}
 
+			inline bool operator==(const InfoEnumerator& that) { return device_info == that.device_info; }
+			inline bool operator!=(const InfoEnumerator& that) { return device_info != that.device_info; }
+
+			inline bool operator==(const Info* that) { return device_info.get() == that; }
+			inline bool operator!=(const Info* that) { return device_info.get() != that; }
+
 			Iterator begin() { return Iterator(device_info, device_info.get()); }
 			Iterator end() { return Iterator(device_info, NULL); }
 		};
@@ -226,6 +232,12 @@ namespace SDL::HID
 			: device(MakeSharedPtr(SDL_hid_open_path(path, false))) {}
 		Device(const std::string& path)
 			: Device(path.c_str()) {}
+
+		inline bool operator==(const Device& that) { return device == that.device; }
+		inline bool operator!=(const Device& that) { return device != that.device; }
+
+		inline bool operator==(const SDL_hid_device* that) { return device.get() == that; }
+		inline bool operator!=(const SDL_hid_device* that) { return device.get() != that; }
 
 		/**
 		 * Write an Output report to a HID device.

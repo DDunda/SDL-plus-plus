@@ -567,9 +567,9 @@ namespace SDL::MIX
 	 *                 count.
 	 * \returns true if the audio device has been opened, false otherwise.
 	 */
-	bool QuerySpec(int* frequency, Uint16* format, int* channels)
+	inline bool QuerySpec(int* frequency, Uint16* format, int* channels)
 		{ return Mix_QuerySpec(frequency, format, channels) == 1; }
-	bool QuerySpec(int& frequency, Uint16& format, int& channels)
+	inline bool QuerySpec(int& frequency, Uint16& format, int& channels)
 		{ return QuerySpec(&frequency, &format, &channels); }
 
 	/**
@@ -637,6 +637,12 @@ namespace SDL::MIX
 
 		inline Chunk(std::shared_ptr<Mix_Chunk> chunk)
 			: chunk(chunk) {}
+
+		inline bool operator==(const Chunk& that) { return chunk == that.chunk; }
+		inline bool operator!=(const Chunk& that) { return chunk != that.chunk; }
+
+		inline bool operator==(const Mix_Chunk* that) { return chunk.get() == that; }
+		inline bool operator!=(const Mix_Chunk* that) { return chunk.get() != that; }
 
 #if SDL_MIXER_VERSION_ATLEAST(2,6,0)
 		/**
@@ -1060,6 +1066,12 @@ namespace SDL::MIX
 
 		inline Music(std::shared_ptr<Mix_Music> music)
 			: music(music) {}
+
+		inline bool operator==(const Music& that) { return music == that.music; }
+		inline bool operator!=(const Music& that) { return music != that.music; }
+
+		inline bool operator==(const Mix_Music* that) { return music.get() == that; }
+		inline bool operator!=(const Mix_Music* that) { return music.get() != that; }
 
 		/**
 		 * Load a supported audio format into a music object.

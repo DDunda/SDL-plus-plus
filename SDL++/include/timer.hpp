@@ -178,6 +178,12 @@ namespace SDL
 			{ id = timer.id; return *this; }
 		inline Timer& operator=(Timer&& timer) noexcept
 			{ std::swap(id, timer.id); return *this; }
+
+		inline bool operator==(const Timer& that) { return id == that.id; }
+		inline bool operator!=(const Timer& that) { return id != that.id; }
+
+		inline bool operator==(const SDL_TimerID that) { return *id == that; }
+		inline bool operator!=(const SDL_TimerID that) { return *id != that; }
 	};
 }
 

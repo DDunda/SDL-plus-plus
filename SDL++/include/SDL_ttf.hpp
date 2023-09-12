@@ -166,6 +166,12 @@ namespace SDL::TTF
 		inline Font(std::shared_ptr<TTF_Font> font)
 			: font(font) {}
 
+		inline bool operator==(const Font& that) { return font == that.font; }
+		inline bool operator!=(const Font& that) { return font != that.font; }
+
+		inline bool operator==(const TTF_Font* that) { return font.get() == that; }
+		inline bool operator!=(const TTF_Font* that) { return font.get() != that; }
+
 		/**
 		 * Create a font from a file, using a specified point size.
 		 *

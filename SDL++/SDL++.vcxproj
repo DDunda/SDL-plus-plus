@@ -175,6 +175,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\guid.hpp" />
     <ClInclude Include="include\audio.hpp" />
     <ClInclude Include="include\blendmode.hpp" />
     <ClInclude Include="include\clipboard.hpp" />

@@ -16,7 +16,7 @@
 #include "events.hpp"
 //#include "filesystem.hpp"
 //#include "gamecontroller.hpp"
-//#include "guid.hpp"
+#include "guid.hpp"
 //#include "haptic.hpp"
 #include "hidapi.hpp"
 #include "hints.hpp"

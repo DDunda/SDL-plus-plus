@@ -89,7 +89,16 @@
     <ClInclude Include="include\rwops.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\gamecontroller.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="include\guid.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\joystick.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sensor.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

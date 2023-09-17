@@ -44,7 +44,9 @@ int main(int argc, char* argv[])
 	{
 		Input::Update();
 
-		r.SetDrawColour(VERY_DARK_BLUE).Clear().Present();
+		r.SetDrawColour(VERY_DARK_BLUE);
+		r.Clear();
+		r.Present();
 
 		Delay(16);
 	}

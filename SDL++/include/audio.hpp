@@ -239,7 +239,7 @@ namespace SDL
 		 */
 		typedef SDL_AudioDeviceID DeviceID;
 
-		// This is custom destructor for smart pointers that DeviceID SDL_Texture through SDL
+		// This is custom destructor for smart pointers that destroys AudioDevices through SDL
 		static void DestroyAudioDevice(DeviceID* ID);
 
 		// This is custom destructor for smart pointers that does not destroy the AudioDevice. This is for pointers you do not own

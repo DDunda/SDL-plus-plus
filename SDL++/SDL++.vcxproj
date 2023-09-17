@@ -176,6 +176,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\guid.hpp" />
+    <ClInclude Include="include\gamecontroller.hpp" />
     <ClInclude Include="include\audio.hpp" />
     <ClInclude Include="include\blendmode.hpp" />
     <ClInclude Include="include\clipboard.hpp" />
@@ -184,6 +185,7 @@
     <ClInclude Include="include\events.hpp" />
     <ClInclude Include="include\hidapi.hpp" />
     <ClInclude Include="include\hints.hpp" />
+    <ClInclude Include="include\joystick.hpp" />
     <ClInclude Include="include\rwops.hpp" />
     <ClInclude Include="include\SDL_image.hpp" />
     <ClInclude Include="include\pixels.hpp" />
@@ -194,6 +196,7 @@
     <ClInclude Include="include\SDL.hpp" />
     <ClInclude Include="include\SDL_mixer.hpp" />
     <ClInclude Include="include\SDL_ttf.hpp" />
+    <ClInclude Include="include\sensor.hpp" />
     <ClInclude Include="include\surface.hpp" />
     <ClInclude Include="include\timer.hpp" />
     <ClInclude Include="include\version.hpp" />

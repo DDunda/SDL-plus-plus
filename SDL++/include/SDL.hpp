@@ -47,13 +47,13 @@ namespace SDL
 {
 	constexpr Uint32 INIT_TIMER          = SDL_INIT_TIMER;
 	constexpr Uint32 INIT_AUDIO          = SDL_INIT_AUDIO;
-	constexpr Uint32 INIT_VIDEO          = SDL_INIT_VIDEO;  /**< SDL_INIT_VIDEO implies SDL_INIT_EVENTS */
-	constexpr Uint32 INIT_JOYSTICK       = SDL_INIT_EVENTS;  /**< SDL_INIT_JOYSTICK implies SDL_INIT_EVENTS */
+	constexpr Uint32 INIT_VIDEO          = SDL_INIT_VIDEO;           /**< SDL_INIT_VIDEO implies SDL_INIT_EVENTS */
+	constexpr Uint32 INIT_JOYSTICK       = SDL_INIT_JOYSTICK;        /**< SDL_INIT_JOYSTICK implies SDL_INIT_EVENTS */
 	constexpr Uint32 INIT_HAPTIC         = SDL_INIT_HAPTIC;
 	constexpr Uint32 INIT_GAMECONTROLLER = SDL_INIT_GAMECONTROLLER;  /**< SDL_INIT_GAMECONTROLLER implies SDL_INIT_JOYSTICK */
 	constexpr Uint32 INIT_EVENTS         = SDL_INIT_EVENTS;
 	constexpr Uint32 INIT_SENSOR         = SDL_INIT_SENSOR;
-	constexpr Uint32 INIT_NOPARACHUTE    = SDL_INIT_NOPARACHUTE;  /**< compatibility; this flag is ignored. */
+	constexpr Uint32 INIT_NOPARACHUTE    = SDL_INIT_NOPARACHUTE;     /**< compatibility; this flag is ignored. */
 	constexpr Uint32 INIT_EVERYTHING     = SDL_INIT_EVERYTHING;
 
 	// This function initializes the subsystems specified by \c flags.

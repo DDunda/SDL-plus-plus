@@ -2622,7 +2622,7 @@ namespace SDL
 				uv, uv_stride,
 				num_vertices,
 				indices.data(), (int)indices.size(),
-				sizeof(T)
+				sizeof(t)
 			) == 0;
 		}
 

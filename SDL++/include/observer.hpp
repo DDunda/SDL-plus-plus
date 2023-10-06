@@ -16,8 +16,6 @@ struct IObserver
 
 	virtual void AddSubject(ISubject<Ts...>& s) = 0;
 	virtual void RemoveSubject(ISubject<Ts...>& s) = 0;
-	virtual void Register(ISubject<Ts...>& s) = 0;
-	virtual void Unregister(ISubject<Ts...>& s) = 0;
 	virtual void Notify(Ts... args) = 0;
 };
 
@@ -28,8 +26,6 @@ struct ISubject
 
 	virtual void AddObserver(IObserver<Ts...>& o) = 0;
 	virtual void RemoveObserver(IObserver<Ts...>& o) = 0;
-	virtual void Register(IObserver<Ts...>& o) = 0;
-	virtual void Unregister(IObserver<Ts...>& o) = 0;
 	virtual void Notify(Ts... args) = 0;
 };
 
@@ -82,7 +78,7 @@ protected:
 	std::function<void(Ts...)> function;
 public:
 	Listener(std::function<void(Ts...)> function) : function(function) {};
-	Listener(std::function<void(Ts...)> function, ISubject<Ts...>& subject) : function(function) { subject.Register(*this); };
+	Listener(std::function<void(Ts...)> function, ISubject<Ts...>& subject) : function(function) { Observer<Ts...>::Register(subject); };
 	virtual void Notify(Ts... args) { function(args...); }
 };
 

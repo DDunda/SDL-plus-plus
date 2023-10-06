@@ -27,9 +27,6 @@
     <ClCompile Include="$(SDLpp)\src\mouse.cpp">
       <Filter>SDL++</Filter>
     </ClCompile>
-    <ClCompile Include="$(SDLpp)\src\pixels.cpp">
-      <Filter>SDL++</Filter>
-    </ClCompile>
     <ClCompile Include="$(SDLpp)\src\rect.cpp">
       <Filter>SDL++</Filter>
     </ClCompile>

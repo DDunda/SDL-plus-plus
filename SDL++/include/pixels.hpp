@@ -141,40 +141,49 @@ namespace SDL
 
 	struct Palette
 	{
+#pragma region Safety
+
 		// This is custom destructor for smart pointers that destroys SDL_Palette through SDL
-		static void DestroyPalette(SDL_Palette* palette);
+		static void DestroyPalette(SDL_Palette* palette) { SDL_FreePalette(palette); }
 
 		// This is custom destructor for smart pointers that does not destroy the Palette. This is for pointers you do not own
-		static void DontDestroyPalette(SDL_Palette* palette);
+		static void DontDestroyPalette(SDL_Palette* palette) {}
 
 		// This creates a smart pointer to an SDL_Palette with a custom destructor
-		static std::shared_ptr<SDL_Palette> MakeSharedPtr(SDL_Palette* palette);
+		static std::shared_ptr<SDL_Palette> MakeSharedPtr(SDL_Palette* palette) { return std::shared_ptr<SDL_Palette>(palette, DestroyPalette); }
 
 		// This creates a Palette from a SDL_Palette pointer, taking ownership of the pointer
-		static Palette FromPtr(SDL_Palette* palette);
+		static Palette FromPtr(SDL_Palette* palette) { return Palette(MakeSharedPtr(palette)); }
 
 		// This creates a Palette from a SDL_Palette pointer, but does not take ownership of the pointer
-		static Palette FromUnownedPtr(SDL_Palette* palette);
+		static Palette FromUnownedPtr(SDL_Palette* palette) { return Palette(std::shared_ptr<SDL_Palette>(palette, DontDestroyPalette)); }
+
+#pragma endregion
 
 		std::shared_ptr<SDL_Palette> palette = nullptr;
 
-		Palette(std::shared_ptr<SDL_Palette> palette);
+
+		inline Palette(std::shared_ptr<SDL_Palette> palette)
+			: palette(palette) {}
 
 		/**
-		 *  \brief    Create a palette structure with the specified number of colour
-		 *            entries.
+		 * Create a palette structure with the specified number of color entries.
 		 *
-		 *  \return   A new palette, or NULL if there wasn't enough memory.
+		 * The palette entries are initialized to white.
 		 *
-		 *  \note     The palette entries are initialized to white.
+		 * \param ncolors represents the number of color entries in the color palette
+		 * \returns a new Palette object on success or an invalid one on failure (e.g.
+		 *          if there wasn't enough memory); call SDL::GetError() for more
+		 *          information.
 		 */
-		Palette(int ncolours);
+		inline Palette(int ncolours)
+			: palette(MakeSharedPtr(SDL_AllocPalette(ncolours))) {}
 
-		inline bool operator==(const Palette& that) { return palette == that.palette; }
-		inline bool operator!=(const Palette& that) { return palette != that.palette; }
+		inline bool operator==(const Palette& that) const { return palette == that.palette; }
+		inline bool operator!=(const Palette& that) const { return palette != that.palette; }
 
-		inline bool operator==(const SDL_Palette* that) { return palette.get() == that; }
-		inline bool operator!=(const SDL_Palette* that) { return palette.get() != that; }
+		inline bool operator==(const SDL_Palette* that) const { return palette.get() == that; }
+		inline bool operator!=(const SDL_Palette* that) const { return palette.get() != that; }
 
 		/**
 		 *  \brief    Set a range of colours in a palette.
@@ -183,9 +192,10 @@ namespace SDL
 		 *  \param    firstcolour: The index of the first palette entry to modify.
 		 *  \param    ncolours:    The number of entries to modify.
 		 *
-		 *  \return   0 on success, or -1 if not all of the colours could be set.
+		 *  \return   true on success, or false if not all of the colours could be set.
 		 */
-		int SetColours(const Colour* colours, int firstcolour, int ncolours);
+		inline bool SetColours(const Colour* colours, int firstcolour, int ncolours)
+			{ return SDL_SetPaletteColors(palette.get(), colours, firstcolour, ncolours) == 0; }
 
 		/**
 		 *  \brief    Set a range of colours in a palette.
@@ -215,39 +225,50 @@ namespace SDL
 	// \note Everything in the pixel format structure is read-only.
 	struct PixelFormat
 	{
+#pragma region Safety
+
 		// This is custom destructor for smart pointers that destroys SDL_PixelFormat through SDL
-		static void DestroyPixelFormat(SDL_PixelFormat* format);
+		static void DestroyPixelFormat(SDL_PixelFormat* format) { SDL_FreeFormat(format); }
 
 		// This is custom destructor for smart pointers that does not destroy the PixelFormat. This is for pointers you do not own
-		static void DontDestroyPixelFormat(SDL_PixelFormat* format);
+		static void DontDestroyPixelFormat(SDL_PixelFormat* format) {}
 
 		// This creates a smart pointer to an SDL_PixelFormat with a custom destructor
-		static std::shared_ptr<SDL_PixelFormat> MakeSharedPtr(SDL_PixelFormat* format);
+		static std::shared_ptr<SDL_PixelFormat> MakeSharedPtr(SDL_PixelFormat* format) { return std::shared_ptr<SDL_PixelFormat>(format, DestroyPixelFormat); }
 
 		// This creates a PixelFormat from a SDL_PixelFormat pointer, taking ownership of the pointer
-		static PixelFormat FromPtr(SDL_PixelFormat* format);
+		static PixelFormat FromPtr(SDL_PixelFormat* format) { return PixelFormat(MakeSharedPtr(format)); }
 
 		// This creates a PixelFormat from a SDL_PixelFormat pointer, but does not take ownership of the pointer
-		static PixelFormat FromUnownedPtr(SDL_PixelFormat* format);
+		static PixelFormat FromUnownedPtr(SDL_PixelFormat* format) { return PixelFormat(std::shared_ptr<SDL_PixelFormat>(format, DontDestroyPixelFormat)); }
+
+#pragma endregion
 
 		std::shared_ptr<SDL_PixelFormat> format = nullptr;
 
-		PixelFormat(std::shared_ptr<SDL_PixelFormat> format);
+		inline PixelFormat(std::shared_ptr<SDL_PixelFormat> format)
+			: format(format) {}
 
-		inline bool operator==(const PixelFormat& that) { return format == that.format; }
-		inline bool operator!=(const PixelFormat& that) { return format != that.format; }
+		inline bool operator==(const PixelFormat& that) const { return format == that.format; }
+		inline bool operator!=(const PixelFormat& that) const { return format != that.format; }
 
-		inline bool operator==(const SDL_PixelFormat* that) { return format.get() == that; }
-		inline bool operator!=(const SDL_PixelFormat* that) { return format.get() != that; }
+		inline bool operator==(const SDL_PixelFormat* that) const { return format.get() == that; }
+		inline bool operator!=(const SDL_PixelFormat* that) const { return format.get() != that; }
 
 		// Create an SDL_PixelFormat structure from a pixel format enum.
-		PixelFormat(Uint32 pixel_format);
+		inline PixelFormat(Uint32 pixel_format)
+			: format(MakeSharedPtr(SDL_AllocFormat(pixel_format))) {}
 
 		// Get the human readable name of a pixel format
-		const char* GetName() const;
+		inline const char* GetName() const
+			{ return SDL_GetPixelFormatName(format->format); }
+
+		inline static const char* GetName(Uint32 format)
+			{ return SDL_GetPixelFormatName(format); }
 
 		// Set the palette for a pixel format structure.
-		int SetPalette(Palette& palette);
+		inline bool SetPalette(Palette& palette)
+			{ return SDL_SetPixelFormatPalette(format.get(), palette.palette.get()) == 0; }
 
 		// Maps an RGB triple to an opaque pixel value for a given pixel format.
 		inline Uint32 MapRGB(Uint8 r, Uint8 g, Uint8 b) const { return SDL_MapRGB(format.get(), r, g, b); }
@@ -283,10 +304,30 @@ namespace SDL
 	 *
 	 *  \return The pixel format, or ::SDL_PIXELFORMAT_UNKNOWN if the conversion wasn't possible.
 	 */
-	static PixelFormatEnum MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask);
+	inline static PixelFormatEnum MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask)
+		{ return (PixelFormatEnum)SDL_MasksToPixelFormatEnum(bpp, Rmask, Gmask, Bmask, Amask); }
 
-	// Calculate a 256 entry gamma ramp for a gamma value.
-	static Uint16* CalculateGammaRamp(float gamma);
+	/**
+	 * Calculate a 256 entry gamma ramp for a gamma value.
+	 *
+	 * \param gamma a gamma value where 0.0 is black and 1.0 is identity
+	 * \return An array of 256 values filled in with the gamma ramp. This ramp must be deleted with delete[].
+	 */
+	inline static Uint16* CalculateGammaRamp(float gamma)
+	{
+		Uint16* ramp = new Uint16[256];
+		SDL_CalculateGammaRamp(gamma, ramp);
+		return ramp;
+	}
+	
+	/**
+	 * Calculate a 256 entry gamma ramp for a gamma value.
+	 *
+	 * \param gamma a gamma value where 0.0 is black and 1.0 is identity
+	 * \param ramp an array of 256 values filled in with the gamma ramp
+	 */
+	inline static void CalculateGammaRamp(float gamma, Uint16* ramp)
+		{ SDL_CalculateGammaRamp(gamma, ramp); }
 }
 
 #endif

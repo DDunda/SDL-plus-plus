@@ -178,7 +178,6 @@
     <ClCompile Include="..\SDL++\src\audio.cpp" />
     <ClCompile Include="..\SDL++\src\input.cpp" />
     <ClCompile Include="..\SDL++\src\mouse.cpp" />
-    <ClCompile Include="..\SDL++\src\pixels.cpp" />
     <ClCompile Include="..\SDL++\src\rect.cpp" />
     <ClCompile Include="Example.cpp" />
   </ItemGroup>

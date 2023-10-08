@@ -81,13 +81,21 @@ namespace SDL
 
 		static void ProcessEvent(const Event& e);
 
-		inline static int Init()
+		inline static bool Init()
 		{
-			untyped_subject = new InputSubject();
-			return 0;
+			try
+			{
+				untyped_subject = new InputSubject();
+				return true;
+			}
+			catch(...)
+			{
+				untyped_subject = nullptr;
+				return false;
+			}
 		}
 
-		inline static int Quit()
+		inline static void Quit()
 		{
 			for (auto pair : typed_subjects) delete pair.second;
 
@@ -97,8 +105,6 @@ namespace SDL
 				delete untyped_subject;
 				untyped_subject = nullptr;
 			}
-
-			return 0;
 		}
 
 		inline static void Update()

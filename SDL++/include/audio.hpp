@@ -59,13 +59,15 @@ namespace SDL
 	 */
 	typedef SDL_AudioSpec AudioSpec;
 	typedef SDL_AudioFilter AudioFilter;
-	enum class AudioStatus {
+	enum class AudioStatus
+	{
 		STOPPED = SDL_AUDIO_STOPPED,
 		PLAYING = SDL_AUDIO_PLAYING,
 		PAUSED = SDL_AUDIO_PAUSED
 	};
 
-	enum class AudioFormatEnum {
+	enum class AudioFormatEnum
+	{
 		U8     = AUDIO_U8,     // Unsigned 8-bit samples
 		S8     = AUDIO_S8,     // Signed 8-bit samples
 		U16LSB = AUDIO_U16LSB, // Unsigned 16-bit samples
@@ -86,7 +88,8 @@ namespace SDL
 		F32SYS = AUDIO_F32SYS
 	};
 
-	struct Audio {
+	struct Audio
+	{
 		bool freeAudio;
 		int error = 0;
 
@@ -702,7 +705,8 @@ namespace SDL
 		WAV(const char* file);
 	};
 
-	struct AudioCVT {
+	struct AudioCVT
+	{
 		SDL_AudioCVT cvt;
 		int error = 0;
 

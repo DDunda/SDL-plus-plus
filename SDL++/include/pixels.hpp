@@ -313,6 +313,7 @@ namespace SDL
 	 * \param gamma a gamma value where 0.0 is black and 1.0 is identity
 	 * \return An array of 256 values filled in with the gamma ramp. This ramp must be deleted with delete[].
 	 */
+	[[nodiscard("CalculateGammaRamp returns an array that must be freed with delete[].")]]
 	inline static Uint16* CalculateGammaRamp(float gamma)
 	{
 		Uint16* ramp = new Uint16[256];

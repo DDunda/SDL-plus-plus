@@ -13,8 +13,10 @@
 namespace SDL
 {
 	// The flags on a window
-	enum class WindowFlags
+	enum class WindowFlags : Uint32
 	{
+		NONE = 0,
+
 		FULLSCREEN         = SDL_WINDOW_FULLSCREEN,         // fullscreen window
 		OPENGL             = SDL_WINDOW_OPENGL,             // window usable with OpenGL context
 		SHOWN              = SDL_WINDOW_SHOWN,              // window is visible
@@ -28,45 +30,107 @@ namespace SDL
 		MOUSE_FOCUS        = SDL_WINDOW_MOUSE_FOCUS,        // window has mouse focus
 		FULLSCREEN_DESKTOP = SDL_WINDOW_FULLSCREEN_DESKTOP,
 		FOREIGN            = SDL_WINDOW_FOREIGN,            // window not created by SDL
+#if SDL_VERSION_ATLEAST(2, 0, 1)
 		ALLOW_HIGHDPI      = SDL_WINDOW_ALLOW_HIGHDPI,      /* window should be created in high - DPI mode if supported.
-		                                                       On macOS NSHighResolutionCapable must be set true in the
-		                                                       application's Info.plist for this to have any effect. */
+															   On macOS NSHighResolutionCapable must be set true in the
+															   application's Info.plist for this to have any effect. */
+#if SDL_VERSION_ATLEAST(2, 0, 4)
 		MOUSE_CAPTURE      = SDL_WINDOW_MOUSE_CAPTURE,      // window has mouse captured (unrelated to INPUT_GRABBED)
+#if SDL_VERSION_ATLEAST(2, 0, 5)
 		ALWAYS_ON_TOP      = SDL_WINDOW_ALWAYS_ON_TOP,      // window should always be above others
 		SKIP_TASKBAR       = SDL_WINDOW_SKIP_TASKBAR,       // window should not be added to the taskbar
 		UTILITY            = SDL_WINDOW_UTILITY,            // window should be treated as a utility window
 		TOOLTIP            = SDL_WINDOW_TOOLTIP,            // window should be treated as a tooltip
 		POPUP_MENU         = SDL_WINDOW_POPUP_MENU,         // window should be treated as a popup menu
-		VULKAN             = SDL_WINDOW_VULKAN              // window usable for Vulkan surface
+#if SDL_VERSION_ATLEAST(2, 0, 6)
+		VULKAN             = SDL_WINDOW_VULKAN,             // window usable for Vulkan surface
+#if SDL_VERSION_ATLEAST(2, 0, 14)
+		METAL              = SDL_WINDOW_METAL,              // window usable for Metal view
+#if SDL_VERSION_ATLEAST(2, 0, 15)
+		MOUSE_GRABBED      = SDL_WINDOW_MOUSE_GRABBED,      // window has grabbed mouse input
+#endif
+#endif
+#endif
+#endif
+#endif
+#endif
+
+		EVERYTHING = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_HIDDEN
+		| SDL_WINDOW_BORDERLESS | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MINIMIZED | SDL_WINDOW_MAXIMIZED
+		| SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS
+		| SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_FOREIGN
+#if SDL_VERSION_ATLEAST(2, 0, 1)
+		| SDL_WINDOW_ALLOW_HIGHDPI
+#if SDL_VERSION_ATLEAST(2, 0, 4)
+		| SDL_WINDOW_MOUSE_CAPTURE
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+		| SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_UTILITY | SDL_WINDOW_TOOLTIP
+		| SDL_WINDOW_POPUP_MENU
+#if SDL_VERSION_ATLEAST(2, 0, 6)
+		| SDL_WINDOW_VULKAN
+#if SDL_VERSION_ATLEAST(2, 0, 14)
+		| SDL_WINDOW_METAL
+#endif
+#endif
+#endif
+#endif
+#endif
 	};
+
+	inline constexpr WindowFlags  operator|  (WindowFlags  a, WindowFlags b) { return static_cast<WindowFlags>(static_cast<Uint32>(a) | static_cast<Uint32>(b)); }
+	inline constexpr WindowFlags  operator&  (WindowFlags  a, WindowFlags b) { return static_cast<WindowFlags>(static_cast<Uint32>(a) & static_cast<Uint32>(b)); }
+	inline constexpr WindowFlags  operator^  (WindowFlags  a, WindowFlags b) { return static_cast<WindowFlags>(static_cast<Uint32>(a) ^ static_cast<Uint32>(b)); }
+	inline constexpr WindowFlags& operator|= (WindowFlags& a, WindowFlags b) { return (WindowFlags&)((Uint32&)a |= static_cast<Uint32>(b)); }
+	inline constexpr WindowFlags& operator&= (WindowFlags& a, WindowFlags b) { return (WindowFlags&)((Uint32&)a &= static_cast<Uint32>(b)); }
+	inline constexpr WindowFlags& operator^= (WindowFlags& a, WindowFlags b) { return (WindowFlags&)((Uint32&)a ^= static_cast<Uint32>(b)); }
+
+	inline constexpr bool operator==(WindowFlags a, Uint32 b) { return a == static_cast<WindowFlags>(b); }
+	inline constexpr bool operator!=(WindowFlags a, Uint32 b) { return a != static_cast<WindowFlags>(b); }
+	inline constexpr bool operator==(Uint32 a, WindowFlags b) { return static_cast<WindowFlags>(a) == b; }
+	inline constexpr bool operator!=(Uint32 a, WindowFlags b) { return static_cast<WindowFlags>(a) != b; }
+
+	inline constexpr WindowFlags operator~ (WindowFlags a) { return a ^ WindowFlags::EVERYTHING; }
 
 	// Event subtype for window events
 	enum class WindowEventID
 	{
-		NONE         = SDL_WINDOWEVENT_NONE,         // Never used
-		SHOWN        = SDL_WINDOWEVENT_SHOWN,        // Window has been shown
-		HIDDEN       = SDL_WINDOWEVENT_HIDDEN,       // Window has been hidden
-		EXPOSED      = SDL_WINDOWEVENT_EXPOSED,      // Window has been exposed and should be redrawn
-		MOVED        = SDL_WINDOWEVENT_MOVED,        // Window has been moved to data1, data2
-		RESIZED      = SDL_WINDOWEVENT_RESIZED,      // Window has been resized to data1xdata2
-		SIZE_CHANGED = SDL_WINDOWEVENT_SIZE_CHANGED, // The window size has changed, either as a result of an API call, or through the system or user changing the window size.
-		MINIMIZED    = SDL_WINDOWEVENT_MINIMIZED,    // Window has been minimized
-		MAXIMIZED    = SDL_WINDOWEVENT_MAXIMIZED,    // Window has been maximized
-		RESTORED     = SDL_WINDOWEVENT_RESTORED,     // Window has been restored to normal size and position
-		ENTER        = SDL_WINDOWEVENT_ENTER,        // Window has gained mouse focus
-		LEAVE        = SDL_WINDOWEVENT_LEAVE,        // Window has lost mouse focus
-		FOCUS_GAINED = SDL_WINDOWEVENT_FOCUS_GAINED, // Window has gained keyboard focus
-		FOCUS_LOST   = SDL_WINDOWEVENT_FOCUS_LOST,   // Window has lost keyboard focus
-		CLOSE        = SDL_WINDOWEVENT_CLOSE,        // The window manager requests that the window be closed
-		TAKE_FOCUS   = SDL_WINDOWEVENT_TAKE_FOCUS,   // Window is being offered a focus (should SetWindowInputFocus() on itself or a subwindow, or ignore)
-		HIT_TEST     = SDL_WINDOWEVENT_HIT_TEST      // Window had a hit test that wasn't SDL_HITTEST_NORMAL.
+		NONE            = SDL_WINDOWEVENT_NONE,            // Never used
+		SHOWN           = SDL_WINDOWEVENT_SHOWN,           // Window has been shown
+		HIDDEN          = SDL_WINDOWEVENT_HIDDEN,          // Window has been hidden
+		EXPOSED         = SDL_WINDOWEVENT_EXPOSED,         // Window has been exposed and should be redrawn
+		MOVED           = SDL_WINDOWEVENT_MOVED,           // Window has been moved to data1, data2
+		RESIZED         = SDL_WINDOWEVENT_RESIZED,         // Window has been resized to data1xdata2
+		SIZE_CHANGED    = SDL_WINDOWEVENT_SIZE_CHANGED,    // The window size has changed, either as a result of an API call, or through the system or user changing the window size.
+		MINIMIZED       = SDL_WINDOWEVENT_MINIMIZED,       // Window has been minimized
+		MAXIMIZED       = SDL_WINDOWEVENT_MAXIMIZED,       // Window has been maximized
+		RESTORED        = SDL_WINDOWEVENT_RESTORED,        // Window has been restored to normal size and position
+		ENTER           = SDL_WINDOWEVENT_ENTER,           // Window has gained mouse focus
+		LEAVE           = SDL_WINDOWEVENT_LEAVE,           // Window has lost mouse focus
+		FOCUS_GAINED    = SDL_WINDOWEVENT_FOCUS_GAINED,    // Window has gained keyboard focus
+		FOCUS_LOST      = SDL_WINDOWEVENT_FOCUS_LOST,      // Window has lost keyboard focus
+		CLOSE           = SDL_WINDOWEVENT_CLOSE,           // The window manager requests that the window be closed
+#if SDL_VERSION_ATLEAST(2, 0, 4)
+		TAKE_FOCUS      = SDL_WINDOWEVENT_TAKE_FOCUS,      // Window is being offered a focus (should SetWindowInputFocus() on itself or a subwindow, or ignore)
+		HIT_TEST        = SDL_WINDOWEVENT_HIT_TEST,        // Window had a hit test that wasn't SDL_HITTEST_NORMAL.
+#if SDL_VERSION_ATLEAST(2, 0, 18)
+		ICCPROF_CHANGED = SDL_WINDOWEVENT_ICCPROF_CHANGED, // The ICC profile of the window's display has changed.
+		DISPLAY_CHANGED = SDL_WINDOWEVENT_DISPLAY_CHANGED, // Window has been moved to display data1.
+#endif
+#endif
 	};
 
 	// Event subtype for display events
 	enum class DisplayEventID
 	{
-		NONE        = SDL_DISPLAYEVENT_NONE,       // Never used
-		ORIENTATION = SDL_DISPLAYEVENT_ORIENTATION // Display orientation has changed to data1
+		NONE         = SDL_DISPLAYEVENT_NONE,         // Never used
+		ORIENTATION  = SDL_DISPLAYEVENT_ORIENTATION,  // Display orientation has changed to data1
+#if SDL_VERSION_ATLEAST(2, 0, 13)
+		CONNECTED    = SDL_DISPLAYEVENT_CONNECTED,    // Display has been added to the system
+		DISCONNECTED = SDL_DISPLAYEVENT_DISCONNECTED, // Display has been removed from the system
+#if SDL_VERSION_ATLEAST(2, 28, 0)
+		MOVED        = SDL_DISPLAYEVENT_MOVED         // Display has changed position
+#endif
+#endif
 	};
 
 
@@ -148,14 +212,16 @@ namespace SDL
 		//  The structure that defines a display mode
 		typedef SDL_DisplayMode Mode;
 
+#if SDL_VERSION_ATLEAST(2, 0, 9)
 		enum class Orientation
 		{
-			UNKNOWN = SDL_ORIENTATION_UNKNOWN,                     // The display orientation can't be determined
-			LANDSCAPE = SDL_ORIENTATION_LANDSCAPE,                 // The display is in landscape mode, with the right side up, relative to portrait mode
-			PORTRAIT = SDL_ORIENTATION_PORTRAIT,                   // The display is in portrait mode
+			UNKNOWN           = SDL_ORIENTATION_UNKNOWN,           // The display orientation can't be determined
+			LANDSCAPE         = SDL_ORIENTATION_LANDSCAPE,         // The display is in landscape mode, with the right side up, relative to portrait mode
+			PORTRAIT          = SDL_ORIENTATION_PORTRAIT,          // The display is in portrait mode
 			LANDSCAPE_FLIPPED = SDL_ORIENTATION_LANDSCAPE_FLIPPED, // The display is in landscape mode, with the left side up, relative to portrait mode
-			PORTRAIT_FLIPPED = SDL_ORIENTATION_PORTRAIT_FLIPPED    // The display is in portrait mode, upside down
+			PORTRAIT_FLIPPED  = SDL_ORIENTATION_PORTRAIT_FLIPPED   // The display is in portrait mode, upside down
 		};
+#endif
 
 		int index;
 
@@ -365,9 +431,9 @@ namespace SDL
 		 *            Vulkan loader or link to a dynamic library version. This limitation
 		 *            may be removed in a future version of SDL.
 		 */
-		inline Window(const char* title, const Rect& shape, Uint32 flags)
-			: Window(MakeSharedPtr(SDL_CreateWindow(title, shape.x, shape.y, shape.w, shape.h, flags))) {}
-		inline Window(const std::string& title, const Rect& shape, Uint32 flags)
+		inline Window(const char* title, const Rect& shape, WindowFlags flags)
+			: Window(MakeSharedPtr(SDL_CreateWindow(title, shape.x, shape.y, shape.w, shape.h, static_cast<Uint32>(flags)))) {}
+		inline Window(const std::string& title, const Rect& shape, WindowFlags flags)
 			: Window(title.c_str(), shape, flags) {}
 
 		/**
@@ -419,6 +485,7 @@ namespace SDL
 		 * \returns the raw ICC profile data on success or NULL on failure; call
 		 *          SDL::GetError() for more information.
 		 */
+		[[nodiscard("GetICCProfile returns data that must be freed with SDL_free().")]]
 		inline void* GetICCProfile(size_t& size) { return SDL_GetWindowICCProfile(window.get(), &size); }
 		inline Window& GetICCProfile(size_t& size, void*& profile) { profile = GetICCProfile(size); return *this; }
 #endif
@@ -436,9 +503,9 @@ namespace SDL
 		inline Window& GetID(Uint32& id) { id = SDL_GetWindowID(window.get()); return *this; }
 
 		// Get this window's flags.
-		inline Uint32 GetFlags() { return SDL_GetWindowFlags(window.get()); }
+		inline WindowFlags GetFlags() { return static_cast<WindowFlags>(SDL_GetWindowFlags(window.get())); }
 		// Get this window's flags.
-		inline Window& GetFlags(Uint32& flags) { flags = GetFlags(); return *this; }
+		inline Window& GetFlags(WindowFlags& flags) { flags = GetFlags(); return *this; }
 
 		// Set the title of this window.
 		inline Window& SetTitle(const char* title) { SDL_SetWindowTitle(window.get(), title); return *this; }
@@ -806,12 +873,8 @@ namespace SDL
 		 * will bring the window to the front and keep the window above the rest.
 		 *
 		 * \param window The window of which to change the always on top state
-		 * \param on_top SDL_TRUE to set the window always on top, SDL_FALSE to
+		 * \param on_top true to set the window always on top, false to
 		 *               disable
-		 *
-		 * \since This function is available since SDL 2.0.16.
-		 *
-		 * \sa SDL_GetWindowFlags
 		 */
 		inline Window& SetAlwaysOnTop(bool on_top) { SDL_SetWindowAlwaysOnTop(window.get(), on_top ? SDL_TRUE : SDL_FALSE); return *this; }
 #endif
@@ -1252,8 +1315,13 @@ namespace SDL
 			SHARE_WITH_CURRENT_CONTEXT = SDL_GL_SHARE_WITH_CURRENT_CONTEXT,
 			FRAMEBUFFER_SRGB_CAPABLE   = SDL_GL_FRAMEBUFFER_SRGB_CAPABLE,
 			CONTEXT_RELEASE_BEHAVIOR   = SDL_GL_CONTEXT_RELEASE_BEHAVIOR,
+#if SDL_VERSION_ATLEAST(2, 0, 6)
 			CONTEXT_RESET_NOTIFICATION = SDL_GL_CONTEXT_RESET_NOTIFICATION,
-			CONTEXT_NO_ERROR           = SDL_GL_CONTEXT_NO_ERROR
+			CONTEXT_NO_ERROR           = SDL_GL_CONTEXT_NO_ERROR,
+#if SDL_VERSION_ATLEAST(2, 24, 0)
+			FLOATBUFFERS               = SDL_GL_FLOATBUFFERS
+#endif
+#endif
 		};
 
 		/**

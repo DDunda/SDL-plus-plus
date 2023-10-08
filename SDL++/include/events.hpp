@@ -11,7 +11,9 @@ namespace SDL
 	struct Event
 	{
 		typedef SDL_CommonEvent           Common;           // Common event data
+#if SDL_VERSION_ATLEAST(2, 0, 9)
 		typedef SDL_DisplayEvent          Display;          // Display event data
+#endif
 		typedef SDL_WindowEvent           Window;           // Window event data
 		typedef SDL_KeyboardEvent         Keyboard;         // Keyboard event data
 		typedef SDL_TextEditingEvent      TextEditing;      // Text editing event data
@@ -59,8 +61,10 @@ namespace SDL
 			APP_WILLENTERFOREGROUND = SDL_APP_WILLENTERFOREGROUND, /* The application is about to enter the foreground */
 			APP_DIDENTERFOREGROUND  = SDL_APP_DIDENTERFOREGROUND,  /* The application is now interactive */
 
+#if SDL_VERSION_ATLEAST(2, 0, 9)
 			/* Display events */
 			DISPLAYEVENT = SDL_DISPLAYEVENT, /* Display state change */
+#endif
 
 			/* Window events */
 			WINDOWEVENT = SDL_WINDOWEVENT, /* Window state change */

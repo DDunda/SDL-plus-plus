@@ -13,7 +13,8 @@
 namespace SDL
 {
 	// Cursor types creating system cursors
-	enum class SystemCursor {
+	enum class SystemCursor
+	{
 		ARROW = SDL_SYSTEM_CURSOR_ARROW,	     // Arrow
 		IBEAM = SDL_SYSTEM_CURSOR_IBEAM,	     // I-beam
 		WAIT = SDL_SYSTEM_CURSOR_WAIT,	         // Wait
@@ -30,7 +31,8 @@ namespace SDL
 	};
 
 	// Scroll direction types for the Scroll event
-	enum class MouseWheelDirection {
+	enum class MouseWheelDirection
+	{
 		NORMAL = SDL_MOUSEWHEEL_NORMAL,  // The scroll direction is normal
 		FLIPPED = SDL_MOUSEWHEEL_FLIPPED // The scroll direction is flipped / natural
 	};

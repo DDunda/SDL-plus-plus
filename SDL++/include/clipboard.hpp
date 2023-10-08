@@ -28,6 +28,7 @@ namespace SDL
      *          on the returned pointer when done with it (even if there was an
      *          error).
      */
+    [[nodiscard("GetClipboardText returns a string that must be freed with SDL_free().")]]
     inline char* GetClipboardText() { return SDL_GetClipboardText(); }
 
     /**
@@ -59,6 +60,7 @@ namespace SDL
      *          call SDL_free() on the returned pointer when done with it (even if
      *          there was an error).
      */
+    [[nodiscard("GetPrimarySelectionText returns a string that must be freed with SDL_free().")]]
     inline char* GetPrimarySelectionText() { return SDL_GetPrimarySelectionText(); }
 
     /**

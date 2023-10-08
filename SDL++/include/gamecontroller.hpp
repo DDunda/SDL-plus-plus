@@ -232,6 +232,7 @@ namespace SDL
 		 * \returns a string that has the controller's mapping or NULL if no mapping
 		 *          is available; call SDL::GetError() for more information.
 		 */
+		[[nodiscard("GameController::Mapping returns a string that must be freed with SDL_free().")]]
 		inline char* Mapping()
 			{ return SDL_GameControllerMapping(controller.get()); }
 
@@ -313,6 +314,7 @@ namespace SDL
 		 * \returns the mapping string. Must be freed with SDL_free(). Returns NULL if
 		 *          no mapping is available.
 		 */
+		[[nodiscard("GameController::MappingForDeviceIndex returns a string that must be freed with SDL_free().")]]
 		inline static char* MappingForDeviceIndex(int joystick_index)
 			{ return SDL_GameControllerMappingForDeviceIndex(joystick_index); }
 

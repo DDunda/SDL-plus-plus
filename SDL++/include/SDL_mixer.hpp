@@ -1,4 +1,5 @@
 #include <SDL_mixer.h>
+#ifdef SDL_MIXER_VERSION_ATLEAST
 #if SDL_MIXER_VERSION_ATLEAST(2,0,0)
 #ifndef SDL_mixer_hpp_
 #define SDL_mixer_hpp_
@@ -41,15 +42,33 @@ namespace SDL::MIX
 		{ return SDL_MIXER_VERSION_ATLEAST(major, minor, patch); }
 
 	// Initialization flags
-	typedef enum class InitFlags
+	enum class InitFlags : Uint8
 	{
+		NONE = 0,
+
 		FLAC = MIX_INIT_FLAC,
 		MOD  = MIX_INIT_MOD,
 		MP3  = MIX_INIT_MP3,
 		OGG  = MIX_INIT_OGG,
 		MID  = MIX_INIT_MID,
 		OPUS = MIX_INIT_OPUS,
+
+		EVERYTHING  = MIX_INIT_FLAC | MIX_INIT_MOD | MIX_INIT_MP3 | MIX_INIT_OGG | MIX_INIT_MID | MIX_INIT_OPUS
 	};
+
+	inline constexpr InitFlags  operator|  (InitFlags  a, InitFlags b) { return static_cast<InitFlags>(static_cast<Uint8>(a) | static_cast<Uint8>(b)); }
+ 	inline constexpr InitFlags  operator&  (InitFlags  a, InitFlags b) { return static_cast<InitFlags>(static_cast<Uint8>(a) & static_cast<Uint8>(b)); }
+	inline constexpr InitFlags  operator^  (InitFlags  a, InitFlags b) { return static_cast<InitFlags>(static_cast<Uint8>(a) ^ static_cast<Uint8>(b)); }
+	inline constexpr InitFlags& operator|= (InitFlags& a, InitFlags b) { return (InitFlags&)((Uint8&)a |= static_cast<Uint8>(b)); }
+	inline constexpr InitFlags& operator&= (InitFlags& a, InitFlags b) { return (InitFlags&)((Uint8&)a &= static_cast<Uint8>(b)); }
+	inline constexpr InitFlags& operator^= (InitFlags& a, InitFlags b) { return (InitFlags&)((Uint8&)a ^= static_cast<Uint8>(b)); }
+
+	inline constexpr bool operator==(InitFlags a, Uint8 b) { return a == static_cast<InitFlags>(b); }
+	inline constexpr bool operator!=(InitFlags a, Uint8 b) { return a != static_cast<InitFlags>(b); }
+	inline constexpr bool operator==(Uint8 a, InitFlags b) { return static_cast<InitFlags>(a) == b; }
+	inline constexpr bool operator!=(Uint8 a, InitFlags b) { return static_cast<InitFlags>(a) != b; }
+
+	inline constexpr InitFlags operator~ (InitFlags a) { return a ^ InitFlags::EVERYTHING; }
 
 	/**
 	 * Initialize SDL_mixer.
@@ -111,8 +130,8 @@ namespace SDL::MIX
 	 *
 	 * \since This function is available since SDL_mixer 2.0.0.
 	 */
-	inline int Init(int flags)
-		{ return Mix_Init(flags); }
+	inline InitFlags Init(InitFlags flags)
+		{ return static_cast<InitFlags>(Mix_Init(static_cast<Uint8>(flags))); }
 
 	/**
 	 * Deinitialize SDL_mixer.
@@ -2778,5 +2797,6 @@ namespace SDL::MIX
 #endif
 }
 
+#endif
 #endif
 #endif

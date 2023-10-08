@@ -39,9 +39,9 @@ public:
 	inline Observer(const Observer<Ts...>& ob);
 	inline Observer(Observer<Ts...>&& ob) noexcept;
 
-	virtual inline Observer& operator=(const Observer<Ts...>& ob);
-	virtual inline Observer& operator=(Observer<Ts...>&& ob) noexcept;
-	virtual inline ~Observer();
+	inline Observer& operator=(const Observer<Ts...>& ob);
+	inline Observer& operator=(Observer<Ts...>&& ob) noexcept;
+	inline ~Observer();
 
 	virtual void AddSubject(ISubject<Ts...>& s);
 	virtual void RemoveSubject(ISubject<Ts...>& s);
@@ -61,9 +61,9 @@ public:
 	inline Subject(const Subject<Ts...>& sub);
 	inline Subject(Subject<Ts...>&& sub) noexcept;
 
-	virtual inline Subject& operator=(const Subject<Ts...>& sub);
-	virtual inline Subject& operator=(Subject<Ts...>&& sub) noexcept;
-	virtual inline ~Subject();
+	inline Subject& operator=(const Subject<Ts...>& sub);
+	inline Subject& operator=(Subject<Ts...>&& sub) noexcept;
+	inline ~Subject();
 
 	virtual void AddObserver(IObserver<Ts...>& o);
 	virtual void RemoveObserver(IObserver<Ts...>& o);

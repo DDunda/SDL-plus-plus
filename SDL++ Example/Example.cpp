@@ -48,7 +48,7 @@ void Program(int argc, char* argv[])
 	Point windowSize = { 500, 500 };
 
 	Rect rect(windowSize / 2 - Point(20, 20), { 40, 40 });
-	CreateWindowAndRenderer(windowSize, w, r, SDL_WINDOW_BORDERLESS);
+	if (!CreateWindowAndRenderer(windowSize, w, r, WindowFlags::BORDERLESS)) return;
 
 	w.SetTitle("Sample window");
 	w.SetHitTest(hit_test, NULL);
@@ -88,6 +88,17 @@ void Program(int argc, char* argv[])
 			running = false;
 		},
 		Input::GetTypedEventSubject(Event::Type::QUIT)
+	);
+
+	Listener<const Event&> escape_program(
+		[&running, &wID](const Event& e)
+		{
+			if (e.key.keysym.sym != SDLK_ESCAPE) return;
+			if (e.key.windowID != wID) return;
+
+			running = false;
+		},
+		Input::GetTypedEventSubject(Event::Type::KEYDOWN)
 	);
 
 #if SDL_VERSION_ATLEAST(2, 0, 18)
@@ -190,18 +201,20 @@ void Program(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
+	using namespace SDL;
+
 	SDL::Init();
-	//SDL::IMG::Init(IMG_INIT_PNG);
-	//SDL::MIX::Init(MIX_INIT_MP3 | MIX_INIT_OGG);
-	//SDL::TTF::Init();
-	SDL::Input::Init();
+	//IMG::Init(IMG::InitFlags::PNG);
+	//MIX::Init(MIX::InitFlags::MP3 | MIX::InitFlags::OGG);
+	//TTF::Init();
+	Input::Init();
 
 	Program(argc, argv);
 
-	SDL::Input::Quit();
-	//SDL::TTF::Quit();
-	//SDL::MIX::Quit();
-	//SDL::IMG::Quit();
+	Input::Quit();
+	//TTF::Quit();
+	//MIX::Quit();
+	//IMG::Quit();
 	SDL::Quit();
 
 	return 0;

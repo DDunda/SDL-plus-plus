@@ -62,12 +62,16 @@ namespace SDL
 	struct Renderer
 	{
 		// Flags used when creating a rendering context
-		enum class Flags
+		enum class Flags : Uint8
 		{
+			NONE          = 0,
+
 			SOFTWARE      = SDL_RENDERER_SOFTWARE,         // The renderer is a software fallback
 			ACCELERATED   = SDL_RENDERER_ACCELERATED,      // The renderer uses hardware acceleration
 			PRESENTVSYNC  = SDL_RENDERER_PRESENTVSYNC,     // Present is synchronized with the refresh rate
-			TARGETTEXTURE = SDL_RENDERER_TARGETTEXTURE     // The renderer supports rendering to texture
+			TARGETTEXTURE = SDL_RENDERER_TARGETTEXTURE,    // The renderer supports rendering to texture
+
+			EVERYTHING    = SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE
 		};
 
 		// Information on the capabilities of a render driver or context.
@@ -108,14 +112,14 @@ namespace SDL
 		*  \brief    Create a 2D rendering context for a window.
 		 *
 		 *  \param    window: The window where rendering is displayed.
-		 *  \param    flags:  ::SDL_RendererFlags.
+		 *  \param    flags:  Renderer::Flags.
 		 *  \param    index:  The index of the rendering driver to initialize, or -1 to
 		 *                    initialize the first one supporting the requested flags.
 		 *
 		 *  \return   A valid rendering context or NULL if there was an error.
 		 */
-		inline Renderer(Window& window, Uint32 flags, int index = -1)
-			: Renderer(MakeSharedPtr(SDL_CreateRenderer(window.window.get(), index, flags))) {}
+		inline Renderer(Window& window, Flags flags, int index = -1)
+			: Renderer(MakeSharedPtr(SDL_CreateRenderer(window.window.get(), index, static_cast<Uint8>(flags)))) {}
 
 		/**
 		 *  \brief    Create a 2D software rendering context for a surface.
@@ -1641,6 +1645,20 @@ namespace SDL
 #endif
 	};
 
+	inline constexpr Renderer::Flags  operator|  (Renderer::Flags  a, Renderer::Flags b) { return static_cast<Renderer::Flags>(static_cast<Uint8>(a) | static_cast<Uint8>(b)); }
+	inline constexpr Renderer::Flags  operator&  (Renderer::Flags  a, Renderer::Flags b) { return static_cast<Renderer::Flags>(static_cast<Uint8>(a) & static_cast<Uint8>(b)); }
+	inline constexpr Renderer::Flags  operator^  (Renderer::Flags  a, Renderer::Flags b) { return static_cast<Renderer::Flags>(static_cast<Uint8>(a) ^ static_cast<Uint8>(b)); }
+	inline constexpr Renderer::Flags& operator|= (Renderer::Flags& a, Renderer::Flags b) { return (Renderer::Flags&)((Uint8&)a |= static_cast<Uint8>(b)); }
+	inline constexpr Renderer::Flags& operator&= (Renderer::Flags& a, Renderer::Flags b) { return (Renderer::Flags&)((Uint8&)a &= static_cast<Uint8>(b)); }
+	inline constexpr Renderer::Flags& operator^= (Renderer::Flags& a, Renderer::Flags b) { return (Renderer::Flags&)((Uint8&)a ^= static_cast<Uint8>(b)); }
+
+	inline constexpr bool operator==(Renderer::Flags a, Uint8 b) { return a == static_cast<Renderer::Flags>(b); }
+	inline constexpr bool operator!=(Renderer::Flags a, Uint8 b) { return a != static_cast<Renderer::Flags>(b); }
+	inline constexpr bool operator==(Uint8 a, Renderer::Flags b) { return static_cast<Renderer::Flags>(a) == b; }
+	inline constexpr bool operator!=(Uint8 a, Renderer::Flags b) { return static_cast<Renderer::Flags>(a) != b; }
+
+	inline constexpr Renderer::Flags operator~ (Renderer::Flags a) { return a ^ Renderer::Flags::EVERYTHING; }
+
 	// An efficient driver-specific representation of pixel data
 	struct Texture
 	{
@@ -2881,11 +2899,11 @@ namespace SDL
 	 *
 	 *  \return   true on success, or false on error
 	 */
-	inline bool CreateWindowAndRenderer(const Point& size, Window& window, Renderer& renderer, Uint32 window_flags = SDL_WINDOW_SHOWN & SDL_WINDOW_RESIZABLE)
+	inline bool CreateWindowAndRenderer(const Point& size, Window& window, Renderer& renderer, WindowFlags window_flags = WindowFlags::SHOWN | WindowFlags::RESIZABLE)
 	{
 		SDL_Window* w;
 		SDL_Renderer* r;
-		if (SDL_CreateWindowAndRenderer(size.w, size.h, window_flags, &w, &r) != 0)
+		if (SDL_CreateWindowAndRenderer(size.w, size.h, static_cast<Uint32>(window_flags), &w, &r) != 0)
 		{
 			renderer = Renderer::FromUnownedPtr(NULL);
 			window = Window::FromUnownedPtr(NULL);

@@ -1,4 +1,5 @@
 #include <SDL_image.h>
+#ifdef SDL_IMAGE_VERSION_ATLEAST
 #if SDL_IMAGE_VERSION_ATLEAST(2, 0, 0)
 #ifndef SDL_image_hpp_
 #define SDL_image_hpp_
@@ -7,28 +8,49 @@
 #include "error.hpp"
 #include "render.hpp"
 #include "rwops.hpp"
+#include "version.hpp"
 
 namespace SDL::IMG
 {
 	inline const SDL_version* Linked_Version() { return IMG_Linked_Version(); }
 
-	enum class InitFlags
+	enum class InitFlags : Uint8
 	{
+		NONE = 0,
+
 		JPG  = IMG_INIT_JPG,
 		PNG  = IMG_INIT_PNG,
 		TIF  = IMG_INIT_TIF,
 		WEBP = IMG_INIT_WEBP,
 #if SDL_IMAGE_VERSION_ATLEAST(2, 6, 0)
 		JXL  = IMG_INIT_JXL,
-		AVIF = IMG_INIT_AVIF
+		AVIF = IMG_INIT_AVIF,
+#endif
+		EVERYTHING = IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_WEBP
+#if SDL_IMAGE_VERSION_ATLEAST(2, 6, 0)
+		           | IMG_INIT_JXL | IMG_INIT_AVIF
 #endif
 	};
 
+	inline constexpr InitFlags  operator|  (InitFlags  a, InitFlags b) { return static_cast<InitFlags>(static_cast<Uint8>(a) | static_cast<Uint8>(b)); }
+	inline constexpr InitFlags  operator&  (InitFlags  a, InitFlags b) { return static_cast<InitFlags>(static_cast<Uint8>(a) & static_cast<Uint8>(b)); }
+	inline constexpr InitFlags  operator^  (InitFlags  a, InitFlags b) { return static_cast<InitFlags>(static_cast<Uint8>(a) ^ static_cast<Uint8>(b)); }
+	inline constexpr InitFlags& operator|= (InitFlags& a, InitFlags b) { return (InitFlags&)((Uint8&)a |= static_cast<Uint8>(b)); }
+	inline constexpr InitFlags& operator&= (InitFlags& a, InitFlags b) { return (InitFlags&)((Uint8&)a &= static_cast<Uint8>(b)); }
+	inline constexpr InitFlags& operator^= (InitFlags& a, InitFlags b) { return (InitFlags&)((Uint8&)a ^= static_cast<Uint8>(b)); }
+
+	inline constexpr bool operator==(InitFlags a, Uint8 b) { return a == static_cast<InitFlags>(b); }
+	inline constexpr bool operator!=(InitFlags a, Uint8 b) { return a != static_cast<InitFlags>(b); }
+	inline constexpr bool operator==(Uint8 a, InitFlags b) { return static_cast<InitFlags>(a) == b; }
+	inline constexpr bool operator!=(Uint8 a, InitFlags b) { return static_cast<InitFlags>(a) != b; }
+
+	inline constexpr InitFlags operator~ (InitFlags a) { return a ^ InitFlags::EVERYTHING; }
+
 	/* Loads dynamic libraries and prepares them for use.  Flags should be
 		one or more flags from InitFlags OR'd together.
-		It returns the flags successfully initialized, or 0 on failure.
+		It returns the flags successfully initialized, or NONE on failure.
 		*/
-	inline int Init(int flags) { return IMG_Init(flags); }
+	inline InitFlags Init(InitFlags flags) { return static_cast<InitFlags>(IMG_Init(static_cast<Uint8>(flags))); }
 
 	/* Unloads libraries loaded with IMG_Init */
 	inline void Quit() { IMG_Quit(); }
@@ -60,6 +82,7 @@ namespace SDL::IMG
 #pragma endregion
 
 #pragma region Load Texture
+#ifdef SDL_VERSION_ATLEAST
 #if SDL_VERSION_ATLEAST(2,0,0)
 	// Load an image directly into a render texture.
 	inline Texture LoadTexture        (Renderer& renderer, const char* file)
@@ -77,6 +100,7 @@ namespace SDL::IMG
 		return Texture::FromPtr(renderer, IMG_LoadTextureTyped_RW(renderer.renderer.get(), ptr, freesrc, type));
 	}
 #endif /* SDL 2.0 */
+#endif
 #pragma endregion
 
 #pragma region Check Type
@@ -286,5 +310,6 @@ namespace SDL::IMG
 	inline const char* GetError() { return IMG_GetError(); }
 }
 
+#endif
 #endif
 #endif

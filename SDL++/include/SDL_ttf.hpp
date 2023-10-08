@@ -1,4 +1,5 @@
 #include <SDL_ttf.h>
+#ifdef SDL_TTF_VERSION_ATLEAST
 #if SDL_TTF_VERSION_ATLEAST(2,0,12)
 #ifndef SDL_ttf_hpp_
 #define SDL_ttf_hpp_
@@ -1944,5 +1945,6 @@ namespace SDL::TTF
 	};
 }
 
+#endif
 #endif
 #endif

@@ -175,6 +175,8 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\cpuinfo.hpp" />
+    <ClInclude Include="include\filesystem.hpp" />
     <ClInclude Include="include\guid.hpp" />
     <ClInclude Include="include\gamecontroller.hpp" />
     <ClInclude Include="include\audio.hpp" />
@@ -186,6 +188,7 @@
     <ClInclude Include="include\hidapi.hpp" />
     <ClInclude Include="include\hints.hpp" />
     <ClInclude Include="include\joystick.hpp" />
+    <ClInclude Include="include\mutex.hpp" />
     <ClInclude Include="include\rwops.hpp" />
     <ClInclude Include="include\SDL_image.hpp" />
     <ClInclude Include="include\pixels.hpp" />
@@ -207,6 +210,7 @@
     <ClInclude Include="include\shape.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\atomic.hpp" />
     <ClCompile Include="src\input.cpp" />
     <ClCompile Include="src\audio.cpp" />
     <ClCompile Include="src\mouse.cpp" />

@@ -545,7 +545,7 @@ namespace SDL
 	/**
 	 * Determine whether two rectangles intersect with float precision.
 	 *
-	 * If either pointer is NULL the function will return SDL_FALSE.
+	 * If either pointer is NULL the function will return false.
 	 *
 	 * \param A an FRect structure representing the first rectangle
 	 * \param B an FRect structure representing the second rectangle

@@ -87,6 +87,8 @@ namespace SDL::IMG
 	// Load an image directly into a render texture.
 	inline Texture LoadTexture        (Renderer& renderer, const char* file)
 		{ return Texture::FromPtr(renderer, IMG_LoadTexture        (renderer.renderer.get(), file)); }
+	inline Texture LoadTexture        (Renderer& renderer, const std::string& file)
+		{ return Texture::FromPtr(renderer, IMG_LoadTexture        (renderer.renderer.get(), file.c_str())); }
 	inline Texture LoadTexture_RW(Renderer& renderer, RWops& src, bool freesrc)
 	{
 		SDL_RWops* const ptr = (SDL_RWops*)src;

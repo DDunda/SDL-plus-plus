@@ -139,6 +139,16 @@ namespace SDL
 	typedef SDL_Color Color;
 	typedef SDL_Colour Colour;
 
+	inline constexpr bool operator==(const SDL::Colour& first, const SDL::Colour& second)
+	{
+		return first.r == second.r && first.g == second.g && first.b == second.b && first.a == second.a;
+	}
+
+	inline constexpr bool operator!=(const SDL::Colour& first, const SDL::Colour& second)
+	{
+		return first.r != second.r || first.g != second.g || first.b != second.b || first.a != second.a;
+	}
+
 	struct Palette
 	{
 #pragma region Safety

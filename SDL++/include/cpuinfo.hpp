@@ -37,7 +37,7 @@ namespace SDL
 	 * \returns true if the CPU has the RDTSC instruction or false if not.
 	 */
 	inline static bool HasRDTSC()
-		{ return SDL_HasRDTSC() == true; }
+		{ return SDL_HasRDTSC() == SDL_TRUE; }
 
 	/**
 	 * Determine whether the CPU has AltiVec features.
@@ -48,7 +48,7 @@ namespace SDL
 	 * \returns true if the CPU has AltiVec features or false if not.
 	 */
 	inline static bool HasAltiVec()
-		{ return SDL_HasAltiVec() == true; }
+		{ return SDL_HasAltiVec() == SDL_TRUE; }
 
 	/**
 	 * Determine whether the CPU has MMX features.
@@ -58,7 +58,7 @@ namespace SDL
 	 * \returns true if the CPU has MMX features or false if not.
 	 */
 	inline static bool HasMMX()
-		{ return SDL_HasMMX() == true; }
+		{ return SDL_HasMMX() == SDL_TRUE; }
 
 	/**
 	 * Determine whether the CPU has 3DNow! features.
@@ -68,7 +68,7 @@ namespace SDL
 	 * \returns true if the CPU has 3DNow! features or false if not.
 	 */
 	inline static bool Has3DNow()
-		{ return SDL_Has3DNow() == true; }
+		{ return SDL_Has3DNow() == SDL_TRUE; }
 
 	/**
 	 * Determine whether the CPU has SSE features.
@@ -78,7 +78,7 @@ namespace SDL
 	 * \returns true if the CPU has SSE features or false if not.
 	 */
 	inline static bool HasSSE()
-		{ return SDL_HasSSE() == true; }
+		{ return SDL_HasSSE() == SDL_TRUE; }
 
 	/**
 	 * Determine whether the CPU has SSE2 features.
@@ -88,7 +88,7 @@ namespace SDL
 	 * \returns true if the CPU has SSE2 features or false if not.
 	 */
 	inline static bool HasSSE2()
-		{ return SDL_HasSSE2() == true; }
+		{ return SDL_HasSSE2() == SDL_TRUE; }
 
 	/**
 	 * Determine whether the CPU has SSE3 features.
@@ -98,7 +98,7 @@ namespace SDL
 	 * \returns true if the CPU has SSE3 features or false if not.
 	 */
 	inline static bool HasSSE3()
-		{ return SDL_HasSSE3() == true; }
+		{ return SDL_HasSSE3() == SDL_TRUE; }
 
 	/**
 	 * Determine whether the CPU has SSE4.1 features.
@@ -108,7 +108,7 @@ namespace SDL
 	 * \returns true if the CPU has SSE4.1 features or false if not.
 	 */
 	inline static bool HasSSE41()
-		{ return SDL_HasSSE41() == true; }
+		{ return SDL_HasSSE41() == SDL_TRUE; }
 
 	/**
 	 * Determine whether the CPU has SSE4.2 features.
@@ -118,7 +118,7 @@ namespace SDL
 	 * \returns true if the CPU has SSE4.2 features or false if not.
 	 */
 	inline static bool HasSSE42()
-		{ return SDL_HasSSE42() == true; }
+		{ return SDL_HasSSE42() == SDL_TRUE; }
 
 #if SDL_VERSION_ATLEAST(2, 0, 2)
 	/**
@@ -129,7 +129,7 @@ namespace SDL
 	 * \returns true if the CPU has AVX features or false if not.
 	 */
 	inline static bool HasAVX()
-		{ return SDL_HasAVX() == true; }
+		{ return SDL_HasAVX() == SDL_TRUE; }
 
 #if SDL_VERSION_ATLEAST(2, 0, 4)
 	/**
@@ -140,7 +140,7 @@ namespace SDL
 	 * \returns true the CPU has AVX2 features or false if not.
 	 */
 	inline static bool HasAVX2()
-		{ return SDL_HasAVX2() == true; }
+		{ return SDL_HasAVX2() == SDL_TRUE; }
 
 #if SDL_VERSION_ATLEAST(2, 0, 9)
 	/**
@@ -151,7 +151,7 @@ namespace SDL
 	 * \returns true if the CPU has AVX-512F features or false if not.
 	 */
 	inline static bool HasAVX512F()
-		{ return SDL_HasAVX512F() == true; }
+		{ return SDL_HasAVX512F() == SDL_TRUE; }
 
 #if SDL_VERSION_ATLEAST(2, 0, 12)
 	/**
@@ -164,7 +164,7 @@ namespace SDL
 	 * \returns true if the CPU has ARM SIMD features or false if not.
 	 */
 	inline static bool HasARMSIMD()
-		{ return SDL_HasARMSIMD() == true; }
+		{ return SDL_HasARMSIMD() == SDL_TRUE; }
 #endif // v2.0.12
 #endif // v2.0.9
 
@@ -177,7 +177,7 @@ namespace SDL
 	 * \returns true if the CPU has ARM NEON features or false if not.
 	 */
 	inline static bool HasNEON()
-		{ return SDL_HasNEON() == true; }
+		{ return SDL_HasNEON() == SDL_TRUE; }
 
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 	/**
@@ -189,7 +189,7 @@ namespace SDL
 	 * \returns true if the CPU has LOONGARCH LSX features or false if not.
 	 */
 	inline static bool HasLSX()
-		{ return SDL_HasLSX() == true; }
+		{ return SDL_HasLSX() == SDL_TRUE; }
 
 	/**
 	 * Determine whether the CPU has LASX (LOONGARCH SIMD) features.
@@ -200,7 +200,7 @@ namespace SDL
 	 * \returns true if the CPU has LOONGARCH LASX features or false if not.
 	 */
 	inline static bool HasLASX()
-		{ return SDL_HasLASX() == true; }
+		{ return SDL_HasLASX() == SDL_TRUE; }
 #endif // v2.24.0
 #endif // v2.0.6
 #endif // v2.0.4

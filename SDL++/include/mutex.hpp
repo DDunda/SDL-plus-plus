@@ -33,7 +33,7 @@ namespace SDL
 		// This creates a Mutex from a SDL_Mutex pointer, but does not take ownership of the pointer
 		inline static Mutex FromUnownedPtr(SDL_mutex* mutex) { return Mutex(std::shared_ptr<SDL_mutex>(mutex, DontDestroyMutex)); }
 
-		inline Mutex(std::shared_ptr<SDL_mutex> mutex = nullptr)
+		inline Mutex(std::shared_ptr<SDL_mutex> mutex)
 			: mutex(mutex) {}
 
 		inline Mutex()
